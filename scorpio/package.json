@@ -9,13 +9,35 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+  ], 
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "artemis-sidebar-view",
+          "title": "Artemis",
+          "icon": "media/favicon.svg"
+        }
+      ]
+    },
+    "views": {
+      "artemis-sidebar-view": [
+        {
+          "type": "webview",
+          "id": "artemis-sidebar",
+          "name": "Artemis",
+          "icon": "media/checklist.svg",
+          "contextualTitle": "Artemis"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "scorpio.helloWorld",
-        "title": "Hello World"
+        "command": "scorpio.openWebview",
+        "category": "Artemis",
+        "title": "Open Webview"
       }
     ]
   },
