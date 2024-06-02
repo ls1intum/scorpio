@@ -4,7 +4,6 @@ import { getNonce } from "./getNonce";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
-  _doc?: vscode.TextDocument;
 
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -60,9 +59,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <title>Angular App</title>
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
+        <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+        }
+        iframe {
+          width: 100%;
+          height: 93%;
+          border: none;
+          margin: 5px;
+          display: block;
+        }
+        </style>
 			</head>
       <body>
       <h1> Artemis </h1>
+      <iframe id="artIframe" src="http://localhost:9000/" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>      
 			</body>
 			</html>`;
   }
