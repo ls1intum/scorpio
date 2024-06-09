@@ -1,1 +1,1 @@
-export const base_url = "http://localhost:9000/api";
+export const base_url = "http://artemis.local/api";
