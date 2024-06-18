@@ -1,9 +1,8 @@
-// export const base_url = "http://artemis.local/api";
+import dotenv from "dotenv";
 
-export const base_url = "http://localhost:8080";
-export const testuser = "artemis_admin"
-export const testpassword = "artemis_admin"
+// Parsing the env file.
+dotenv.config();
 
-// export const base_url = "https://artemis-test9.artemis.cit.tum.de"
-// export const testuser = "artemis_admin"
-// export const testpassword = "***REMOVED***"
+export const base_url = process.env.BASE_URL || "http://localhost:8080";
+export const testuser = process.env.TEST_USER || "artemis_admin";
+export const testpassword = process.env.TEST_PASSWORD || "artemis_admin";
