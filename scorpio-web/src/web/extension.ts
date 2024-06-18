@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { authenticateCookie, authenticateToken } from './authentication';
+import { authenticateCookieCmd, authenticateTokenCmd} from './authentication/authentication';
 import { fetch_courses } from './course';
 import { fetch_exercise } from './exercise';
 import { testpassword, testuser } from './config';
@@ -30,51 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// command to authenticate the user with the Artemis server
 	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.authenticateCookie', async () => {
-			vscode.window.showInformationMessage('Start Cookie Authentication');
-			const username = await vscode.window.showInputBox({ prompt: 'Enter Username' });
-			const password = await vscode.window.showInputBox({ prompt: 'Enter Password', password: true });
-			if (!username || !password) {
-				// vscode.window.showErrorMessage('Username and Password are required');
-
-				vscode.window.showWarningMessage('falling back to test credentials');
-				console.log(`authenticate with ${testuser}, ${testpassword}`);// TODO: remove this line
-				authenticateCookie(testuser, testpassword); // TODO: remove this line
-				return;
-			}
-
-			try{
-				console.log(`authenticate with ${username}, ${password}`);// TODO: remove this line
-				authenticateCookie(username, password);
-			}catch(e){
-				vscode.window.showErrorMessage(`error: ${e}`);
-				return;
-			}
-	}));
+		vscode.commands.registerCommand('scorpio.authenticateCookie', async () => authenticateCookieCmd()));
 
 	// command to authenticate the user with the Artemis server
 	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.authenticateToken', async () => {
-			vscode.window.showInformationMessage('Start Token Authentication');
-			const username = await vscode.window.showInputBox({ prompt: 'Enter Username' });
-			const password = await vscode.window.showInputBox({ prompt: 'Enter Password', password: true });
-			if (!username || !password) {
-				// vscode.window.showErrorMessage('Username and Password are required');
-
-				vscode.window.showWarningMessage('falling back to test credentials');
-				console.log(`authenticate with ${testuser}, ${testpassword}`);// TODO: remove this line
-				authenticateToken(testuser, testpassword); // TODO: remove this line
-				return;
-			}
-
-			try{
-				console.log(`authenticate with ${username}, ${password}`);// TODO: remove this line
-				authenticateToken(username, password);
-			}catch(e){
-				vscode.window.showErrorMessage(`error: ${e}`);
-				return;
-			}
-	}));
+		vscode.commands.registerCommand('scorpio.authenticateToken', async () => authenticateTokenCmd()));
 
 	// command to select a course and exercise
 	context.subscriptions.push(

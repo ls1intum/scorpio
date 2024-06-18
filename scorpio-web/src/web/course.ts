@@ -1,4 +1,4 @@
-import { token } from "./authentication";
+import { token } from "./authentication/authentication";
 import { base_url } from "./config";
 
 
@@ -18,20 +18,18 @@ export async function  fetch_courses(): Promise<Course[]> {
     }
 
     console.log("fetching courses");
-	  return fetch(url, {
+	  const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
         headers: headers,
-    }).then((response) => {
-        if (!response.ok) {
-            response.text().then((text) => {
-                throw new Error(`HTTP error! status: ${response.status} message: ${text}`);
-            });
-        }
-        
-        return response.json();
-    }).then((data) => {
-        console.log(`retrieved courses successful ${data}`);
-        return data as Course[];
     })
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
+    }
+        
+    const data = await response.json();
+    console.log(`retrieved courses successful ${data}`);
+    return data as Course[];
 }

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "path";
 
 // Parsing the env file.
 dotenv.config();

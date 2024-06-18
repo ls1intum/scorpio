@@ -1,4 +1,4 @@
-import { token } from "./authentication";
+import { token } from "./authentication/authentication";
 import { base_url } from "./config";
 
 type Exercise = {
@@ -13,19 +13,20 @@ export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
 	const url = `${base_url}/api/courses/${courseId}/programming-exercises`;
 
     console.log("fetching exercises");
-    return fetch(url, {
+    const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
         headers: {
             'Cookie': `jwt=${token}`,
         },
-    }).then((response) => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} message: ${response.text}`);
-        }
-        return response.json();
-    }).then((data) => {
-        console.log(`retrieved exercises successful ${data}`);
-        return data as Exercise[];
     })
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} message: ${response.text}`);
+    }
+
+    const data = await response.json();
+
+    console.log(`retrieved exercises successful ${data}`);
+    return data as Exercise[];
 }
