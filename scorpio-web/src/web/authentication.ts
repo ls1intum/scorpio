@@ -1,10 +1,11 @@
-import { base_url } from './config';
+import {base_url} from './config';
 
-export async function authenticate(username: string, password: string) {
-	const url = `${base_url}/public/authenticate`;
-  
-	try{
-	  let response = await fetch(url, {
+export var token:string;
+
+export async function authenticateCookie(username: string, password: string) {
+	const url = `${base_url}/api/public/authenticate`;
+
+	  fetch(url, {
 		method: "POST",
 		headers: {
 		  "Content-Type": "application/json",
@@ -14,19 +15,35 @@ export async function authenticate(username: string, password: string) {
 		  "password": password,
 		  "rememberMe": true
 		})
-		}); 
-  
-	  console.log(`response: ${response.status}`);
-  
-	  const data = await response.json();
-	  console.log(`data: ${data}`);
-  
-	} catch (e) {
-	  if (typeof e === "string") {
-		console.log(e)
-	  } else if (e instanceof Error) {
-		  console.log(e.message)
-	  }
-	  console.log(`${e}`)
-	}
-}
+		}).then((response) => {		
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status} message: ${response.body}`);
+			}
+
+		})
+}	
+
+export async function authenticateToken(username: string, password: string) {
+	const url = `${base_url}/api/public/authenticate/token`;
+
+	  fetch(url, {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+		  "username": username,
+		  "password": password,
+		  "rememberMe": true
+		})
+		}).then((response) => {		
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status} message: ${response.body}`);
+			}
+			
+			return response.text()
+		}).then((data) => {
+			console.log(`response data: ${data}`);
+			token = data;
+		})
+}		
