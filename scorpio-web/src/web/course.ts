@@ -12,16 +12,13 @@ type Course = {
 export async function  fetch_courses(): Promise<Course[]> {
 	const url = `${base_url}/api/courses`;
 
-    const headers = {
-        'Content-Type': 'application/json',
-        'Cookie': `jwt=${token}`,
-    }
-
     console.log("fetching courses");
 	  const response = await fetch(url, {
         method: 'GET',
-        credentials: 'include',
-        headers: headers,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
     })
 
     if (!response.ok) {

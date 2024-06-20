@@ -4,8 +4,7 @@ import * as vscode from 'vscode';
 import { authenticateCookieCmd, authenticateTokenCmd} from './authentication/authentication';
 import { fetch_courses } from './course';
 import { fetch_exercise } from './exercise';
-import { testpassword, testuser } from './config';
-import { getOrigin } from './originRequest';
+import { getTest } from './test_api';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -16,12 +15,12 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "scorpio-web" is now active!');
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.origin', async () => {
-			vscode.window.showInformationMessage('Try to get origin');
+		vscode.commands.registerCommand('scorpio.test', async () => {
+			vscode.window.showInformationMessage('Start API test');
 			try{
-				console.log(`get origin`);
-				const origin = await getOrigin();
-				console.log(`origin: ${origin}`);
+				console.log(`start test`);
+				const testBody = await getTest();
+				console.log(`Test return: ${testBody}`);
 			}catch(e){
 				vscode.window.showErrorMessage(`error: ${e}`);
 				return;

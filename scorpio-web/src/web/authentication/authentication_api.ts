@@ -18,6 +18,8 @@ export async function authenticateCookie(username: string, password: string) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status} message: ${response.body}`);
 	}
+
+	console.log(JSON.stringify(response.headers))
 }	
 
 export async function authenticateToken(username: string, password: string) {

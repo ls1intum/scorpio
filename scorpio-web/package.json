@@ -38,9 +38,9 @@
         "title": "Hello World"
       },
       {
-        "command": "scorpio.origin",
+        "command": "scorpio.test",
         "category": "Artemis",
-        "title": "Give me origin"
+        "title": "Test api"
       },
       {
         "command": "scorpio.authenticateCookie",
@@ -90,6 +90,7 @@
   "dependencies": {
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
+    "fetch-cookie": "^3.0.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "ts-node": "^10.9.2"

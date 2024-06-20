@@ -15,9 +15,9 @@ export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
     console.log("fetching exercises");
     const response = await fetch(url, {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Cookie': `jwt=${token}`,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
     })
 

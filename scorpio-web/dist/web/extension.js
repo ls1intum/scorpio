@@ -36,19 +36,19 @@ const vscode = __importStar(__webpack_require__(1));
 const authentication_1 = __webpack_require__(2);
 const course_1 = __webpack_require__(12);
 const exercise_1 = __webpack_require__(13);
-const originRequest_1 = __webpack_require__(14);
+const test_api_1 = __webpack_require__(14);
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "scorpio-web" is now active!');
-    context.subscriptions.push(vscode.commands.registerCommand('scorpio.origin', async () => {
-        vscode.window.showInformationMessage('Try to get origin');
+    context.subscriptions.push(vscode.commands.registerCommand('scorpio.test', async () => {
+        vscode.window.showInformationMessage('Start API test');
         try {
-            console.log(`get origin`);
-            const origin = await (0, originRequest_1.getOrigin)();
-            console.log(`origin: ${origin}`);
+            console.log(`start test`);
+            const testBody = await (0, test_api_1.getTest)();
+            console.log(`Test return: ${testBody}`);
         }
         catch (e) {
             vscode.window.showErrorMessage(`error: ${e}`);
@@ -1412,6 +1412,7 @@ async function authenticateCookie(username, password) {
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} message: ${response.body}`);
     }
+    console.log(JSON.stringify(response.headers));
 }
 exports.authenticateCookie = authenticateCookie;
 async function authenticateToken(username, password) {
@@ -1449,15 +1450,13 @@ const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
 async function fetch_courses() {
     const url = `${config_1.base_url}/api/courses`;
-    const headers = {
-        'Content-Type': 'application/json',
-        'Cookie': `jwt=${authentication_1.token}`,
-    };
     console.log("fetching courses");
     const response = await fetch(url, {
         method: 'GET',
-        credentials: 'include',
-        headers: headers,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authentication_1.token}`
+        },
     });
     if (!response.ok) {
         const errorText = await response.text();
@@ -1485,9 +1484,9 @@ async function fetch_exercise(courseId) {
     console.log("fetching exercises");
     const response = await fetch(url, {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Cookie': `jwt=${authentication_1.token}`,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authentication_1.token}`
         },
     });
     if (!response.ok) {
@@ -1507,20 +1506,25 @@ exports.fetch_exercise = fetch_exercise;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOrigin = void 0;
+exports.getTest = void 0;
+const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
-async function getOrigin() {
-    const url = `${config_1.base_url}/api/public/origin`;
-    return fetch(url, {
-        method: 'GET',
-    }).then((response) => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} message: ${response.text}`);
-        }
-        return response.text();
+async function getTest() {
+    const url = `${config_1.base_url}/api/public/headers`;
+    const headers = new Headers({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authentication_1.token}`
     });
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: headers
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} message: ${response.text}`);
+    }
+    return await response.text();
 }
-exports.getOrigin = getOrigin;
+exports.getTest = getTest;
 
 
 /***/ })
