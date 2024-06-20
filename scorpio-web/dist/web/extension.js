@@ -212,7 +212,7 @@ dotenv_1.default.config();
 console.log(`env: ${JSON.stringify(process.env)}`);
 // export const base_url = process.env.BASE_URL || 'https://artemis-test9.artemis.cit.tum.de';
 // export const testuser = process.env.TEST_USER || 'artemis_admin';
-// export const testpassword = process.env.TEST_PASSWORD || '***REMOVED***';
+// export const testpassword = process.env.TEST_PASSWORD || 'RNhX5G5nqZg8FK5Npwa9ECKJrfGJoQWi';
 exports.base_url = process.env.BASE_URL || 'http://localhost:8080';
 exports.testuser = process.env.TEST_USER || 'artemis_admin';
 exports.testpassword = process.env.TEST_PASSWORD || 'artemis_admin';
