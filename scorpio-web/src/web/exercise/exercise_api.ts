@@ -1,13 +1,6 @@
 import { token } from "../authentication/authentication";
 import { settings_base_url } from "../config";
-
-type Exercise = {
-    type: string,
-    id: number,
-    title: string,
-    shortName: string
-    problemStatement: string,
-}
+import { Exercise } from "./exercise_model";
 
 export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
 	const url = `${settings_base_url}/api/courses/${courseId}/programming-exercises`;
@@ -29,4 +22,26 @@ export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
 
     console.log(`retrieved exercises successful ${data}`);
     return data as Exercise[];
+}
+
+export async function fetch_problem_statement(courseId: string, exerciseId: string){
+	const url = `${settings_base_url}/api/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+
+    console.log("fetching problem statement");
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    })
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} message: ${response.text}`);
+    }
+
+    const data = await response.text();
+
+    console.log(`retrieved exercises successful ${data}`);
+    return data;
 }

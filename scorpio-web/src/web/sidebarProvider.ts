@@ -1,24 +1,31 @@
 import * as vscode from "vscode";
+import { current_course, current_exercise, settings_base_url, settings_client_url } from "./config";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(private readonly _extensionUri: vscode.Uri) { }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
+    console.log("resolveWebviewView");
     this._view = webviewView;
 
     webviewView.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
-
       localResourceRoots: [this._extensionUri],
     };
+
+    // TODO if current_course is undefined, show a message to select a course and exercise
+    if (!current_course || !current_exercise) {
+      vscode.window.showErrorMessage("Please select a course and exercise");
+      return;
+    }
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-        switch (data.type) {
+      switch (data.type) {
         case "onInfo": {
           if (!data.value) {
             return;
@@ -49,6 +56,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
 
+    const problemStatementUrl = `${settings_client_url}/courses/${current_course?.id}/exercises/${current_exercise?.id}`
+
     return `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -75,7 +84,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 			</head>
       <body>
       <h1> Artemis </h1>
-      <iframe id="artIframe" src="http://localhost:9000/" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>      
+      <iframe src="${problemStatementUrl}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>      
 			</body>
 			</html>`;
   }

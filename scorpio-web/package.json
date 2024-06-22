@@ -21,6 +21,12 @@
           "editPresentation": "singlelineText",
           "default": "http://localhost:8080"
         },
+        "scorpio.clientBaseUrl": {
+          "description": "The URL of the Artemis Client",
+          "type": "string",
+          "editPresentation": "singlelineText",
+          "default": "http://localhost:9000"
+        },
         "scorpio.userData.username": {
           "description": "The username for login to Artemis",
           "editPresentation": "singlelineText",
