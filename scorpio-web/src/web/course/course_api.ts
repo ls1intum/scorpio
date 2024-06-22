@@ -1,5 +1,5 @@
-import { token } from "./authentication/authentication";
-import { base_url } from "./config";
+import { token } from "../authentication/authentication";
+import { settings_base_url } from "../config";
 
 
 type Course = {
@@ -10,7 +10,7 @@ type Course = {
 }
 
 export async function  fetch_courses(): Promise<Course[]> {
-	const url = `${base_url}/api/courses`;
+	const url = `${settings_base_url}/api/courses`;
 
     console.log("fetching courses");
 	  const response = await fetch(url, {

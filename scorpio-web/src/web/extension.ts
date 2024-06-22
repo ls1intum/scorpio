@@ -2,8 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { authenticateCookieCmd, authenticateTokenCmd} from './authentication/authentication';
-import { fetch_courses } from './course';
-import { fetch_exercise } from './exercise';
+import { fetch_courses } from './course/course_api';
+import { fetch_exercise } from './exercise/exercise_api';
 import { getTest } from './test_api';
 
 // This method is called when your extension is activated

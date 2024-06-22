@@ -12,6 +12,29 @@
   "activationEvents": [],
   "browser": "./dist/web/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Scorpio",
+      "properties": {
+        "scorpio.apiBaseUrl": {
+          "description": "The base URL of the Artemis Server",
+          "type": "string",
+          "editPresentation": "singlelineText",
+          "default": "http://localhost:8080"
+        },
+        "scorpio.userData.username": {
+          "description": "The username for login to Artemis",
+          "editPresentation": "singlelineText",
+          "type": "string",
+          "default": "artemis_admin"
+        },
+        "scorpio.userData.password": {
+          "description": "The password for login to Artemis",
+          "editPresentation": "singlelineText",
+          "type": "string",
+          "default": "artemis_admin"
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {

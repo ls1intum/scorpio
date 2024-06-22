@@ -1,7 +1,11 @@
-import { base_url } from "../config";
+import { settings_base_url } from "../config";
 
-export async function authenticateCookie(username: string, password: string) {
-	const url = `${base_url}/api/public/authenticate`;
+export async function authenticateCookie(username: string | undefined, password: string | undefined) {
+	if (!username || !password) {
+		throw new Error('Username and Password are required');
+	}
+
+	const url = `${settings_base_url}/api/public/authenticate`;
 
 	const response = await fetch(url, {
 		method: "POST",
@@ -22,8 +26,12 @@ export async function authenticateCookie(username: string, password: string) {
 	console.log(JSON.stringify(response.headers))
 }	
 
-export async function authenticateToken(username: string, password: string) {
-	const url = `${base_url}/api/public/authenticate/token`;
+export async function authenticateToken(username: string | undefined, password: string | undefined) {
+	if (!username || !password) {
+		throw new Error('Username and Password are required');
+	}
+
+	const url = `${settings_base_url}/api/public/authenticate/token`;
 
 	const response = await fetch(url, {
 		method: "POST",
