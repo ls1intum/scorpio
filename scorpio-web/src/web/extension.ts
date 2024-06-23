@@ -1,10 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { authenticateCookieCmd, authenticateTokenCmd} from './authentication/authentication';
-import { fetch_courses } from './course/course_api';
-import { fetch_exercise } from './exercise/exercise_api';
+import { authenticateCookieCmd, authenticateTokenCmd, isTokenValid } from './authentication/authentication';
 import { getTest } from './test_api';
+import { build_course_options } from './course/course';
+import { build_exercise_options } from './exercise/exercise';
+import { SidebarProvider } from './sidebarProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -17,69 +18,43 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('scorpio.test', async () => {
 			vscode.window.showInformationMessage('Start API test');
-			try{
+			try {
 				console.log(`start test`);
 				const testBody = await getTest();
 				console.log(`Test return: ${testBody}`);
-			}catch(e){
+			} catch (e) {
 				vscode.window.showErrorMessage(`error: ${e}`);
 				return;
 			}
-	}));
+		}));
 
-	// command to authenticate the user with the Artemis server
+	// register sidebar for problem statement
+	const sidebarProvider = new SidebarProvider(context.extensionUri);
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider)
+	);
+
+	// command to authenticate the user with the Artemis server by cookie
 	context.subscriptions.push(
 		vscode.commands.registerCommand('scorpio.authenticateCookie', async () => authenticateCookieCmd()));
 
-	// command to authenticate the user with the Artemis server
+	// command to authenticate the user with the Artemis server by bearer token
 	context.subscriptions.push(
 		vscode.commands.registerCommand('scorpio.authenticateToken', async () => authenticateTokenCmd()));
 
 	// command to select a course and exercise
 	context.subscriptions.push(
 		vscode.commands.registerCommand('scorpio.selectExercise', async () => {
-			let courses;
-			try{
-				courses = await fetch_courses();
-			}catch(e){
-				vscode.window.showErrorMessage(`error: ${e}`);
+			if (!isTokenValid()){
+				vscode.window.showErrorMessage('Please authenticate first');
 				return;
 			}
 
-			const courseOptions = courses.map(course => ({
-				label: course.title, // Adjust based on your data structure
-				description: course.description, // Adjust based on your data structure
-				itemId: course.id, // Use a unique identifier
-			}));
-			const selectedCourse = await vscode.window.showQuickPick(courseOptions, {
-				placeHolder: 'Select an item',
-			});
-			if (!selectedCourse) {
-				vscode.window.showErrorMessage('Course is required');
-				return;
-			}
+			const courseOptions = await build_course_options();
 
-			let exercises;
-			try{
-				exercises = await fetch_exercise(selectedCourse.itemId);
-			}catch(e){
-				vscode.window.showErrorMessage(`error: ${e}`);
-				return;
-			}
-			const exerciseOptions = exercises.map(exercise => ({
-				label: exercise.title, // Adjust based on your data structure
-				description: "", // Adjust based on your data structure
-				itemId: exercise.id, // Use a unique identifier
-			}));
-			const selectedExercise = await vscode.window.showQuickPick(exerciseOptions, {
-				placeHolder: 'Select an item',
-			});
-			if (!selectedCourse) {
-				vscode.window.showErrorMessage('Course is required');
-				return;
-			}
-	}));
+			await build_exercise_options(courseOptions);
+		}));
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

@@ -1,16 +1,9 @@
 import { token } from "../authentication/authentication";
-import { settings_base_url } from "../config";
-
-
-type Course = {
-    id: string;
-    title: string;
-    description: string;
-    shortName: string;
-}
+import { settings } from "../config";
+import { Course } from "./course_model";
 
 export async function  fetch_courses(): Promise<Course[]> {
-	const url = `${settings_base_url}/api/courses`;
+	const url = `${settings.base_url}/api/courses`;
 
     console.log("fetching courses");
 	  const response = await fetch(url, {
