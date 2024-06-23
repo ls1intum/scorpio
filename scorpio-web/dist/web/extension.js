@@ -37,7 +37,7 @@ const authentication_1 = __webpack_require__(2);
 const test_api_1 = __webpack_require__(5);
 const course_1 = __webpack_require__(6);
 const exercise_1 = __webpack_require__(8);
-const sidebarProvider_1 = __webpack_require__(10);
+const sidebarProvider_1 = __webpack_require__(11);
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
@@ -120,8 +120,8 @@ const config_1 = __webpack_require__(3);
 const authentication_api_1 = __webpack_require__(4);
 async function authenticateCookieCmd() {
     vscode.window.showInformationMessage('Start Cookie Authentication');
-    const username = await vscode.window.showInputBox({ value: config_1.settings_user, prompt: 'Enter Username' });
-    const password = await vscode.window.showInputBox({ value: config_1.settings_password, prompt: 'Enter Password', password: true });
+    const username = await vscode.window.showInputBox({ value: config_1.settings.user, prompt: 'Enter Username' });
+    const password = await vscode.window.showInputBox({ value: config_1.settings.password, prompt: 'Enter Password', password: true });
     try {
         console.log(`authenticate with ${username}, ${password}`);
         (0, authentication_api_1.authenticateCookie)(username, password);
@@ -135,8 +135,8 @@ async function authenticateCookieCmd() {
 exports.authenticateCookieCmd = authenticateCookieCmd;
 async function authenticateTokenCmd() {
     vscode.window.showInformationMessage('Start Token Authentication');
-    const username = await vscode.window.showInputBox({ value: config_1.settings_user, prompt: 'Enter Username' });
-    const password = await vscode.window.showInputBox({ value: config_1.settings_password, prompt: 'Enter Password', password: true });
+    const username = await vscode.window.showInputBox({ value: config_1.settings.user, prompt: 'Enter Username' });
+    const password = await vscode.window.showInputBox({ value: config_1.settings.password, prompt: 'Enter Password', password: true });
     try {
         console.log(`authenticate with ${username}, ${password}`); // TODO: remove this line
         exports.token = await (0, authentication_api_1.authenticateToken)(username, password);
@@ -186,22 +186,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.set_current_exercise = exports.current_exercise = exports.set_current_course = exports.current_course = exports.settings_password = exports.settings_user = exports.settings_client_url = exports.settings_base_url = void 0;
+exports.settings = void 0;
 const vscode = __importStar(__webpack_require__(1));
-exports.settings_base_url = vscode.workspace.getConfiguration('scorpio').get('apiBaseUrl');
-exports.settings_client_url = vscode.workspace.getConfiguration('scorpio').get('clientBaseUrl');
-exports.settings_user = vscode.workspace.getConfiguration('scorpio').get('userData.username');
-exports.settings_password = vscode.workspace.getConfiguration('scorpio').get('userData.password');
-exports.current_course = undefined;
-const set_current_course = (course) => {
-    exports.current_course = course;
+exports.settings = {
+    base_url: vscode.workspace.getConfiguration('scorpio').get('apiBaseUrl'),
+    client_url: vscode.workspace.getConfiguration('scorpio').get('clientBaseUrl'),
+    user: vscode.workspace.getConfiguration('scorpio').get('userData.username'),
+    password: vscode.workspace.getConfiguration('scorpio').get('userData.password')
 };
-exports.set_current_course = set_current_course;
-exports.current_exercise = undefined;
-const set_current_exercise = (exercise) => {
-    exports.current_exercise = exercise;
-};
-exports.set_current_exercise = set_current_exercise;
 
 
 /***/ }),
@@ -216,7 +208,7 @@ async function authenticateCookie(username, password) {
     if (!username || !password) {
         throw new Error('Username and Password are required');
     }
-    const url = `${config_1.settings_base_url}/api/public/authenticate`;
+    const url = `${config_1.settings.base_url}/api/public/authenticate`;
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -238,7 +230,7 @@ async function authenticateToken(username, password) {
     if (!username || !password) {
         throw new Error('Username and Password are required');
     }
-    const url = `${config_1.settings_base_url}/api/public/authenticate/token`;
+    const url = `${config_1.settings.base_url}/api/public/authenticate/token`;
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -270,7 +262,7 @@ exports.getTest = void 0;
 const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
 async function getTest() {
-    const url = `${config_1.settings_base_url}/api/public/headers`;
+    const url = `${config_1.settings.base_url}/api/public/headers`;
     const headers = new Headers({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authentication_1.token}`
@@ -348,7 +340,7 @@ exports.fetch_courses = void 0;
 const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
 async function fetch_courses() {
-    const url = `${config_1.settings_base_url}/api/courses`;
+    const url = `${config_1.settings.base_url}/api/courses`;
     console.log("fetching courses");
     const response = await fetch(url, {
         method: 'GET',
@@ -400,7 +392,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.build_exercise_options = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const exercise_api_1 = __webpack_require__(9);
-const config_1 = __webpack_require__(3);
+const shared_model_1 = __webpack_require__(10);
 async function build_exercise_options(courseOptions) {
     if (!courseOptions) {
         return;
@@ -433,8 +425,7 @@ async function build_exercise_options(courseOptions) {
         return;
     }
     // set current course here so that if an error occurs before the previous exercise and course are still set
-    (0, config_1.set_current_course)(selectedCourse.course);
-    (0, config_1.set_current_exercise)(selectedExercise.exercise);
+    (0, shared_model_1.set_current)(selectedCourse.course, selectedExercise.exercise);
 }
 exports.build_exercise_options = build_exercise_options;
 
@@ -449,7 +440,7 @@ exports.fetch_problem_statement = exports.fetch_exercise = void 0;
 const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
 async function fetch_exercise(courseId) {
-    const url = `${config_1.settings_base_url}/api/courses/${courseId}/programming-exercises`;
+    const url = `${config_1.settings.base_url}/api/courses/${courseId}/programming-exercises`;
     console.log("fetching exercises");
     const response = await fetch(url, {
         method: 'GET',
@@ -467,7 +458,7 @@ async function fetch_exercise(courseId) {
 }
 exports.fetch_exercise = fetch_exercise;
 async function fetch_problem_statement(courseId, exerciseId) {
-    const url = `${config_1.settings_base_url}/api/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+    const url = `${config_1.settings.base_url}/api/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
     console.log("fetching problem statement");
     const response = await fetch(url, {
         method: 'GET',
@@ -515,12 +506,60 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.set_current = exports.current = void 0;
+const vscode = __importStar(__webpack_require__(1));
+exports.current = {
+    course: undefined,
+    exercise: undefined,
+    onCurrentChange: new vscode.EventEmitter()
+};
+const set_current = (course, exercise) => {
+    exports.current.course = course;
+    exports.current.exercise = exercise;
+    exports.current.onCurrentChange.fire();
+};
+exports.set_current = set_current;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SidebarProvider = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const config_1 = __webpack_require__(3);
+const shared_model_1 = __webpack_require__(10);
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;
+        shared_model_1.current.onCurrentChange.event(() => {
+            this.updateWebviewContent();
+        });
     }
     resolveWebviewView(webviewView) {
         console.log("resolveWebviewView");
@@ -530,12 +569,7 @@ class SidebarProvider {
             enableScripts: true,
             localResourceRoots: [this._extensionUri],
         };
-        // TODO if current_course is undefined, show a message to select a course and exercise
-        if (!config_1.current_course || !config_1.current_exercise) {
-            vscode.window.showErrorMessage("Please select a course and exercise");
-            return;
-        }
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        this.updateWebviewContent();
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case "onInfo": {
@@ -555,13 +589,24 @@ class SidebarProvider {
             }
         });
     }
+    updateWebviewContent() {
+        if (!this._view) {
+            return;
+        }
+        // TODO if current_course is undefined, show a message to select a course and exercise
+        if (!shared_model_1.current.course || !shared_model_1.current.exercise) {
+            vscode.window.showErrorMessage("Please select a course and exercise");
+            return;
+        }
+        this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+    }
     revive(panel) {
         this._view = panel;
     }
     _getHtmlForWebview(webview) {
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
         const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
-        const problemStatementUrl = `${config_1.settings_client_url}/courses/${config_1.current_course?.id}/exercises/${config_1.current_exercise?.id}`;
+        const problemStatementUrl = `${config_1.settings.client_url}/courses/${shared_model_1.current.course?.id}/exercises/${shared_model_1.current.exercise?.id}`;
         return `<!DOCTYPE html>
 			<html lang="en">
 			<head>

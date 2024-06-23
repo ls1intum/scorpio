@@ -1,10 +1,15 @@
 import * as vscode from "vscode";
-import { current_course, current_exercise, settings_base_url, settings_client_url } from "./config";
+import { settings } from "./config";
+import { current } from "./shared_model";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
 
-  constructor(private readonly _extensionUri: vscode.Uri) { }
+  constructor(private readonly _extensionUri: vscode.Uri) { 
+    current.onCurrentChange.event(() => {
+      this.updateWebviewContent();
+    })
+  }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     console.log("resolveWebviewView");
@@ -16,13 +21,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri],
     };
 
-    // TODO if current_course is undefined, show a message to select a course and exercise
-    if (!current_course || !current_exercise) {
-      vscode.window.showErrorMessage("Please select a course and exercise");
-      return;
-    }
-
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    this.updateWebviewContent();
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
@@ -44,6 +43,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     });
   }
 
+  private updateWebviewContent(){
+    if (!this._view) {
+      return;
+    }
+
+    // TODO if current_course is undefined, show a message to select a course and exercise
+    if (!current.course || !current.exercise) {
+      vscode.window.showErrorMessage("Please select a course and exercise");
+      return;
+    }
+
+    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+  }
+
   public revive(panel: vscode.WebviewView) {
     this._view = panel;
   }
@@ -56,7 +69,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
 
-    const problemStatementUrl = `${settings_client_url}/courses/${current_course?.id}/exercises/${current_exercise?.id}`
+    const problemStatementUrl = `${settings.client_url}/courses/${current.course?.id}/exercises/${current.exercise?.id}`
 
     return `<!DOCTYPE html>
 			<html lang="en">

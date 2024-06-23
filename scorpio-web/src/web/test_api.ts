@@ -1,8 +1,8 @@
 import { token } from "./authentication/authentication";
-import { settings_base_url } from "./config";
+import { settings } from "./config";
 
 export async function getTest() {
-	const url = `${settings_base_url}/api/public/headers`;
+	const url = `${settings.base_url}/api/public/headers`;
     const headers = new Headers(
         {
             'Content-Type': 'application/json',

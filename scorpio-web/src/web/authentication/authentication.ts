@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { settings_user, settings_password} from '../config';
+import { settings} from '../config';
 import { authenticateCookie, authenticateToken } from './authentication_api';
 
 export var token:string;
@@ -7,8 +7,8 @@ export var token:string;
 export async function authenticateCookieCmd(){
 		vscode.window.showInformationMessage('Start Cookie Authentication');
 		
-		const username = await vscode.window.showInputBox({ value: settings_user, prompt: 'Enter Username'});
-		const password = await vscode.window.showInputBox({ value: settings_password, prompt: 'Enter Password', password: true });
+		const username = await vscode.window.showInputBox({ value: settings.user, prompt: 'Enter Username'});
+		const password = await vscode.window.showInputBox({ value: settings.password, prompt: 'Enter Password', password: true });
 
 		try{
 			console.log(`authenticate with ${username}, ${password}`);
@@ -22,8 +22,8 @@ export async function authenticateCookieCmd(){
 
 export async function authenticateTokenCmd(){
 		vscode.window.showInformationMessage('Start Token Authentication');
-		const username = await vscode.window.showInputBox({ value: settings_user, prompt: 'Enter Username'});
-		const password = await vscode.window.showInputBox({ value: settings_password, prompt: 'Enter Password', password: true });
+		const username = await vscode.window.showInputBox({ value: settings.user, prompt: 'Enter Username'});
+		const password = await vscode.window.showInputBox({ value: settings.password, prompt: 'Enter Password', password: true });
 
 
 		try{

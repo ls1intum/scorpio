@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { fetch_exercise } from './exercise_api';
 import { CourseOption } from '../course/course';
-import { set_current_course, set_current_exercise } from '../config';
+import { set_current } from '../shared_model';
 
 export async function build_exercise_options(courseOptions: CourseOption[] | undefined) {
     if (!courseOptions) {
@@ -37,6 +37,5 @@ export async function build_exercise_options(courseOptions: CourseOption[] | und
     }
 
     // set current course here so that if an error occurs before the previous exercise and course are still set
-    set_current_course(selectedCourse.course);
-    set_current_exercise(selectedExercise.exercise);
+    set_current(selectedCourse.course, selectedExercise.exercise);
 }
