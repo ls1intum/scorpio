@@ -3,8 +3,11 @@
 Scorpio is an IDE-integrated Visual Studio Code plugin for the online learning platform Artemis. The plugin seamlessly incorporates the entire programming exercise life cycle directly within the student's IDE. It enables the student to start the programming exercise, displays the instructions, offers the option to submit the exercise, and returns the submission results all within the IDE.
 
 ## Installation
+### Requirements
 
-## Functionality
+If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+
+## Features
 
 ### Seamless Authentication
 The plugin allows the student to authenticate to Artemis. The authentication includes two independent authentication options. 
@@ -23,3 +26,7 @@ The plugin allows the students to submit the exercise directly within the IDE. T
 ### Feedback Display
 The plugin displays submission feedback within the IDE. The feedback can either be displayed inside the textual part of the problem statement or within the UML diagrams. This should enable the student to get instant submission feedback and aid the solving process.
 
+
+## Extension Settings
+
+* `placeholder.enable`: Enable/disable this placeholder.
