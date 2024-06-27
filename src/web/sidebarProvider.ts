@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { settings } from "./config";
 import { current } from "./shared_model";
+import { fetch_problem_statement } from "./exercise/exercise_api";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -21,7 +22,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri],
     };
 
+    try {
     this.updateWebviewContent();
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error: ${error}`);
+    }
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
@@ -48,29 +53,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       return;
     }
 
-    // TODO if current_course is undefined, show a message to select a course and exercise
-    if (!current.course || !current.exercise) {
-      vscode.window.showErrorMessage("Please select a course and exercise");
-      return;
-    }
-
-    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+     this._getHtmlForWebview(this._view.webview).then(
+      (html) => {
+        this._view!.webview.html = html;
+      }
+    );
   }
 
   public revive(panel: vscode.WebviewView) {
     this._view = panel;
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
+  private async _getHtmlForWebview(webview: vscode.Webview) : Promise<string> {
+     // TODO if current_course is undefined, show a message to select a course and exercise
+     if (!current.course || !current.exercise) {
+      throw new Error("No course and exercise selected");
+    }
+
     const styleResetUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
     );
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
+    const problemStatementUrl = `${settings.client_url}/courses/${current.course!.id}/exercises/${current.exercise!.id}`;
 
-    const problemStatementUrl = `${settings.client_url}/courses/${current.course?.id}/exercises/${current.exercise?.id}`
-
+    const problemStatement = await fetch_problem_statement(current.course!.id, current.exercise!.id);
+    
     return `<!DOCTYPE html>
 			<html lang="en">
 			<head>

@@ -2,7 +2,7 @@ import { token } from "../authentication/authentication";
 import { settings } from "../config";
 import { Exercise } from "./exercise_model";
 
-export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
+export async function fetch_exercise(courseId: number): Promise<Exercise[]>{
 	const url = `${settings.base_url}/api/courses/${courseId}/programming-exercises`;
 
     console.log("fetching exercises");
@@ -20,11 +20,10 @@ export async function fetch_exercise(courseId: string): Promise<Exercise[]>{
 
     const data = await response.json();
 
-    console.log(`retrieved exercises successful ${data}`);
     return data as Exercise[];
 }
 
-export async function fetch_problem_statement(courseId: string, exerciseId: string){
+export async function fetch_problem_statement(courseId: number, exerciseId: number){
 	const url = `${settings.base_url}/api/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
 
     console.log("fetching problem statement");
@@ -42,6 +41,5 @@ export async function fetch_problem_statement(courseId: string, exerciseId: stri
 
     const data = await response.text();
 
-    console.log(`retrieved exercises successful ${data}`);
     return data;
 }
