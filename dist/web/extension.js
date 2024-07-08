@@ -36,8 +36,9 @@ const vscode = __importStar(__webpack_require__(1));
 const authentication_1 = __webpack_require__(2);
 const test_api_1 = __webpack_require__(5);
 const course_1 = __webpack_require__(6);
-const exercise_1 = __webpack_require__(8);
-const sidebarProvider_1 = __webpack_require__(11);
+const exercise_1 = __webpack_require__(9);
+const sidebarProvider_1 = __webpack_require__(12);
+const authentication_provider_1 = __webpack_require__(8);
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
@@ -56,6 +57,7 @@ function activate(context) {
             return;
         }
     }));
+    context.subscriptions.push(new authentication_provider_1.ArtemisAuthenticationProvider(context.secrets));
     // register sidebar for problem statement
     const sidebarProvider = new sidebarProvider_1.SidebarProvider(context.extensionUri);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider));
@@ -65,10 +67,6 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('scorpio.authenticateToken', async () => (0, authentication_1.authenticateTokenCmd)()));
     // command to select a course and exercise
     context.subscriptions.push(vscode.commands.registerCommand('scorpio.selectExercise', async () => {
-        if (!(0, authentication_1.isTokenValid)()) {
-            vscode.window.showErrorMessage('Please authenticate first');
-            return;
-        }
         const courseOptions = await (0, course_1.build_course_options)();
         await (0, exercise_1.build_exercise_options)(courseOptions);
     }));
@@ -114,7 +112,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isTokenValid = exports.authenticateTokenCmd = exports.authenticateCookieCmd = exports.token = void 0;
+exports.authenticateTokenCmd = exports.authenticateCookieCmd = exports.token = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const config_1 = __webpack_require__(3);
 const authentication_api_1 = __webpack_require__(4);
@@ -148,13 +146,6 @@ async function authenticateTokenCmd() {
     }
 }
 exports.authenticateTokenCmd = authenticateTokenCmd;
-function isTokenValid() {
-    if (exports.token === undefined)
-        return false;
-    // TODO check to Artemis if token is not experied yet
-    return true;
-}
-exports.isTokenValid = isTokenValid;
 
 
 /***/ }),
@@ -230,7 +221,8 @@ async function authenticateToken(username, password) {
     if (!username || !password) {
         throw new Error('Username and Password are required');
     }
-    const url = `${config_1.settings.base_url}/api/public/authenticate/token`;
+    var url = new URL(`${config_1.settings.base_url}/api/public/authenticate`);
+    url.searchParams.append('as-bearer', 'true');
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -311,10 +303,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.build_course_options = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const course_api_1 = __webpack_require__(7);
+const authentication_provider_1 = __webpack_require__(8);
 async function build_course_options() {
     let courses;
     try {
-        courses = await (0, course_api_1.fetch_courses)();
+        const session = await vscode.authentication.getSession(authentication_provider_1.AUTH_ID, [], { createIfNone: false });
+        if (!session) {
+            throw new Error(`Please sign in`);
+        }
+        courses = await (0, course_api_1.fetch_courses)(session.accessToken);
     }
     catch (e) {
         vscode.window.showErrorMessage(`error: ${e}`);
@@ -337,16 +334,15 @@ exports.build_course_options = build_course_options;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fetch_courses = void 0;
-const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
-async function fetch_courses() {
+async function fetch_courses(token) {
     const url = `${config_1.settings.base_url}/api/courses`;
     console.log("fetching courses");
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authentication_1.token}`
+            'Authorization': `Bearer ${token}`
         },
     });
     if (!response.ok) {
@@ -362,6 +358,141 @@ exports.fetch_courses = fetch_courses;
 
 /***/ }),
 /* 8 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ArtemisAuthenticationProvider = exports.AUTH_ID = void 0;
+const vscode_1 = __webpack_require__(1);
+const config_1 = __webpack_require__(3);
+const authentication_api_1 = __webpack_require__(4);
+exports.AUTH_ID = 'artemis';
+const AUTH_NAME = `Artemis`;
+const SESSIONS_SECRET_KEY = `${exports.AUTH_ID}.sessions`;
+class ArtemisSession {
+    constructor(accessToken, username, scopes) {
+        this.id = exports.AUTH_ID;
+        this.accessToken = accessToken;
+        this.account = {
+            label: username,
+            id: username,
+        };
+        this.scopes = scopes ?? [];
+    }
+}
+class ArtemisAuthenticationProvider {
+    constructor(secretStorage) {
+        this.secretStorage = secretStorage;
+        this._onDidChangeSessions = new vscode_1.EventEmitter();
+        console.log('ArtemisAuthenticationProvider');
+        this.sessionPromise = this.getSessionFromStorage();
+        this._disposable = vscode_1.Disposable.from(vscode_1.authentication.registerAuthenticationProvider(exports.AUTH_ID, AUTH_NAME, this), secretStorage.onDidChange(() => this.checkForUpdates()));
+    }
+    get onDidChangeSessions() {
+        return this._onDidChangeSessions.event;
+    }
+    /**
+   * Get the existing sessions
+   * @param scopes
+   * @returns
+   */
+    async getSessions(scopes) {
+        console.log('getSessions');
+        const session = await this.getSessionFromStorage();
+        return session ? [session] : [];
+    }
+    async getSessionFromStorage() {
+        return this.secretStorage.get(SESSIONS_SECRET_KEY).then((sessionString) => sessionString ? JSON.parse(sessionString) : undefined);
+    }
+    /**
+     * Create a new auth session
+     * @param scopes
+     * @returns
+     */
+    async createSession(scopes) {
+        console.log('createSession');
+        try {
+            var username = config_1.settings.user;
+            if (!username) {
+                username = await vscode_1.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: 'Enter your email address',
+                });
+            }
+            if (!username) {
+                throw new Error('No username provided');
+            }
+            var password = config_1.settings.password;
+            if (!password) {
+                password = await vscode_1.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: 'Enter your password',
+                    password: true
+                });
+            }
+            if (!password) {
+                throw new Error('No password provided');
+            }
+            const token = await this.login(username, password);
+            if (!token) {
+                throw new Error(`login failure`);
+            }
+            const session = new ArtemisSession(token, username, scopes);
+            await this.secretStorage.store(SESSIONS_SECRET_KEY, JSON.stringify(session));
+            this._onDidChangeSessions.fire({ added: [session], removed: [], changed: [] });
+            return session;
+        }
+        catch (e) {
+            vscode_1.window.showErrorMessage(`Sign in failed: ${e}`);
+            throw e;
+        }
+    }
+    async login(username, password) {
+        return (0, authentication_api_1.authenticateToken)(username, password);
+    }
+    // This function is called when the end user signs out of the account.
+    async removeSession(_sessionId) {
+        console.log("removeSession");
+        const session = await this.sessionPromise;
+        if (!session) {
+            return;
+        }
+        await this.secretStorage.delete(SESSIONS_SECRET_KEY);
+        this._onDidChangeSessions.fire({ added: [], removed: [session], changed: [] });
+    }
+    // This is a crucial function that handles whether or not the token has changed in
+    // a different window of VS Code and sends the necessary event if it has.
+    async checkForUpdates() {
+        const added = [];
+        const removed = [];
+        const previousSession = await this.sessionPromise;
+        this.sessionPromise = this.getSessionFromStorage();
+        const currentSession = await this.sessionPromise;
+        if (!currentSession) {
+            return;
+        }
+        if (previousSession?.accessToken !== currentSession?.accessToken) {
+            if (previousSession) {
+                removed.push(previousSession);
+            }
+            if (currentSession) {
+                added.push(currentSession);
+            }
+        }
+        else {
+            return;
+        }
+        this._onDidChangeSessions.fire({ added: added, removed: removed, changed: [] });
+    }
+    dispose() {
+        this._disposable?.dispose();
+    }
+}
+exports.ArtemisAuthenticationProvider = ArtemisAuthenticationProvider;
+
+
+/***/ }),
+/* 9 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -391,8 +522,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.build_exercise_options = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const exercise_api_1 = __webpack_require__(9);
-const shared_model_1 = __webpack_require__(10);
+const exercise_api_1 = __webpack_require__(10);
+const shared_model_1 = __webpack_require__(11);
+const authentication_provider_1 = __webpack_require__(8);
 async function build_exercise_options(courseOptions) {
     if (!courseOptions) {
         return;
@@ -406,7 +538,11 @@ async function build_exercise_options(courseOptions) {
     }
     let exercises;
     try {
-        exercises = await (0, exercise_api_1.fetch_exercise)(selectedCourse.course.id);
+        const session = await vscode.authentication.getSession(authentication_provider_1.AUTH_ID, [], { createIfNone: false });
+        if (!session) {
+            throw new Error(`Please sign in`);
+        }
+        exercises = await (0, exercise_api_1.fetch_exercise)(session.accessToken, selectedCourse.course.id);
     }
     catch (e) {
         vscode.window.showErrorMessage(`error: ${e}`);
@@ -431,22 +567,21 @@ exports.build_exercise_options = build_exercise_options;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fetch_problem_statement = exports.fetch_exercise = void 0;
-const authentication_1 = __webpack_require__(2);
 const config_1 = __webpack_require__(3);
-async function fetch_exercise(courseId) {
+async function fetch_exercise(token, courseId) {
     const url = `${config_1.settings.base_url}/api/courses/${courseId}/programming-exercises`;
     console.log("fetching exercises");
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authentication_1.token}`
+            'Authorization': `Bearer ${token}`
         },
     });
     if (!response.ok) {
@@ -457,14 +592,14 @@ async function fetch_exercise(courseId) {
     return data;
 }
 exports.fetch_exercise = fetch_exercise;
-async function fetch_problem_statement(courseId, exerciseId) {
+async function fetch_problem_statement(token, courseId, exerciseId) {
     const url = `${config_1.settings.base_url}/api/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
     console.log("fetching problem statement");
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authentication_1.token}`
+            'Authorization': `Bearer ${token}`
         },
     });
     if (!response.ok) {
@@ -478,7 +613,7 @@ exports.fetch_problem_statement = fetch_problem_statement;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -522,7 +657,7 @@ exports.set_current = set_current;
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -553,7 +688,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SidebarProvider = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const config_1 = __webpack_require__(3);
-const shared_model_1 = __webpack_require__(10);
+const shared_model_1 = __webpack_require__(11);
 class SidebarProvider {
     constructor(_extensionUri) {
         this._extensionUri = _extensionUri;

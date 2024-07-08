@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { fetch_courses } from "./course_api";
 import { Course } from './course_model';
+import { AUTH_ID } from '../authentication/authentication_provider';
 
 export type CourseOption = {
     label: string;
@@ -11,7 +12,12 @@ export type CourseOption = {
 export async function build_course_options() {
     let courses;
     try {
-        courses = await fetch_courses();
+        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: false });
+			
+        if (!session) {
+            throw new Error(`Please sign in`);
+        }
+        courses = await fetch_courses(session.accessToken);
     } catch (e) {
         vscode.window.showErrorMessage(`error: ${e}`);
         return;

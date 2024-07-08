@@ -31,7 +31,8 @@ export async function authenticateToken(username: string | undefined, password: 
 		throw new Error('Username and Password are required');
 	}
 
-	const url = `${settings.base_url}/api/public/authenticate/token`;
+	var url = new URL(`${settings.base_url}/api/public/authenticate`);
+	url.searchParams.append('as-bearer', 'true');
 
 	const response = await fetch(url, {
 		method: "POST",

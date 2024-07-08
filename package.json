@@ -6,12 +6,23 @@
   "engines": {
     "vscode": "^1.90.0"
   },
+  "icon": "media/artemis_logo.png",
   "categories": [
     "Other"
+  ],
+  "extensionKind": [
+    "ui",
+    "workspace"
   ],
   "activationEvents": [],
   "browser": "./dist/web/extension.js",
   "contributes": {
+    "authentication": [
+      {
+        "id": "artemis",
+        "label": "Artemis"
+      }
+    ],
     "configuration": {
       "title": "Scorpio",
       "properties": {
@@ -46,7 +57,7 @@
         {
           "id": "artemis-sidebar-view",
           "title": "Artemis",
-          "icon": "media/favicon.svg"
+          "icon": "media/artemis_logo.svg"
         }
       ]
     },
@@ -122,6 +133,11 @@
     "fetch-cookie": "^3.0.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "uuid": "^10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ls1intum/scorpio.git"
   }
 }

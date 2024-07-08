@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { fetch_exercise } from './exercise_api';
 import { CourseOption } from '../course/course';
 import { set_current } from '../shared_model';
+import { AUTH_ID } from '../authentication/authentication_provider';
 
 export async function build_exercise_options(courseOptions: CourseOption[] | undefined) {
     if (!courseOptions) {
@@ -18,7 +19,12 @@ export async function build_exercise_options(courseOptions: CourseOption[] | und
 
     let exercises;
     try {
-        exercises = await fetch_exercise(selectedCourse.course.id);
+        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: false });
+			
+        if (!session) {
+            throw new Error(`Please sign in`);
+        }
+        exercises = await fetch_exercise(session.accessToken, selectedCourse.course.id);
     } catch (e) {
         vscode.window.showErrorMessage(`error: ${e}`);
         return;

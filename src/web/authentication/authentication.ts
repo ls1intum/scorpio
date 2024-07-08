@@ -35,10 +35,3 @@ export async function authenticateTokenCmd(){
 			return;
 		}
 }
-
-export function isTokenValid(): boolean{
-	if (token === undefined) return false;
-	// TODO check to Artemis if token is not experied yet
-
-	return true;
-}
