@@ -1,8 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { authenticateCookieCmd, authenticateTokenCmd } from './authentication/authentication';
-import { getTest } from './test_api';
 import { build_course_options } from './course/course';
 import { build_exercise_options } from './exercise/exercise';
 import { SidebarProvider } from './sidebarProvider';
@@ -17,19 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "scorpio" is now active!');
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.test', async () => {
-			vscode.window.showInformationMessage('Start API test');
-			try {
-				console.log(`start test`);
-				const testBody = await getTest();
-				console.log(`Test return: ${testBody}`);
-			} catch (e) {
-				vscode.window.showErrorMessage(`error: ${e}`);
-				return;
-			}
-		}));
-
-	context.subscriptions.push(
 		new ArtemisAuthenticationProvider(context.secrets)
 	);
 
@@ -38,14 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider)
 	);
-
-	// command to authenticate the user with the Artemis server by cookie
-	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.authenticateCookie', async () => authenticateCookieCmd()));
-
-	// command to authenticate the user with the Artemis server by bearer token
-	context.subscriptions.push(
-		vscode.commands.registerCommand('scorpio.authenticateToken', async () => authenticateTokenCmd()));
 
 	// command to select a course and exercise
 	context.subscriptions.push(

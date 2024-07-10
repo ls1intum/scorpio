@@ -12,7 +12,7 @@ export type CourseOption = {
 export async function build_course_options() {
     let courses;
     try {
-        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: false });
+        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: true });
 			
         if (!session) {
             throw new Error(`Please sign in`);

@@ -51,6 +51,7 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
     public async getSessions(scopes?: string[]): Promise<readonly AuthenticationSession[]> {
         console.log('getSessions');
         const session = await this.getSessionFromStorage();
+        console.log(`got session ${session}`)
         return session ? [session] : [];
     }
 
@@ -71,7 +72,7 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
             if (!username) {
                 username = await window.showInputBox({
                     ignoreFocusOut: true,
-                    prompt: 'Enter your email address',
+                    prompt: 'Enter your username',
                 });
             }
             if (!username) {

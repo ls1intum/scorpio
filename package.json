@@ -14,7 +14,9 @@
     "ui",
     "workspace"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "browser": "./dist/web/extension.js",
   "contributes": {
     "authentication": [
@@ -73,25 +75,6 @@
       ]
     },
     "commands": [
-      {
-        "command": "scorpio.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "scorpio.test",
-        "category": "Artemis",
-        "title": "Test api"
-      },
-      {
-        "command": "scorpio.authenticateCookie",
-        "category": "Artemis",
-        "title": "Log In for cookie"
-      },
-      {
-        "command": "scorpio.authenticateToken",
-        "category": "Artemis",
-        "title": "Log In for bearer token"
-      },
       {
         "command": "scorpio.selectExercise",
         "category": "Artemis",

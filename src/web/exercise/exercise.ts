@@ -19,7 +19,7 @@ export async function build_exercise_options(courseOptions: CourseOption[] | und
 
     let exercises;
     try {
-        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: false });
+        const session = await vscode.authentication.getSession(AUTH_ID, [], { createIfNone: true });
 			
         if (!session) {
             throw new Error(`Please sign in`);
