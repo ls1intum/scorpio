@@ -6,12 +6,25 @@
   "engines": {
     "vscode": "^1.90.0"
   },
+  "icon": "media/artemis_logo.png",
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "browser": "./dist/web/extension.js",
   "contributes": {
+    "authentication": [
+      {
+        "id": "artemis",
+        "label": "Artemis"
+      }
+    ],
     "configuration": {
       "title": "Scorpio",
       "properties": {
@@ -46,7 +59,7 @@
         {
           "id": "artemis-sidebar-view",
           "title": "Artemis",
-          "icon": "media/favicon.svg"
+          "icon": "media/artemis_logo.svg"
         }
       ]
     },
@@ -62,25 +75,6 @@
       ]
     },
     "commands": [
-      {
-        "command": "scorpio.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "scorpio.test",
-        "category": "Artemis",
-        "title": "Test api"
-      },
-      {
-        "command": "scorpio.authenticateCookie",
-        "category": "Artemis",
-        "title": "Log In for cookie"
-      },
-      {
-        "command": "scorpio.authenticateToken",
-        "category": "Artemis",
-        "title": "Log In for bearer token"
-      },
       {
         "command": "scorpio.selectExercise",
         "category": "Artemis",
@@ -122,6 +116,11 @@
     "fetch-cookie": "^3.0.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "uuid": "^10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ls1intum/scorpio.git"
   }
 }
