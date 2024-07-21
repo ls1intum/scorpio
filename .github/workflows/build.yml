@@ -1,0 +1,45 @@
+name: Build
+on:
+    workflow_call:
+        inputs:
+          version:
+            description: 'Version of the plugin to build'
+            default: ""
+            required: false
+            type: string
+    pull_request:
+    push:
+        branches:
+        - main
+        
+
+
+jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            # Check out current repository
+            - name: Fetch Sources
+              uses: actions/checkout@v4
+
+            - name: Install Node Packages
+              run: npm install
+
+            - name: Package VSIX
+              uses: lannonbr/vsce-action@3.0.0
+              with:
+                  args: "package"
+            
+            - name: Upload VSIX to Cache
+              uses: actions/cache@v2
+              with:
+                  path: ./*.vsix
+                  key: scorpio-${{ inputs.version }}.vsix
+
+            # Upload plugin artifact
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  path: ./*.vsix
+                  name: scorpio-${{ inputs.version }}.vsix
