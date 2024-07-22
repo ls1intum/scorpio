@@ -1,3 +1,4 @@
+# refer to the github docs for more information https://github.com/github/vscode-github-actions/blob/main/.github/workflows/publish.yml
 # Releases the plugin to GitHub and VS Code Marketplace
 name: Release
 on:
@@ -5,9 +6,9 @@ on:
     types: [released]
 
 jobs:
-    build:
-        name: Build
-        uses: ./.github/workflows/build.yml
+    package:
+        name: Package
+        uses: ./.github/workflows/package.yml
         secrets: inherit
         with:
           version: ${{ github.event.release.tag_name }}
@@ -15,18 +16,30 @@ jobs:
     release:
         name: Release
         runs-on: ubuntu-latest
-        needs: build
+        needs: package
         steps:
-            - name: Download VSIX from Cache
-              uses: actions/cache@v2
+            - name: Download VSIX artifact
+              uses: actions/download-artifact@v4
               with:
-                  path: ./*.vsix
-                  key: scorpio-${{ github.event.release.tag_name }}.vsix
+                  name: scorpio${{ github.event.release.tag_name }}.vsix
+            
+            - uses: actions/setup-node@v4
+              with:
+                node-version: latest
+                cache: "npm"
+                registry-url: "https://npm.pkg.github.com"
+    
+            - name: Install CI
+              run: npm ci
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             # release to VS Code Marketplace
+            - name: Publish Plugin
+              run: npx vsce publish --packagePath ./scorpio${{ github.event.release.tag_name }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
 
             # Upload artifact as a release asset
             - name: Upload Release Asset
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh release upload ${{ github.event.release.tag_name }} ./*.vsix
+              run: gh release upload ${{ github.event.release.tag_name }} ./scorpio${{ github.event.release.tag_name }}.vsix

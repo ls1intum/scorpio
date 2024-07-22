@@ -1,0 +1,45 @@
+name: Package
+on:
+    workflow_call:
+        inputs:
+          version:
+            description: 'Version of the plugin to build'
+            default: "0.0.1"
+            required: false
+            type: string
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
+
+jobs:
+    package:
+        name: Package
+        runs-on: ubuntu-latest
+        steps:
+            # Check out current repository
+            - name: Fetch Sources
+              uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                node-version: latest
+                cache: "npm"
+                registry-url: "https://npm.pkg.github.com"
+
+            - name: Install CI
+              run: npm ci
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Package VSIX
+              run: npm run package
+
+            # Upload plugin artifact
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  path: ./*.vsix
+                  name: scorpio${{ inputs.version }}.vsix
