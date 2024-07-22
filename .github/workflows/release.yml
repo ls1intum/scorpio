@@ -17,11 +17,12 @@ jobs:
         name: Release
         runs-on: ubuntu-latest
         needs: package
+        environment: prod
         steps:
             # Check out current repository
             - name: Fetch Sources
               uses: actions/checkout@v4
-              
+
             - name: Download VSIX artifact
               uses: actions/download-artifact@v4
               with:
