@@ -42,7 +42,7 @@ jobs:
 
             # release to VS Code Marketplace
             - name: Publish Plugin
-              run: npx vsce publish --packagePath ./scorpio-${{ github.event.release.tag_name }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
+              run: npx vsce publish --packagePath /home/runner/work/scorpio/scorpio/scorpio-${{ github.event.release.tag_name }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
 
             # Upload artifact as a release asset
             - name: Upload Release Asset
