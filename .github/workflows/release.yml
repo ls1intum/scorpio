@@ -44,16 +44,17 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Strip v from version
+              id: strip-v
               run: 
                 TAG=${{ github.event.release.tag_name }}
-                echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+                echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
 
             # release to VS Code Marketplace
             - name: Publish Plugin
-              run: npx vsce publish --packagePath ./scorpio-${{ env.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
+              run: npx vsce publish --packagePath ./scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
 
             # Upload artifact as a release asset
             - name: Upload Release Asset
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh release upload ${{ github.event.release.tag_name }} ./scorpio-${{ env.VERSION }}.vsix
+              run: gh release upload ${{ github.event.release.tag_name }} ./scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix
