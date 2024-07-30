@@ -28,9 +28,6 @@ jobs:
               with:
                   name: scorpio-${{ github.event.release.tag_name }}.vsix
                   path: .
-
-            - name: List files
-              run: ls -R
             
             - uses: actions/setup-node@v4
               with:
@@ -49,7 +46,6 @@ jobs:
               run: |
                 TAG=${{ github.event.release.tag_name }}
                 echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
-                echo "VERSION=${TAG#v}" >> $GITHUB_STEP_SUMMARY
 
             # release to VS Code Marketplace
             - name: Publish Plugin
@@ -60,4 +56,4 @@ jobs:
             - name: Upload Release Asset
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix
+              run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix#scorpio-${{ github.event.release.tag_name }}.vsix
