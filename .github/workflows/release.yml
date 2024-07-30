@@ -48,6 +48,7 @@ jobs:
               run: 
                 TAG=${{ github.event.release.tag_name }}
                 echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+                echo "VERSION=${TAG#v}" >> $GITHUB_STEP_SUMMARY
 
             # release to VS Code Marketplace
             - name: Publish Plugin
