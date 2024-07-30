@@ -27,6 +27,9 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: scorpio-${{ github.event.release.tag_name }}.vsix
+
+            - name: List files
+              run: ls -R
             
             - uses: actions/setup-node@v4
               with:
