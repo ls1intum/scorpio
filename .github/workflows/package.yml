@@ -4,7 +4,7 @@ on:
         inputs:
           version:
             description: 'Version of the plugin to build'
-            default: "0.0.1"
+            default: "0.0.0"
             required: false
             type: string
     pull_request:
@@ -33,6 +33,9 @@ jobs:
               run: npm ci
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Change version
+              run: npm version ${{ inputs.version }} --no-git-tag-version
 
             - name: Package VSIX
               run: npm run package

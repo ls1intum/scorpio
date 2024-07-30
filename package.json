@@ -1,10 +1,10 @@
 {
-  "name": "scorpio",
-  "displayName": "scorpio",
+  "name": "artemis-scorpio",
+  "displayName": "Artemis - Scorpio",
   "description": "",
   "publisher": "tum-aet",
   "icon": "media/artemis_logo.png",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "engines": {
     "vscode": "^1.91.0"
   },

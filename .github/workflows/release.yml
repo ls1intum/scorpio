@@ -27,7 +27,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: scorpio-${{ github.event.release.tag_name }}.vsix
-                  path: ./scorpio-${{ github.event.release.tag_name }}.vsix
+                  path: .
             
             - uses: actions/setup-node@v4
               with:
@@ -40,12 +40,20 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Strip v from version
+              id: strip-v
+              shell: bash
+              run: |
+                TAG=${{ github.event.release.tag_name }}
+                echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+
             # release to VS Code Marketplace
             - name: Publish Plugin
-              run: npx vsce publish --packagePath /home/runner/work/scorpio/scorpio/scorpio-${{ github.event.release.tag_name }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
+              continue-on-error: true
+              run: npx vsce publish --packagePath ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
 
             # Upload artifact as a release asset
             - name: Upload Release Asset
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh release upload ${{ github.event.release.tag_name }} ./scorpio-${{ github.event.release.tag_name }}.vsix
+              run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix#scorpio-${{ github.event.release.tag_name }}.vsix
