@@ -45,7 +45,8 @@ jobs:
 
             - name: Strip v from version
               id: strip-v
-              run: 
+              shell: bash
+              run: |
                 TAG=${{ github.event.release.tag_name }}
                 echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
                 echo "VERSION=${TAG#v}" >> $GITHUB_STEP_SUMMARY
