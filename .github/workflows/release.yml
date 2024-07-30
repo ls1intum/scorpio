@@ -53,6 +53,7 @@ jobs:
 
             # release to VS Code Marketplace
             - name: Publish Plugin
+              continue-on-error: true
               run: npx vsce publish --packagePath ./scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
 
             # Upload artifact as a release asset
