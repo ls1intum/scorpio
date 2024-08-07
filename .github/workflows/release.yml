@@ -51,6 +51,11 @@ jobs:
             - name: Publish Plugin
               continue-on-error: true
               run: npx vsce publish --packagePath ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
+            
+            - name: Publish to VSX Registry
+              continue-on-error: true
+              run: |
+                npx ovsx publish -p ${{ secrets.PUBLISH_VSX }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix
 
             # Upload artifact as a release asset
             - name: Upload Release Asset
