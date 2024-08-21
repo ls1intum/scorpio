@@ -1,8 +1,7 @@
-import { token } from "../authentication/authentication";
 import { settings } from "../config";
 import { Course } from "./course_model";
 
-export async function  fetch_courses(): Promise<Course[]> {
+export async function  fetch_courses(token:string): Promise<Course[]> {
 	const url = `${settings.base_url}/api/courses`;
 
     console.log("fetching courses");

@@ -1,0 +1,64 @@
+# refer to the github docs for more information https://github.com/github/vscode-github-actions/blob/main/.github/workflows/publish.yml
+# Releases the plugin to GitHub and VS Code Marketplace
+name: Release
+on:
+  release:
+    types: [released]
+
+jobs:
+    package:
+        name: Package
+        uses: ./.github/workflows/package.yml
+        secrets: inherit
+        with:
+          version: ${{ github.event.release.tag_name }}
+
+    release:
+        name: Release
+        runs-on: ubuntu-latest
+        needs: package
+        environment: prod
+        steps:
+            # Check out current repository
+            - name: Fetch Sources
+              uses: actions/checkout@v4
+
+            - name: Download VSIX artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: scorpio-${{ github.event.release.tag_name }}.vsix
+                  path: .
+            
+            - uses: actions/setup-node@v4
+              with:
+                node-version: latest
+                cache: "npm"
+                registry-url: "https://npm.pkg.github.com"
+    
+            - name: Install CI
+              run: npm ci
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Strip v from version
+              id: strip-v
+              shell: bash
+              run: |
+                TAG=${{ github.event.release.tag_name }}
+                echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+
+            # release to VS Code Marketplace
+            - name: Publish Plugin
+              continue-on-error: true
+              run: npx vsce publish --packagePath ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
+            
+            - name: Publish to VSX Registry
+              continue-on-error: true
+              run: |
+                npx ovsx publish -p ${{ secrets.PUBLISH_VSX }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix
+
+            # Upload artifact as a release asset
+            - name: Upload Release Asset
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix#scorpio-${{ github.event.release.tag_name }}.vsix
