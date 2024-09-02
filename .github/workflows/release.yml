@@ -49,11 +49,10 @@ jobs:
 
             # release to VS Code Marketplace
             - name: Publish Plugin
-              continue-on-error: true
               run: npx vsce publish --packagePath ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix -p ${{ secrets.PUBLISH_TOKEN }}
             
             - name: Publish to VSX Registry
-              continue-on-error: true
+              id: vsx-publish
               run: |
                 npx ovsx publish -p ${{ secrets.PUBLISH_VSX }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix
 
@@ -62,3 +61,14 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix#scorpio-${{ github.event.release.tag_name }}.vsix
+            
+            - name: Trigger Theia Build
+              if: steps.vsx-publish.outcome == 'success'
+              uses: distributhor/workflow-webhook@v3
+              with:
+                webhook_url: "${{ vars.THEIA_BLUEPRINT_URL}}/dispatches"
+                webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+                data: '{"version": "${{ steps.strip-v.outputs.VERSION }}"}'
+                webhook_auth_type: "bearer"
+                webhook_auth: ${{ secrets.THEIA_BLUEPRINT_TOKEN }}
+                event_name: 'release_event'
