@@ -64,11 +64,10 @@ jobs:
             
             - name: Trigger Theia Build
               if: steps.vsx-publish.outcome == 'success'
-              uses: distributhor/workflow-webhook@v3
-              with:
-                webhook_url: "${{ vars.THEIA_BLUEPRINT_URL}}/dispatches"
-                webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
-                data: '{"version": "${{ steps.strip-v.outputs.VERSION }}"}'
-                webhook_auth_type: "bearer"
-                webhook_auth: ${{ secrets.THEIA_BLUEPRINT_TOKEN }}
-                event_name: 'release_event'
+              run: |
+                curl -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.THEIA_BLUEPRINT_TOKEN }}" \
+                ${{ vars.THEIA_BLUEPRINT_URL}}dispatches \
+                -d '{"event_type":"release_event","client_payload":{"version": "${{ steps.strip-v.outputs.VERSION }}"}}'
