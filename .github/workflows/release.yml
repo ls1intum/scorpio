@@ -69,5 +69,5 @@ jobs:
                 -X POST \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${{ secrets.THEIA_BLUEPRINT_TOKEN }}" \
-                ${{ vars.THEIA_BLUEPRINT_URL}}dispatches \
+                ${{ vars.THEIA_BLUEPRINT_URL}}/dispatches \
                 -d '{"event_type":"release_event","client_payload":{"version": "${{ steps.strip-v.outputs.VERSION }}"}}'
