@@ -26,7 +26,7 @@ export async function build_exercise_options(courseOptions: CourseOption[] | und
         }
         exercises = await fetch_exercise(session.accessToken, selectedCourse.course.id);
     } catch (e) {
-        vscode.window.showErrorMessage(`error: ${e}`);
+        vscode.window.showErrorMessage(`${e}`);
         return;
     }
     const exerciseOptions = exercises.map(exercise => ({

@@ -25,6 +25,5 @@ export async function authenticateToken(username: string | undefined, password: 
 	}
 	
 	const data = await response.text()
-	console.log(`response data: ${data}`);
 	return data;
 }	

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <title>Artemis</title> -->
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #problemStatement {
+        height: 93%;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        margin: 5px;
+        display: block;
+      }
+    </style>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; connect-src http://localhost:8080; frame-src http://localhost:9000;"
+    />
+  </head>
+  <body>
+    <div id="problemStatement">
+      <!-- TODO add clone button -->
+      <iframe
+        id="problemStatementIframe"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"
+      ></iframe>
+    </div>
+
+    <div id="noExercise">
+      <p>Please select a course and exercise</p>
+    </div>
+
+    <div id="login">
+      <p>Please login</p>
+    </div>
+
+    <script>
+      scriptUri;
+    </script>
+  </body>
+</html>
