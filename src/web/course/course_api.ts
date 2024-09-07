@@ -4,7 +4,6 @@ import { Course } from "./course_model";
 export async function  fetch_courses(token:string): Promise<Course[]> {
 	const url = `${settings.base_url}/api/courses`;
 
-    console.log("fetching courses");
 	  const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -19,6 +18,5 @@ export async function  fetch_courses(token:string): Promise<Course[]> {
     }
         
     const data = await response.json();
-    console.log(`retrieved courses successful ${data}`);
     return data as Course[];
 }

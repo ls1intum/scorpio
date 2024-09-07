@@ -28,8 +28,6 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
     private sessionPromise: Promise<ArtemisSession | undefined>;
 
     constructor(private readonly secretStorage: SecretStorage) {
-        console.log('ArtemisAuthenticationProvider');
-
         this.sessionPromise = this.getSessionFromStorage();
 
         this._disposable = Disposable.from(
@@ -38,9 +36,9 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
         );
     }
 
-    private _onDidChangeSessions = new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
+    public onAuthSessionsChange = new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
     get onDidChangeSessions(): Event<AuthenticationProviderAuthenticationSessionsChangeEvent> {
-        return this._onDidChangeSessions.event;
+        return this.onAuthSessionsChange.event;
     }
 
     /**
@@ -48,10 +46,8 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
    * @param scopes 
    * @returns 
    */
-    public async getSessions(scopes?: string[]): Promise<readonly AuthenticationSession[]> {
-        console.log('getSessions');
+    public async getSessions(scopes: string[] = []): Promise<readonly AuthenticationSession[]> {
         const session = await this.getSessionFromStorage();
-        console.log(`got session ${session}`)
         return session ? [session] : [];
     }
 
@@ -65,8 +61,6 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
      * @returns 
      */
     public async createSession(scopes: string[]): Promise<AuthenticationSession> {
-        console.log('createSession');
-
         try {
             var username = settings.user;
             if (!username) {
@@ -106,7 +100,7 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
 
             await this.secretStorage.store(SESSIONS_SECRET_KEY, JSON.stringify(session));
 
-            this._onDidChangeSessions.fire({ added: [session], removed: [], changed: [] });
+            this.onAuthSessionsChange.fire({ added: [session], removed: [], changed: [] });
 
             return session;
         } catch (e) {
@@ -120,14 +114,13 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
     }
 
     // This function is called when the end user signs out of the account.
-    async removeSession(_sessionId: string): Promise<void> {
-        console.log("removeSession")
+    async removeSession(_sessionId: string = ""): Promise<void> {
         const session = await this.sessionPromise;
         if (!session) {
             return;
         }
         await this.secretStorage.delete(SESSIONS_SECRET_KEY);
-        this._onDidChangeSessions.fire({ added: [], removed: [session], changed: [] });
+        this.onAuthSessionsChange.fire({ added: [], removed: [session], changed: [] });
     }
 
     // This is a crucial function that handles whether or not the token has changed in
@@ -155,7 +148,7 @@ export class ArtemisAuthenticationProvider implements AuthenticationProvider, Di
             return;
         }
 
-        this._onDidChangeSessions.fire({ added: added, removed: removed, changed: [] });
+        this.onAuthSessionsChange.fire({ added: added, removed: removed, changed: [] });
     }
 
     dispose(): void {

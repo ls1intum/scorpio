@@ -19,7 +19,7 @@ export async function build_course_options() {
         }
         courses = await fetch_courses(session.accessToken);
     } catch (e) {
-        vscode.window.showErrorMessage(`error: ${e}`);
+        vscode.window.showErrorMessage(`${e}`);
         return;
     }
 

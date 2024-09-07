@@ -77,6 +77,16 @@
     },
     "commands": [
       {
+        "command": "scorpio.login",
+        "category": "Artemis",
+        "title": "Login"
+      },
+      {
+        "command": "scorpio.logout",
+        "category": "Artemis",
+        "title": "Logout"
+      },
+      {
         "command": "scorpio.selectExercise",
         "category": "Artemis",
         "title": "Select Exercise"
@@ -88,7 +98,7 @@
     "watch": "webpack --watch",
     "build": "webpack --mode production",
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-    "pretest": "npm run compile-web",
+    "pretest": "npm run compile",
     "package": "vsce package",
     "vscode:prepublish": "npm run build",
     "lint": "eslint src --ext ts",
@@ -105,8 +115,10 @@
     "@vscode/test-web": "^0.0.56",
     "assert": "^2.1.0",
     "eslint": "^8.56.0",
+    "html-loader": "^5.1.0",
     "mocha": "^10.7.0",
     "process": "^0.11.10",
+    "raw-loader": "^4.0.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.3",
     "webpack": "^5.93.0",
