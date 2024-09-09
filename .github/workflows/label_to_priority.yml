@@ -20,9 +20,19 @@ jobs:
           echo "PRIORITY=$PRIORITY" >> $GITHUB_STEP_SUMMARY
 
       - name: Set Priority Field
+        if: github.event.action == 'labeled'
         uses: alex-page/github-project-automation-plus@v0.9.0
         with:
           project: Priority
           column: ${{ steps.priority_severity.outputs.PRIORITY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove Priority Field
+        if: github.event.action == 'unlabeled'
+        uses: alex-page/github-project-automation-plus@v0.9.0
+        with:
+          project: Scorpio
+          column: ${{ steps.priority_severity.outputs.PRIORITY }}
+          action: remove
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
