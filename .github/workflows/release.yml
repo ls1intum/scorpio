@@ -62,8 +62,10 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: gh release upload ${{ github.event.release.tag_name }} ./artemis-scorpio-${{ steps.strip-v.outputs.VERSION }}.vsix#scorpio-${{ github.event.release.tag_name }}.vsix
             
+            # personal access token with metadata:r actions:rw contents:rw
             - name: Trigger Theia Build
               if: steps.vsx-publish.outcome == 'success'
+              continue-on-error: true
               run: |
                 curl -L \
                 -X POST \
