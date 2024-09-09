@@ -1,0 +1,44 @@
+name: Sync Label from Priority Field
+
+on:
+  issues:
+    types: [edited]
+
+jobs:
+  sync-priority-field:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Get Priority Field
+        id: priority_field
+        run: |
+          PRIORITY=$(jq -r '.issue.fields.priority.name' $GITHUB_EVENT_PATH)
+          echo "PRIORITY=$PRIORITY" >> $GITHUB_OUTPUT
+          echo "PRIORITY=$PRIORITY" >> $GITHUB_STEP_SUMMARY
+
+      - name: Get Current Labels
+        id: current_labels
+        run: |
+          LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name')
+          echo "LABELS=$LABELS" >> $GITHUB_OUTPUT
+          echo "LABELS=$LABELS" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove Priority Labels
+        run: |
+          for label in ${{ steps.current_labels.outputs.LABELS }}; do
+            if [[ "$label" == priority:* ]]; then
+              gh issue edit ${{ github.event.issue.number }} --remove-label "$label"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Priority Label
+        run: gh issue edit ${{ github.event.issue.number }} --add-label "priority:${{ steps.priority_field.outputs.PRIORITY }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
