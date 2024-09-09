@@ -5,7 +5,7 @@ on:
     types: [labeled, unlabeled]
 
 jobs:
-  sync-priority-label:
+  sync-priority-from-label:
     runs-on: ubuntu-latest
     if: startsWith(github.event.label.name, 'priority:')
     steps:
@@ -24,5 +24,5 @@ jobs:
         with:
           project: Priority
           column: ${{ steps.priority_severity.outputs.PRIORITY }}
-          repo-token: ${{ secrets.PRIORITY_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
