@@ -7,6 +7,7 @@ on:
 jobs:
   sync-priority-from-label:
     runs-on: ubuntu-latest
+    environment: prod
     if: startsWith(github.event.label.name, 'priority:')
     steps:
       - name: Check out the repository
@@ -25,7 +26,7 @@ jobs:
         with:
           project: Priority
           column: ${{ steps.priority_severity.outputs.PRIORITY }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.PRIORITY_TOKEN }}
 
       - name: Remove Priority Field
         if: github.event.action == 'unlabeled'
@@ -34,5 +35,5 @@ jobs:
           project: Scorpio
           column: ${{ steps.priority_severity.outputs.PRIORITY }}
           action: remove
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.PRIORITY_TOKEN }}
 
