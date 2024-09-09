@@ -5,7 +5,7 @@ on:
     types: [edited]
 
 jobs:
-  sync-priority-field:
+  sync-priority-from-field:
     runs-on: ubuntu-latest
 
     steps:
