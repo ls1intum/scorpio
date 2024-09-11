@@ -27,35 +27,10 @@ export function initGitExtension() {
   gitAPI = gitExtension.exports.getAPI(1);
 }
 
-export async function cloneRepository() {
-  if (!state.exercise) {
-    throw new Error("No exercise selected");
-  }
-
+export async function cloneRepository(repoUrl: string, username: string) {
   // Access the git extension
   if (!gitAPI) {
     initGitExtension();
-  }
-
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: true,
-  });
-
-  if (!session) {
-    throw new Error("Please sign in");
-  }
-
-  let participation: Participation;
-  try {
-    participation = await fetch_latest_participation(
-      session.accessToken,
-      state.exercise.id
-    );
-  } catch (e) {
-    participation = await start_exercise(
-      session.accessToken,
-      state.exercise.id
-    );
   }
 
   // Open a dialog to select the folder where the repo will be cloned
@@ -70,10 +45,7 @@ export async function cloneRepository() {
   }
 
   // Clone the repository
-  let cloneUrl = addCredentialsToHTTPUrl(
-    participation.repositoryUri,
-    participation.participantIdentifier
-  );
+  let cloneUrl = addCredentialsToHTTPUrl(repoUrl, username);
 
   await vscode.commands.executeCommand(
     "git.clone",

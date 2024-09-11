@@ -98,9 +98,9 @@
         "title": "Select Exercise"
       },
       {
-        "command": "scorpio.clone",
+        "command": "scorpio.currentExercise.clone",
         "category": "Artemis",
-        "title": "Clone Repository"
+        "title": "Clone Current Exercise"
       }
     ]
   },

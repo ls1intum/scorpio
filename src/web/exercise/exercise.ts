@@ -1,12 +1,20 @@
 import * as vscode from "vscode";
 import { fetch_exercise } from "./exercise_api";
 import { CourseOption } from "../course/course";
-import { set_state } from "../shared/state";
+import { set_state, state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "../course/course_model";
 import { Exercise } from "./exercise_model";
+import {
+  fetch_latest_participation,
+  start_exercise,
+} from "../participation/participation_api";
+import { Participation } from "../participation/participation_model";
+import { cloneRepository } from "../shared/repository";
 
-export async function build_exercise_options(course: Course) : Promise<Exercise>{
+export async function build_exercise_options(
+  course: Course
+): Promise<Exercise> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: true,
   });
@@ -31,6 +39,34 @@ export async function build_exercise_options(course: Course) : Promise<Exercise>
   return selectedExercise.exercise;
 }
 
-export function clone_repo() {
-  vscode.window.showInformationMessage("Cloning repo");
+export async function cloneCurrentExercise() {
+  if (!state.exercise) {
+    throw new Error("No exercise selected");
+  }
+
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: true,
+  });
+
+  if (!session) {
+    throw new Error("Please sign in");
+  }
+
+  let participation: Participation;
+  try {
+    participation = await fetch_latest_participation(
+      session.accessToken,
+      state.exercise.id
+    );
+  } catch (e) {
+    participation = await start_exercise(
+      session.accessToken,
+      state.exercise.id
+    );
+  }
+
+  await cloneRepository(
+    participation.repositoryUri,
+    participation.participantIdentifier
+  );
 }

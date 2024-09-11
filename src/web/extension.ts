@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { build_course_options } from "./course/course";
-import { build_exercise_options } from "./exercise/exercise";
+import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import {
   ArtemisAuthenticationProvider,
@@ -60,8 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   // command to clone repository
   context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.clone", async () => {
-      cloneRepository()
+    vscode.commands.registerCommand("scorpio.currentExercise.clone", async () => {
+      cloneCurrentExercise()
         .then(() => {
           vscode.window.showInformationMessage(
             `Repository cloned successfully.`
