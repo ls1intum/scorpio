@@ -1,8 +1,15 @@
 import * as vscode from "vscode";
-import { current } from "../shared_model";
+import { state } from "../shared/state";
 import { ArtemisAuthenticationProvider } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
-import artemisJS from "!raw-loader!./artemis.js"
+import artemisJS from "!raw-loader!./artemis.js";
+import { cloneRepository } from "../shared/repository";
+
+enum IncomingCommands {
+  INFO = "info",
+  ERROR = "error",
+  CLONE_REPOSITORY = "cloneRepository",
+}
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -12,10 +19,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _extensionUri: vscode.Uri,
     private readonly authenticationProvider: ArtemisAuthenticationProvider
   ) {
-    current.onCurrentChange.event(() => {
-      this.setExercise(current.course!.id, current.exercise!.id);
+    state.onStateChange.event(() => {
+      this.setExercise(state.course!.id, state.exercise!.id);
     });
-    
+
     authenticationProvider.onAuthSessionsChange.event(
       async ({ added, removed, changed }) => {
         if (added && added.length > 0) {
@@ -40,19 +47,34 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
-        case "info": {
+        case IncomingCommands.INFO: {
           if (!data.text) {
             return;
           }
           vscode.window.showInformationMessage(data.text);
           break;
         }
-        case "error": {
+        case IncomingCommands.ERROR: {
           if (!data.text) {
             return;
           }
           console.error(data.text);
           vscode.window.showErrorMessage(data.text);
+          break;
+        }
+        case IncomingCommands.CLONE_REPOSITORY: {
+          cloneRepository()
+            .then(() => {
+              vscode.window.showInformationMessage(
+                `Repository cloned successfully.`
+              );
+            })
+            .catch((e) => {
+              vscode.window.showErrorMessage(
+                `Failed to clone repository: ${(e as Error).message}`
+              );
+            });
+
           break;
         }
       }
@@ -70,7 +92,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     // import JS File
     const scriptUri = artemisJS;
-    this.htmlContent = this.htmlContent.replace("scriptUri", scriptUri);
+    this.htmlContent = this.htmlContent!.replace("scriptUri", scriptUri);
 
     if (this._view) {
       this._view.webview.html = this.htmlContent;

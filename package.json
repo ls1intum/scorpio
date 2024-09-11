@@ -18,7 +18,8 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "browser": "./dist/web/extension.js",
+  "browser": "./dist/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "authentication": [
       {
@@ -52,6 +53,11 @@
           "editPresentation": "singlelineText",
           "type": "string",
           "default": "artemis_admin"
+        },
+        "scorpio.userData.defaultRepoPath": {
+          "description": "The default to search for and clone repositories into - has to be an absolute path",
+          "editPresentation": "singlelineText",
+          "type": "string"
         }
       }
     },
@@ -90,6 +96,11 @@
         "command": "scorpio.selectExercise",
         "category": "Artemis",
         "title": "Select Exercise"
+      },
+      {
+        "command": "scorpio.clone",
+        "category": "Artemis",
+        "title": "Clone Repository"
       }
     ]
   },
@@ -132,6 +143,10 @@
     "path-browserify": "^1.0.1",
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0"
+  },
+  "extensionDependencies": ["vscode.git"],
+  "bugs": {
+    "url": "https://github.com/ls1intum/scorpio/issues"
   },
   "repository": {
     "type": "git",
