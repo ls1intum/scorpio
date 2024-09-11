@@ -7,6 +7,7 @@ import {
 } from "../participation/participation_api";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { state } from "./state";
+import { Participation } from "../participation/participation_model";
 
 let gitAPI: GitAPI;
 
@@ -44,7 +45,7 @@ export async function cloneRepository() {
     throw new Error("Please sign in");
   }
 
-  let participation;
+  let participation: Participation;
   try {
     participation = await fetch_latest_participation(
       session.accessToken,
