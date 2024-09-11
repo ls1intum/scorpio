@@ -62,7 +62,7 @@ export async function cloneRepository() {
   const selectedFolder = await vscode.window.showOpenDialog({
     canSelectFolders: true,
     openLabel: "Select folder to clone into",
-    defaultUri: vscode.Uri.parse(settings.default_repo_path ?? ""),
+    defaultUri: vscode.Uri.file(settings.default_repo_path ?? ""),
   });
 
   if (!selectedFolder || selectedFolder.length === 0) {
@@ -74,7 +74,7 @@ export async function cloneRepository() {
     participation.repositoryUri,
     participation.participantIdentifier
   );
-  
+
   await vscode.commands.executeCommand(
     "git.clone",
     cloneUrl,

@@ -55,7 +55,7 @@
           "default": "artemis_admin"
         },
         "scorpio.userData.defaultRepoPath": {
-          "description": "The directory where the repositories should be cloned into",
+          "description": "The default to search for and clone repositories into - has to be an absolute path",
           "editPresentation": "singlelineText",
           "type": "string"
         }
