@@ -7,6 +7,7 @@ const IncomingCommand = {
 const OutgoingCommand = {
   info: "info",
   error: "error",
+  cloneRepository: "cloneRepository",
 };
 
 const SectionsToDisplay = {
@@ -36,7 +37,7 @@ async function setCookie(token) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (response.ok) {
@@ -46,12 +47,7 @@ async function setCookie(token) {
         text: "Login successful!",
       });
     } else {
-      console.error("Login failed:", response.statusText);
-      vscode.postMessage({
-        command: OutgoingCommand.error,
-        text: "Login failed: " + response.statusText,
-      });
-      return;
+      throw new Error(response.statusText);
     }
   } catch (error) {
     console.error("Login failed:", error);
@@ -88,6 +84,14 @@ function setCurrentExercise(courseId, exerciseId) {
   } else {
     showSection(SectionsToDisplay.problemStatement);
   }
+}
+
+function cloneRepository() {
+  console.log(vscode);
+  vscode.postMessage({
+    command: OutgoingCommand.cloneRepository,
+    text: "",
+  });
 }
 
 const vscode = acquireVsCodeApi();

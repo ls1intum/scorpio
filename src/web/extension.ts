@@ -8,6 +8,8 @@ import {
   ArtemisAuthenticationProvider,
   AUTH_ID,
 } from "./authentication/authentication_provider";
+import { set_state } from "./shared/state";
+import { cloneRepository } from "./shared/repository";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -24,19 +26,11 @@ export function activate(context: vscode.ExtensionContext) {
   // command to login
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.login", async () => {
-      vscode.authentication
-        .getSession(AUTH_ID, [], {
-          createIfNone: false,
-        })
-        .then((session) => {
-          if (session) {
-            vscode.window.showInformationMessage("You are already logged in");
-          } else {
-            vscode.authentication.getSession(AUTH_ID, [], {
-              createIfNone: true,
-            });
-          }
-        });
+      vscode.authentication.getSession(AUTH_ID, [], {
+        createIfNone: true,
+      });
+
+      vscode.window.showInformationMessage("You are logged in now");
     })
   );
 
@@ -45,6 +39,39 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("scorpio.logout", async () => {
       authenticationProvider.removeSession();
       vscode.window.showInformationMessage("You have been logged out");
+    })
+  );
+
+  // command to select a course and exercise
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.selectExercise", async () => {
+      try {
+        const course = await build_course_options();
+
+        const exercise = await build_exercise_options(course);
+
+        set_state(course, exercise);
+      } catch (e) {
+        vscode.window.showErrorMessage(`${e}`);
+        return;
+      }
+    })
+  );
+
+  // command to clone repository
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.clone", async () => {
+      cloneRepository()
+        .then(() => {
+          vscode.window.showInformationMessage(
+            `Repository cloned successfully.`
+          );
+        })
+        .catch((e) => {
+          vscode.window.showErrorMessage(
+            `Failed to clone repository: ${(e as Error).message}`
+          );
+        });
     })
   );
 
@@ -58,15 +85,6 @@ export function activate(context: vscode.ExtensionContext) {
       "artemis-sidebar",
       sidebarProvider
     )
-  );
-
-  // command to select a course and exercise
-  context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.selectExercise", async () => {
-      const courseOptions = await build_course_options();
-
-      await build_exercise_options(courseOptions);
-    })
   );
 }
 
