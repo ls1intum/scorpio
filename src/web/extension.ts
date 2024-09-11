@@ -2,14 +2,17 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { build_course_options } from "./course/course";
-import { build_exercise_options } from "./exercise/exercise";
+import {
+  build_exercise_options,
+  cloneCurrentExercise,
+} from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import {
   ArtemisAuthenticationProvider,
   AUTH_ID,
 } from "./authentication/authentication_provider";
 import { set_state } from "./shared/state";
-import { cloneRepository } from "./shared/repository";
+import { submitCurrentWorkspace } from "./shared/repository";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -52,6 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         set_state(course, exercise);
       } catch (e) {
+        console.error(e);
         vscode.window.showErrorMessage(`${e}`);
         return;
       }
@@ -60,16 +64,38 @@ export function activate(context: vscode.ExtensionContext) {
 
   // command to clone repository
   context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.clone", async () => {
-      cloneRepository()
+    vscode.commands.registerCommand(
+      "scorpio.currentExercise.clone",
+      async () => {
+        cloneCurrentExercise()
+          .then(() => {
+            vscode.window.showInformationMessage(
+              `Repository cloned successfully.`
+            );
+          })
+          .catch((e) => {
+            console.error(e);
+            vscode.window.showErrorMessage(
+              `Failed to clone repository: ${(e as Error).message}`
+            );
+          });
+      }
+    )
+  );
+
+  // command to submit workspace
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.workspace.submit", async () => {
+      submitCurrentWorkspace()
         .then(() => {
           vscode.window.showInformationMessage(
-            `Repository cloned successfully.`
+            `Workspace submitted successfully.`
           );
         })
         .catch((e) => {
+          console.error(e);
           vscode.window.showErrorMessage(
-            `Failed to clone repository: ${(e as Error).message}`
+            `Failed to submit workspace: ${(e as Error).message}`
           );
         });
     })

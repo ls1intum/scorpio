@@ -3,7 +3,7 @@ import { state } from "../shared/state";
 import { ArtemisAuthenticationProvider } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
-import { cloneRepository } from "../shared/repository";
+import { cloneCurrentExercise } from "../exercise/exercise";
 
 enum IncomingCommands {
   INFO = "info",
@@ -63,7 +63,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case IncomingCommands.CLONE_REPOSITORY: {
-          cloneRepository()
+          cloneCurrentExercise()
             .then(() => {
               vscode.window.showInformationMessage(
                 `Repository cloned successfully.`

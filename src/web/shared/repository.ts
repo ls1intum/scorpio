@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 import { API as GitAPI, GitExtension } from "../git"; // Path where you saved git.d.ts
 import { settings } from "../config";
-import {
-  fetch_latest_participation,
-  start_exercise,
-} from "../participation/participation_api";
-import { AUTH_ID } from "../authentication/authentication_provider";
-import { state } from "./state";
-import { Participation } from "../participation/participation_model";
 
 let gitAPI: GitAPI;
 
@@ -27,35 +20,10 @@ export function initGitExtension() {
   gitAPI = gitExtension.exports.getAPI(1);
 }
 
-export async function cloneRepository() {
-  if (!state.exercise) {
-    throw new Error("No exercise selected");
-  }
-
+export async function cloneRepository(repoUrl: string, username: string) {
   // Access the git extension
   if (!gitAPI) {
     initGitExtension();
-  }
-
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: true,
-  });
-
-  if (!session) {
-    throw new Error("Please sign in");
-  }
-
-  let participation: Participation;
-  try {
-    participation = await fetch_latest_participation(
-      session.accessToken,
-      state.exercise.id
-    );
-  } catch (e) {
-    participation = await start_exercise(
-      session.accessToken,
-      state.exercise.id
-    );
   }
 
   // Open a dialog to select the folder where the repo will be cloned
@@ -70,10 +38,7 @@ export async function cloneRepository() {
   }
 
   // Clone the repository
-  let cloneUrl = addCredentialsToHTTPUrl(
-    participation.repositoryUri,
-    participation.participantIdentifier
-  );
+  let cloneUrl = addCredentialsToHTTPUrl(repoUrl, username);
 
   await vscode.commands.executeCommand(
     "git.clone",
@@ -92,6 +57,34 @@ function addCredentialsToHTTPUrl(url: string, username: string) {
     // the url has the format https://username@vcs-server.com -> replace ://username@
     return url.replace(/:\/\/.*@/, credentials);
   }
+}
+
+export async function submitCurrentWorkspace() {
+  // Access the git extension
+  if (!gitAPI) {
+    initGitExtension();
+  }
+
+  const repo = gitAPI.repositories[0];
+  if (!repo) {
+    throw new Error("No repository found");
+  }
+
+  if(!await repo.diff()){
+    throw new Error("No changes to commit");
+  }
+
+  await repo.add([]);
+  const commitMessage = await vscode.window.showInputBox({
+    placeHolder: "Enter commit message",
+    prompt: "Enter commit message",
+    value: "Submit workspace from artemis plugin", // Set your default text here
+  });
+  if (!commitMessage) {
+    throw new Error("Commit process cancelled");
+  }
+  await repo.commit(commitMessage);
+  await repo.push();
 }
 
 export function getExerciseIdAndCourseIdFromRepository(): {
