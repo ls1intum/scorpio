@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 import { API as GitAPI, GitExtension } from "../git"; // Path where you saved git.d.ts
 import { settings } from "../config";
-import {
-  fetch_latest_participation,
-  start_exercise,
-} from "../participation/participation_api";
-import { AUTH_ID } from "../authentication/authentication_provider";
-import { state } from "./state";
-import { Participation } from "../participation/participation_model";
 
 let gitAPI: GitAPI;
 
@@ -64,6 +57,34 @@ function addCredentialsToHTTPUrl(url: string, username: string) {
     // the url has the format https://username@vcs-server.com -> replace ://username@
     return url.replace(/:\/\/.*@/, credentials);
   }
+}
+
+export async function submitCurrentWorkspace() {
+  // Access the git extension
+  if (!gitAPI) {
+    initGitExtension();
+  }
+
+  const repo = gitAPI.repositories[0];
+  if (!repo) {
+    throw new Error("No repository found");
+  }
+
+  if(!await repo.diff()){
+    throw new Error("No changes to commit");
+  }
+
+  await repo.add([]);
+  const commitMessage = await vscode.window.showInputBox({
+    placeHolder: "Enter commit message",
+    prompt: "Enter commit message",
+    value: "Submit workspace from artemis plugin", // Set your default text here
+  });
+  if (!commitMessage) {
+    throw new Error("Commit process cancelled");
+  }
+  await repo.commit(commitMessage);
+  await repo.push();
 }
 
 export function getExerciseIdAndCourseIdFromRepository(): {

@@ -101,8 +101,22 @@
         "command": "scorpio.currentExercise.clone",
         "category": "Artemis",
         "title": "Clone Current Exercise"
+      },
+      {
+        "command": "scorpio.workspace.submit",
+        "category": "Artemis",
+        "title": "Submit Workspace",
+        "icon": "$(repo-push)"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "scorpio.workspace.submit",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "compile": "webpack",
