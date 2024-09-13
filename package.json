@@ -124,7 +124,8 @@
       "editor/title": [
         {
           "command": "scorpio.workspace.submit",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "scorpio.repoDetected"
         }
       ],
       "view/title": [
@@ -176,7 +177,9 @@
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0"
   },
-  "extensionDependencies": ["vscode.git"],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "bugs": {
     "url": "https://github.com/ls1intum/scorpio/issues"
   },

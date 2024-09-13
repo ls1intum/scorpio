@@ -13,7 +13,10 @@ import {
   AUTH_ID,
 } from "./authentication/authentication_provider";
 import { set_state } from "./shared/state";
-import { detectRepoCourseAndExercsie, submitCurrentWorkspace } from "./shared/repository";
+import {
+  detectRepoCourseAndExercsie,
+  submitCurrentWorkspace,
+} from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 
 // This method is called when your extension is activated
@@ -33,10 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
   (async () => {
     // TODO make wait until everything else is initialized
     await new Promise((resolve) => setTimeout(resolve, 2500));
-    detectRepoCourseAndExercsie().catch((e) => {
-      console.warn(e);
-      vscode.window.showWarningMessage(`${e}`);
-    });
+    detectRepoCourseAndExercsie()
+      .then(() => {
+        vscode.commands.executeCommand("setContext", "scorpio.repoDetected", true);
+      })
+      .catch((e) => {
+        console.warn(e);
+        vscode.window.showWarningMessage(`${e}`);
+      });
   })();
 }
 
@@ -103,7 +110,7 @@ function registerCommands(
 
         const exercise = await build_exercise_options(course);
 
-        set_state({displayedCourse: course, displayedExercise: exercise});
+        set_state({ displayedCourse: course, displayedExercise: exercise });
       } catch (e) {
         console.error(e);
         vscode.window.showErrorMessage(`${e}`);
