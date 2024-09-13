@@ -98,7 +98,7 @@
         "title": "Display Exercise"
       },
       {
-        "command": "scorpio.currentExercise.clone",
+        "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
         "title": "Clone Displayed Exercise"
       },

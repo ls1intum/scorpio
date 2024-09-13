@@ -9,6 +9,13 @@ enum IncomingCommands {
   INFO = "info",
   ERROR = "error",
   CLONE_REPOSITORY = "cloneRepository",
+  SUBMIT = "submit",
+}
+
+enum OutgoingCommands {
+  SEND_ACCESS_TOKEN = "sendAccessToken",
+  LOGOUT = "logout",
+  SET_EXERCISE = "setExercise",
 }
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -21,8 +28,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   ) {
     onStateChange.event((e) => {
       if (e.displayedCourse && e.displayedExercise) {
-        this.setExercise(e.displayedCourse.id, e.displayedExercise.id);
-        return;
+        const showSubmitButton =
+          e.displayedCourse.id == e.repoCourse?.id &&
+          e.displayedExercise.id == e.repoExercise?.id;
+        this.setExercise(
+          e.displayedCourse.id,
+          e.displayedExercise.id,
+          showSubmitButton
+        );
       }
     });
 
@@ -72,18 +85,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case IncomingCommands.CLONE_REPOSITORY: {
-          cloneCurrentExercise()
-            .then(() => {
-              vscode.window.showInformationMessage(
-                `Repository cloned successfully.`
-              );
-            })
-            .catch((e) => {
-              vscode.window.showErrorMessage(
-                `Failed to clone repository: ${(e as Error).message}`
-              );
-            });
-
+          vscode.commands.executeCommand("scorpio.displayedExercise.clone");
+          break;
+        }
+        case IncomingCommands.SUBMIT: {
+          vscode.commands.executeCommand("scorpio.workspace.submit");
           break;
         }
       }
@@ -110,27 +116,38 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     });
 
     if (state.displayedCourse && state.displayedExercise) {
-      this.setExercise(state.displayedCourse.id, state.displayedExercise.id);
+      const showSubmitButton =
+        state.displayedCourse.id == state.repoCourse?.id &&
+        state.displayedExercise.id == state.repoExercise?.id;
+      this.setExercise(
+        state.displayedCourse.id,
+        state.displayedExercise.id,
+        showSubmitButton
+      );
     }
   }
 
   private async login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
-      command: "sendAccessToken",
+      command: OutgoingCommands.SEND_ACCESS_TOKEN,
       text: `${session.accessToken}`,
     });
   }
 
   private async logout() {
     this._view?.webview.postMessage({
-      command: "logout",
+      command: OutgoingCommands.LOGOUT,
     });
   }
 
-  private async setExercise(courseId: number, exerciseId: number) {
+  private async setExercise(
+    courseId: number,
+    exerciseId: number,
+    showSubmitButton: boolean
+  ) {
     this._view?.webview.postMessage({
-      command: "setExercise",
-      text: `{"courseId": ${courseId}, "exerciseId": ${exerciseId}}`,
+      command: OutgoingCommands.SET_EXERCISE,
+      text: `{"courseId": ${courseId}, "exerciseId": ${exerciseId}, "showSubmitButton": ${showSubmitButton}}`,
     });
   }
 

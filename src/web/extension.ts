@@ -1,20 +1,19 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { build_course_options, fetch_course_by_id } from "./course/course";
+import { build_course_options } from "./course/course";
 import {
   build_exercise_options,
   cloneCurrentExercise,
-  fetch_exercise_by_id,
 } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import {
   ArtemisAuthenticationProvider,
   AUTH_ID,
 } from "./authentication/authentication_provider";
-import { set_state } from "./shared/state";
+import { set_state, state } from "./shared/state";
 import {
-  detectRepoCourseAndExercsie,
+  detectRepoCourseAndExercise,
   submitCurrentWorkspace,
 } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
@@ -31,16 +30,30 @@ export function activate(context: vscode.ExtensionContext) {
 
   registerCommands(context, authenticationProvider, sidebar);
 
-  listenToEvents();
-
   (async () => {
     // TODO make wait until everything else is initialized
     await new Promise((resolve) => setTimeout(resolve, 2500));
-    detectRepoCourseAndExercsie()
+    detectRepoCourseAndExercise()
       .then(() => {
-        vscode.commands.executeCommand("setContext", "scorpio.repoDetected", true);
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.repoDetected",
+          true
+        );
       })
       .catch((e) => {
+        set_state({
+          repoCourse: undefined,
+          repoExercise: undefined,
+          displayedCourse: state.displayedCourse,
+          displayedExercise: state.displayedExercise,
+        });
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.repoDetected",
+          false
+        );
+
         console.warn(e);
         vscode.window.showWarningMessage(`${e}`);
       });
@@ -110,7 +123,12 @@ function registerCommands(
 
         const exercise = await build_exercise_options(course);
 
-        set_state({ displayedCourse: course, displayedExercise: exercise });
+        set_state({
+          displayedCourse: course,
+          displayedExercise: exercise,
+          repoCourse: state.repoCourse,
+          repoExercise: state.repoExercise,
+        });
       } catch (e) {
         console.error(e);
         vscode.window.showErrorMessage(`${e}`);
@@ -122,7 +140,7 @@ function registerCommands(
   // command to clone repository
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "scorpio.currentExercise.clone",
+      "scorpio.displayedExercise.clone",
       async () => {
         cloneCurrentExercise()
           .then(() => {
@@ -192,7 +210,17 @@ function listenToEvents() {
       console.warn("No workspace added");
     }
 
-    detectRepoCourseAndExercsie();
+    detectRepoCourseAndExercise()
+      .then(() => {
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.repoDetected",
+          true
+        );
+      })
+      .catch((e) => {
+        console.warn(e);
+      });
   });
 }
 

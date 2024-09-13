@@ -8,6 +8,7 @@ const OutgoingCommand = {
   info: "info",
   error: "error",
   cloneRepository: "cloneRepository",
+  submit: "submit",
 };
 
 const SectionsToDisplay = {
@@ -45,7 +46,7 @@ function showSection(section) {
   }
 }
 
-function changeState(){
+function changeState() {
   if (!loggedIn) {
     showSection(SectionsToDisplay.login);
   } else if (!exercise) {
@@ -85,12 +86,21 @@ function deleteCookie() {
   showSection(SectionsToDisplay.login);
 }
 
-function setCurrentExercise(courseId, exerciseId) {
+function setCurrentExercise(courseId, exerciseId, showSubmitButton = false) {
   exercise = { courseId, exerciseId };
 
   document.getElementById(
     "problemStatementIframe"
   ).src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+
+  const button = document.getElementById("cloneButton");
+  if (showSubmitButton) {
+    button.textContent = "Submit";
+    button.onclick = submit;
+  } else {
+    button.textContent = "Clone";
+    button.onclick = cloneRepository;
+  }
 
   changeState();
 }
@@ -98,6 +108,13 @@ function setCurrentExercise(courseId, exerciseId) {
 function cloneRepository() {
   vscode.postMessage({
     command: OutgoingCommand.cloneRepository,
+    text: "",
+  });
+}
+
+function submit() {
+  vscode.postMessage({
+    command: OutgoingCommand.submit,
     text: "",
   });
 }
@@ -122,7 +139,8 @@ window.addEventListener("message", (event) => {
         const deserializedObject = JSON.parse(messageText);
         setCurrentExercise(
           deserializedObject.courseId,
-          deserializedObject.exerciseId
+          deserializedObject.exerciseId,
+          deserializedObject.showSubmitButton
         );
       } catch (error) {
         console.error("Failed to deserialize message text:", error);

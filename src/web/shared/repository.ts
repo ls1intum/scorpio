@@ -1,13 +1,15 @@
 import * as vscode from "vscode";
-import { API as GitAPI, GitExtension } from "../git"; // Path where you saved git.d.ts
+import { API as GitAPI, GitExtension, Repository } from "../git"; // Path where you saved git.d.ts
 import { settings } from "../config";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "../course/course.model";
 import { Exercise } from "../exercise/exercise.model";
 import { fetch_course_exercise_projectKey } from "../exercise/exercise.api";
-import { set_state } from "./state";
+import { set_state, state } from "./state";
 
 let gitAPI: GitAPI;
+
+let currentRepo: Repository | undefined;
 
 export function initGitExtension() {
   if (
@@ -70,16 +72,15 @@ export async function submitCurrentWorkspace() {
     initGitExtension();
   }
 
-  const repo = gitAPI.repositories[0];
-  if (!repo) {
-    throw new Error("No repository found");
+  if (!currentRepo) {
+    throw new Error("No repository in workspace");
   }
 
-  if (!(await repo.diff())) {
+  if (!(await currentRepo.diffWithHEAD())) {
     throw new Error("No changes to commit");
   }
 
-  await repo.add([]);
+  await currentRepo.add([]);
   const commitMessage = await vscode.window.showInputBox({
     placeHolder: "Enter commit message",
     prompt: "Enter commit message",
@@ -88,11 +89,15 @@ export async function submitCurrentWorkspace() {
   if (!commitMessage) {
     throw new Error("Commit process cancelled");
   }
-  await repo.commit(commitMessage);
-  await repo.push();
+  await currentRepo.commit(commitMessage);
+  await currentRepo.push();
 }
 
-export async function detectRepoCourseAndExercsie(){
+export async function detectRepoCourseAndExercise() {
+  if(currentRepo){
+    return;
+  }
+  
   const projectKey: string = await getProjectKeyFromRepos();
 
   const token = (
@@ -107,6 +112,8 @@ export async function detectRepoCourseAndExercsie(){
   set_state({
     repoCourse: course_exercise.course,
     repoExercise: course_exercise.exercise,
+    displayedCourse: state.displayedCourse,
+    displayedExercise: state.displayedExercise,
   });
 }
 
@@ -123,14 +130,19 @@ async function getProjectKeyFromRepos(): Promise<string> {
     for (const remote of repo.state.remotes) {
       if (remote.fetchUrl) {
         // check that artemis is really the repo host
-        if (new URL(remote.fetchUrl).host !== new URL(settings.base_url!).host) {
+        if (
+          new URL(remote.fetchUrl).host !== new URL(settings.base_url!).host
+        ) {
           continue;
         }
-        return getProjectKeyFromRepoUrl(remote.fetchUrl);
+
+        const projectKey = getProjectKeyFromRepoUrl(remote.fetchUrl);
+        currentRepo = repo;
+        return projectKey;
       }
     }
   }
-  
+
   throw new Error("No Artemis repository URL found");
 }
 
