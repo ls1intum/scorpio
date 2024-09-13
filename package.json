@@ -30,31 +30,31 @@
     "configuration": {
       "title": "Scorpio",
       "properties": {
-        "scorpio.apiBaseUrl": {
+        "scorpio.artemis.apiBaseUrl": {
           "description": "The base URL of the Artemis Server",
           "type": "string",
           "editPresentation": "singlelineText",
           "default": "http://localhost:8080"
         },
-        "scorpio.clientBaseUrl": {
-          "description": "The URL of the Artemis Client",
+        "scorpio.artemis.clientBaseUrl": {
+          "description": "The URL of the Artemis Client - probably the same as #scorpio.artemis.apiBaseUrl",
           "type": "string",
           "editPresentation": "singlelineText",
           "default": "http://localhost:9000"
         },
-        "scorpio.userData.username": {
+        "scorpio.credentials.username": {
           "description": "The username for login to Artemis",
           "editPresentation": "singlelineText",
           "type": "string",
-          "default": "artemis_admin"
+          "order": 0
         },
-        "scorpio.userData.password": {
+        "scorpio.credentials.password": {
           "description": "The password for login to Artemis",
           "editPresentation": "singlelineText",
           "type": "string",
-          "default": "artemis_admin"
+          "order": 1
         },
-        "scorpio.userData.defaultRepoPath": {
+        "scorpio.defaults.repoPath": {
           "description": "The default to search for and clone repositories into - has to be an absolute path",
           "editPresentation": "singlelineText",
           "type": "string"
@@ -75,8 +75,8 @@
         {
           "type": "webview",
           "id": "artemis-sidebar",
-          "name": "Artemis",
-          "icon": "media/checklist.svg",
+          "name": "Scorpio",
+          "icon": "media/artemis_logo.svg",
           "contextualTitle": "Artemis"
         }
       ]
@@ -93,26 +93,45 @@
         "title": "Logout"
       },
       {
-        "command": "scorpio.selectExercise",
+        "command": "scorpio.displayExercise",
         "category": "Artemis",
-        "title": "Select Exercise"
+        "title": "Display Exercise"
       },
       {
-        "command": "scorpio.currentExercise.clone",
+        "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
-        "title": "Clone Current Exercise"
+        "title": "Clone Displayed Exercise"
       },
       {
         "command": "scorpio.workspace.submit",
         "category": "Artemis",
         "title": "Submit Workspace",
         "icon": "$(repo-push)"
+      },
+      {
+        "command": "scorpio.workspace.sync",
+        "category": "Artemis",
+        "title": "Sync Problem Statement with Workspace"
+      },
+      {
+        "command": "scorpio.sidebar.refresh",
+        "category": "Artemis",
+        "title": "Refresh the Artemis Window",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "scorpio.workspace.submit",
+          "group": "navigation",
+          "when": "scorpio.repoDetected"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "scorpio.sidebar.refresh",
+          "when": "view == artemis-sidebar",
           "group": "navigation"
         }
       ]
@@ -158,7 +177,9 @@
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0"
   },
-  "extensionDependencies": ["vscode.git"],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "bugs": {
     "url": "https://github.com/ls1intum/scorpio/issues"
   },

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../shared/state";
+import { onStateChange, state } from "../shared/state";
 import { ArtemisAuthenticationProvider } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
@@ -9,6 +9,13 @@ enum IncomingCommands {
   INFO = "info",
   ERROR = "error",
   CLONE_REPOSITORY = "cloneRepository",
+  SUBMIT = "submit",
+}
+
+enum OutgoingCommands {
+  SEND_ACCESS_TOKEN = "sendAccessToken",
+  LOGOUT = "logout",
+  SET_EXERCISE = "setExercise",
 }
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -19,8 +26,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _extensionUri: vscode.Uri,
     private readonly authenticationProvider: ArtemisAuthenticationProvider
   ) {
-    state.onStateChange.event(() => {
-      this.setExercise(state.course!.id, state.exercise!.id);
+    onStateChange.event((e) => {
+      if (e.displayedCourse && e.displayedExercise) {
+        const showSubmitButton =
+          e.displayedCourse.id == e.repoCourse?.id &&
+          e.displayedExercise.id == e.repoExercise?.id;
+        this.setExercise(
+          e.displayedCourse.id,
+          e.displayedExercise.id,
+          showSubmitButton
+        );
+      }
     });
 
     authenticationProvider.onAuthSessionsChange.event(
@@ -45,13 +61,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     this.initHTML();
 
+    webviewView.onDidChangeVisibility((e) => {
+      this.initState();
+    });
+
+    this.initState();
+
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
         case IncomingCommands.INFO: {
           if (!data.text) {
             return;
           }
-          vscode.window.showInformationMessage(data.text);
+          vscode.window.showInformationMessage(`Sidebar: ${data.text}`);
           break;
         }
         case IncomingCommands.ERROR: {
@@ -59,30 +81,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           console.error(data.text);
-          vscode.window.showErrorMessage(data.text);
+          vscode.window.showErrorMessage(`Sidebar: ${data.text}`);
           break;
         }
         case IncomingCommands.CLONE_REPOSITORY: {
-          cloneCurrentExercise()
-            .then(() => {
-              vscode.window.showInformationMessage(
-                `Repository cloned successfully.`
-              );
-            })
-            .catch((e) => {
-              vscode.window.showErrorMessage(
-                `Failed to clone repository: ${(e as Error).message}`
-              );
-            });
-
+          vscode.commands.executeCommand("scorpio.displayedExercise.clone");
           break;
         }
-      }
-    });
-
-    this.authenticationProvider.getSessions().then((sessions) => {
-      if (sessions.length > 0) {
-        this.login(sessions[0]);
+        case IncomingCommands.SUBMIT: {
+          vscode.commands.executeCommand("scorpio.workspace.submit");
+          break;
+        }
       }
     });
   }
@@ -99,27 +108,52 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private initState() {
+    this.authenticationProvider.getSessions().then((sessions) => {
+      if (sessions.length > 0) {
+        this.login(sessions[0]);
+      }
+    });
+
+    if (state.displayedCourse && state.displayedExercise) {
+      const showSubmitButton =
+        state.displayedCourse.id == state.repoCourse?.id &&
+        state.displayedExercise.id == state.repoExercise?.id;
+      this.setExercise(
+        state.displayedCourse.id,
+        state.displayedExercise.id,
+        showSubmitButton
+      );
+    }
+  }
+
   private async login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
-      command: "sendAccessToken",
+      command: OutgoingCommands.SEND_ACCESS_TOKEN,
       text: `${session.accessToken}`,
     });
   }
 
   private async logout() {
     this._view?.webview.postMessage({
-      command: "logout",
+      command: OutgoingCommands.LOGOUT,
     });
   }
 
-  private async setExercise(courseId: number, exerciseId: number) {
+  private async setExercise(
+    courseId: number,
+    exerciseId: number,
+    showSubmitButton: boolean
+  ) {
     this._view?.webview.postMessage({
-      command: "setExercise",
-      text: `{"courseId": ${courseId}, "exerciseId": ${exerciseId}}`,
+      command: OutgoingCommands.SET_EXERCISE,
+      text: `{"courseId": ${courseId}, "exerciseId": ${exerciseId}, "showSubmitButton": ${showSubmitButton}}`,
     });
   }
 
   public revive(panel: vscode.WebviewView) {
     this._view = panel;
+
+    this.initState();
   }
 }

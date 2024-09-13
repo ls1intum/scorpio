@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { fetch_courses } from "./course_api";
-import { Course } from "./course_model";
+import { fetch_all_courses, fetch_course_by_courseId } from "./course.api";
+import { Course } from "./course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 
 export type CourseOption = {
@@ -8,6 +8,17 @@ export type CourseOption = {
   description: string;
   course: Course;
 };
+
+export async function fetch_course_by_id(courseId: number): Promise<Course> {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: true,
+  });
+  if (!session) {
+    throw new Error(`Please sign in`);
+  }
+
+  return fetch_course_by_courseId(session.accessToken, courseId);
+}
 
 export async function build_course_options(): Promise<Course> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
@@ -17,7 +28,7 @@ export async function build_course_options(): Promise<Course> {
   if (!session) {
     throw new Error(`Please sign in`);
   }
-  const courses: Course[] = await fetch_courses(session.accessToken);
+  const courses: Course[] = await fetch_all_courses(session.accessToken);
 
   const courseOptions: CourseOption[] = courses.map((course) => ({
     label: course.title, // Adjust based on your data structure

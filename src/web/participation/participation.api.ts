@@ -1,5 +1,5 @@
 import { settings } from "../config";
-import { Participation } from "./participation_model";
+import { Participation } from "./participation.model";
 
 export async function start_exercise(token:string, exerciseId: number): Promise<Participation>{
     const url = `${settings.base_url}/api/exercises/${exerciseId}/participations`;

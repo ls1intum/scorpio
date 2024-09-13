@@ -8,6 +8,7 @@ const OutgoingCommand = {
   info: "info",
   error: "error",
   cloneRepository: "cloneRepository",
+  submit: "submit",
 };
 
 const SectionsToDisplay = {
@@ -15,6 +16,20 @@ const SectionsToDisplay = {
   noExercise: "noExercise",
   problemStatement: "problemStatement",
 };
+
+function postInfo(text) {
+  vscode.postMessage({
+    command: OutgoingCommand.info,
+    text: text,
+  });
+}
+
+function postError(text) {
+  vscode.postMessage({
+    command: OutgoingCommand.error,
+    text: text,
+  });
+}
 
 let exercise = null;
 let loggedIn = false;
@@ -31,6 +46,16 @@ function showSection(section) {
   }
 }
 
+function changeState() {
+  if (!loggedIn) {
+    showSection(SectionsToDisplay.login);
+  } else if (!exercise) {
+    showSection(SectionsToDisplay.noExercise);
+  } else {
+    showSection(SectionsToDisplay.problemStatement);
+  }
+}
+
 async function setCookie(token) {
   try {
     const response = await fetch(`http://localhost:8080/api/public/re-key`, {
@@ -42,27 +67,16 @@ async function setCookie(token) {
     });
     if (response.ok) {
       loggedIn = true;
-      vscode.postMessage({
-        command: OutgoingCommand.info,
-        text: "Login successful!",
-      });
+      postInfo("Login successful!");
     } else {
       throw new Error(response.statusText);
     }
   } catch (error) {
-    console.error("Login failed:", error);
-    vscode.postMessage({
-      command: OutgoingCommand.error,
-      text: "Login failed: " + error,
-    });
+    postError("Login failed: " + error);
     return;
   }
 
-  if (!exercise) {
-    showSection(SectionsToDisplay.noExercise);
-  } else {
-    showSection(SectionsToDisplay.problemStatement);
-  }
+  changeState();
 }
 
 function deleteCookie() {
@@ -72,39 +86,42 @@ function deleteCookie() {
   showSection(SectionsToDisplay.login);
 }
 
-function setCurrentExercise(courseId, exerciseId) {
+function setCurrentExercise(courseId, exerciseId, showSubmitButton = false) {
+  exercise = { courseId, exerciseId };
+
   document.getElementById(
     "problemStatementIframe"
   ).src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
 
-  exercise = { courseId, exerciseId };
-
-  if (!loggedIn) {
-    showSection(SectionsToDisplay.login);
+  const button = document.getElementById("cloneButton");
+  if (showSubmitButton) {
+    button.textContent = "Submit";
+    button.onclick = submit;
   } else {
-    showSection(SectionsToDisplay.problemStatement);
+    button.textContent = "Clone";
+    button.onclick = cloneRepository;
   }
+
+  changeState();
 }
 
 function cloneRepository() {
-  console.log(vscode);
   vscode.postMessage({
     command: OutgoingCommand.cloneRepository,
     text: "",
   });
 }
 
+function submit() {
+  vscode.postMessage({
+    command: OutgoingCommand.submit,
+    text: "",
+  });
+}
+
 const vscode = acquireVsCodeApi();
 
-if (!loggedIn) {
-  showSection(SectionsToDisplay.login);
-} else if (!exercise) {
-  showSection(SectionsToDisplay.noExercise);
-} else {
-  showSection(SectionsToDisplay.problemStatement);
-}
-// setCurrentExercise(1, 1);
-// showSection(SectionsToDisplay.problemStatement);
+changeState();
 
 // Listen for messages from the extension
 window.addEventListener("message", (event) => {
@@ -122,7 +139,8 @@ window.addEventListener("message", (event) => {
         const deserializedObject = JSON.parse(messageText);
         setCurrentExercise(
           deserializedObject.courseId,
-          deserializedObject.exerciseId
+          deserializedObject.exerciseId,
+          deserializedObject.showSubmitButton
         );
       } catch (error) {
         console.error("Failed to deserialize message text:", error);
