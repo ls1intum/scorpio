@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../shared/state";
+import { onStateChange, state } from "../shared/state";
 import { ArtemisAuthenticationProvider } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
@@ -19,8 +19,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _extensionUri: vscode.Uri,
     private readonly authenticationProvider: ArtemisAuthenticationProvider
   ) {
-    state.onStateChange.event(() => {
-      this.setExercise(state.course!.id, state.exercise!.id);
+    onStateChange.event((e) => {
+      if (e.displayedCourse && e.displayedExercise) {
+        this.setExercise(e.displayedCourse.id, e.displayedExercise.id);
+        return;
+      }
     });
 
     authenticationProvider.onAuthSessionsChange.event(
@@ -45,13 +48,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     this.initHTML();
 
+    webviewView.onDidChangeVisibility((e) => {
+      this.initState();
+    });
+
+    this.initState();
+
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
         case IncomingCommands.INFO: {
           if (!data.text) {
             return;
           }
-          vscode.window.showInformationMessage(data.text);
+          vscode.window.showInformationMessage(`Sidebar: ${data.text}`);
           break;
         }
         case IncomingCommands.ERROR: {
@@ -59,7 +68,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           console.error(data.text);
-          vscode.window.showErrorMessage(data.text);
+          vscode.window.showErrorMessage(`Sidebar: ${data.text}`);
           break;
         }
         case IncomingCommands.CLONE_REPOSITORY: {
@@ -79,12 +88,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
       }
     });
-
-    this.authenticationProvider.getSessions().then((sessions) => {
-      if (sessions.length > 0) {
-        this.login(sessions[0]);
-      }
-    });
   }
 
   private initHTML() {
@@ -96,6 +99,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     if (this._view) {
       this._view.webview.html = this.htmlContent;
+    }
+  }
+
+  private initState() {
+    this.authenticationProvider.getSessions().then((sessions) => {
+      if (sessions.length > 0) {
+        this.login(sessions[0]);
+      }
+    });
+
+    if (state.displayedCourse && state.displayedExercise) {
+      this.setExercise(state.displayedCourse.id, state.displayedExercise.id);
     }
   }
 
@@ -121,5 +136,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   public revive(panel: vscode.WebviewView) {
     this._view = panel;
+
+    this.initState();
   }
 }

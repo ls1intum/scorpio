@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
 import { API as GitAPI, GitExtension } from "../git"; // Path where you saved git.d.ts
 import { settings } from "../config";
+import { AUTH_ID } from "../authentication/authentication_provider";
+import { Course } from "../course/course.model";
+import { Exercise } from "../exercise/exercise.model";
+import { fetch_course_exercise_projectKey } from "../exercise/exercise.api";
+import { set_state } from "./state";
 
 let gitAPI: GitAPI;
 
@@ -17,6 +22,7 @@ export function initGitExtension() {
   if (!gitExtension) {
     throw new Error("Git extension not found");
   }
+
   gitAPI = gitExtension.exports.getAPI(1);
 }
 
@@ -45,7 +51,6 @@ export async function cloneRepository(repoUrl: string, username: string) {
     cloneUrl,
     selectedFolder[0].fsPath.toString()
   );
-  //await gitAPI.clone(cloneUrl, { location: selectedFolder[0] });
 }
 
 function addCredentialsToHTTPUrl(url: string, username: string) {
@@ -70,7 +75,7 @@ export async function submitCurrentWorkspace() {
     throw new Error("No repository found");
   }
 
-  if(!await repo.diff()){
+  if (!(await repo.diff())) {
     throw new Error("No changes to commit");
   }
 
@@ -87,10 +92,58 @@ export async function submitCurrentWorkspace() {
   await repo.push();
 }
 
-export function getExerciseIdAndCourseIdFromRepository(): {
-  courseId: number;
-  exerciseId: number;
-} {
-  // Implement your logic here
-  throw new Error("Not implemented");
+export async function detectRepoCourseAndExercsie(){
+  const projectKey: string = await getProjectKeyFromRepos();
+
+  const token = (
+    await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: true,
+    })
+  ).accessToken;
+
+  const course_exercise: { course: Course; exercise: Exercise } =
+    await fetch_course_exercise_projectKey(token, projectKey);
+
+  set_state({
+    repoCourse: course_exercise.course,
+    repoExercise: course_exercise.exercise,
+  });
+}
+
+async function getProjectKeyFromRepos(): Promise<string> {
+  if (!gitAPI) {
+    initGitExtension();
+  }
+
+  if (!settings.base_url) {
+    throw new Error("Base URL is not set");
+  }
+
+  for (const repo of gitAPI.repositories) {
+    for (const remote of repo.state.remotes) {
+      if (remote.fetchUrl) {
+        // check that artemis is really the repo host
+        if (new URL(remote.fetchUrl).host !== new URL(settings.base_url!).host) {
+          continue;
+        }
+        return getProjectKeyFromRepoUrl(remote.fetchUrl);
+      }
+    }
+  }
+  
+  throw new Error("No Artemis repository URL found");
+}
+
+function getProjectKeyFromRepoUrl(repoUrl: string): string {
+  // extract projectKey {protocol}://{username}@{host}:{port}/git/{PROJECT_KEY}/{project_key}-{username}.git
+  const projectKeyMatch = repoUrl.match(
+    /^[a-zA-Z]+:\/\/[^@]+@[^:]+:[0-9]+\/git\/([^\/]+)\/[^\/]+-[^\/]+\.git$/
+  );
+  if (!projectKeyMatch) {
+    throw new Error(
+      "Invalid artemis repository URL does not contain project key"
+    );
+  }
+
+  return projectKeyMatch[1];
 }

@@ -1,16 +1,26 @@
 import * as vscode from "vscode";
-import { fetch_exercise } from "./exercise_api";
-import { CourseOption } from "../course/course";
-import { set_state, state } from "../shared/state";
+import { fetch_exercise_by_exerciseId, fetch_programming_exercises_by_courseId } from "./exercise.api";
+import { state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
-import { Course } from "../course/course_model";
-import { Exercise } from "./exercise_model";
+import { Course } from "../course/course.model";
+import { Exercise } from "./exercise.model";
 import {
   fetch_latest_participation,
   start_exercise,
-} from "../participation/participation_api";
-import { Participation } from "../participation/participation_model";
+} from "../participation/participation.api";
+import { Participation } from "../participation/participation.model";
 import { cloneRepository } from "../shared/repository";
+
+export async function fetch_exercise_by_id(exerciseId: number): Promise<Exercise> {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: true,
+  });
+  if (!session) {
+    throw new Error(`Please sign in`);
+  }
+
+  return await fetch_exercise_by_exerciseId(session.accessToken, exerciseId);
+}
 
 export async function build_exercise_options(
   course: Course
@@ -22,7 +32,7 @@ export async function build_exercise_options(
   if (!session) {
     throw new Error(`Please sign in`);
   }
-  const exercises = await fetch_exercise(session.accessToken, course.id);
+  const exercises = await fetch_programming_exercises_by_courseId(session.accessToken, course.id);
 
   const exerciseOptions = exercises.map((exercise) => ({
     label: exercise.title, // Adjust based on your data structure
@@ -40,7 +50,8 @@ export async function build_exercise_options(
 }
 
 export async function cloneCurrentExercise() {
-  if (!state.exercise) {
+  const displayedExercise = state.displayedExercise;
+  if (!displayedExercise) {
     throw new Error("No exercise selected");
   }
 
@@ -56,12 +67,12 @@ export async function cloneCurrentExercise() {
   try {
     participation = await fetch_latest_participation(
       session.accessToken,
-      state.exercise.id
+      displayedExercise.id
     );
   } catch (e) {
     participation = await start_exercise(
       session.accessToken,
-      state.exercise.id
+      displayedExercise.id
     );
   }
 

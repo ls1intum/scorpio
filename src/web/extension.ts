@@ -1,10 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { build_course_options } from "./course/course";
+import { build_course_options, fetch_course_by_id } from "./course/course";
 import {
   build_exercise_options,
   cloneCurrentExercise,
+  fetch_exercise_by_id,
 } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import {
@@ -12,7 +13,8 @@ import {
   AUTH_ID,
 } from "./authentication/authentication_provider";
 import { set_state } from "./shared/state";
-import { submitCurrentWorkspace } from "./shared/repository";
+import { detectRepoCourseAndExercsie, submitCurrentWorkspace } from "./shared/repository";
+import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -20,12 +22,60 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "scorpio" is now active!');
 
+  const authenticationProvider = initAuthentication(context);
+
+  const sidebar = initSidebar(context, authenticationProvider);
+
+  registerCommands(context, authenticationProvider, sidebar);
+
+  listenToEvents();
+
+  (async () => {
+    // TODO make wait until everything else is initialized
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    detectRepoCourseAndExercsie().catch((e) => {
+      console.warn(e);
+      vscode.window.showWarningMessage(`${e}`);
+    });
+  })();
+}
+
+function initAuthentication(
+  context: vscode.ExtensionContext
+): ArtemisAuthenticationProvider {
   var authenticationProvider = new ArtemisAuthenticationProvider(
     context.secrets
   );
 
   context.subscriptions.push(authenticationProvider);
 
+  return authenticationProvider;
+}
+
+function initSidebar(
+  context: vscode.ExtensionContext,
+  authenticationProvider: ArtemisAuthenticationProvider
+): SidebarProvider {
+  // register sidebar for problem statement
+  const sidebarProvider = new SidebarProvider(
+    context.extensionUri,
+    authenticationProvider
+  );
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      "artemis-sidebar",
+      sidebarProvider
+    )
+  );
+
+  return sidebarProvider;
+}
+
+function registerCommands(
+  context: vscode.ExtensionContext,
+  authenticationProvider: ArtemisAuthenticationProvider,
+  sidebar: SidebarProvider
+) {
   // command to login
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.login", async () => {
@@ -47,13 +97,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   // command to select a course and exercise
   context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.selectExercise", async () => {
+    vscode.commands.registerCommand("scorpio.displayExercise", async () => {
       try {
         const course = await build_course_options();
 
         const exercise = await build_exercise_options(course);
 
-        set_state(course, exercise);
+        set_state({displayedCourse: course, displayedExercise: exercise});
       } catch (e) {
         console.error(e);
         vscode.window.showErrorMessage(`${e}`);
@@ -101,17 +151,42 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // register sidebar for problem statement
-  const sidebarProvider = new SidebarProvider(
-    context.extensionUri,
-    authenticationProvider
-  );
+  // command to sync problem statement with workspace
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      "artemis-sidebar",
-      sidebarProvider
-    )
+    vscode.commands.registerCommand("scorpio.workspace.sync", async () => {
+      sync_problem_statement_with_workspace()
+        .then(() => {
+          vscode.window.showInformationMessage(
+            `Workspace synced successfully.`
+          );
+        })
+        .catch((e) => {
+          console.error(e);
+          vscode.window.showErrorMessage(
+            `Failed to sync workspace: ${(e as Error).message}`
+          );
+        });
+    })
   );
+
+  // command to refresh sidebar
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.sidebar.refresh", () => {
+      sidebar.resolveWebviewView(sidebar._view!);
+      vscode.window.showInformationMessage("Refreshed Artemis Sidebar");
+    })
+  );
+}
+
+function listenToEvents() {
+  // listen to workspace changes to display problem statement
+  vscode.workspace.onDidChangeWorkspaceFolders((event) => {
+    if (event.added.length === 0) {
+      console.warn("No workspace added");
+    }
+
+    detectRepoCourseAndExercsie();
+  });
 }
 
 // This method is called when your extension is deactivated
