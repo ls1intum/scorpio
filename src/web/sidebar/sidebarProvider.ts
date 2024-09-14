@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
 import { onStateChange, state } from "../shared/state";
-import { ArtemisAuthenticationProvider } from "../authentication/authentication_provider";
+import {
+  ArtemisAuthenticationProvider,
+  AUTH_ID,
+} from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
-import { cloneCurrentExercise } from "../exercise/exercise";
 
 enum IncomingCommands {
   INFO = "info",
@@ -24,9 +26,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
-    private readonly authenticationProvider: ArtemisAuthenticationProvider
+    private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
   ) {
     onStateChange.event((e) => {
+      console.log(e);
       if (e.displayedCourse && e.displayedExercise) {
         const showSubmitButton =
           e.displayedCourse.id == e.repoCourse?.id &&
@@ -39,15 +42,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    authenticationProvider.onAuthSessionsChange.event(
-      async ({ added, removed, changed }) => {
-        if (added && added.length > 0) {
-          await this.login(added[0]);
-        } else if (removed && removed.length > 0) {
-          await this.logout();
-        }
+    onAuthSessionsChange.event(async ({ added, removed, changed }) => {
+      if (added && added.length > 0) {
+        this.login(added[0]);
+        return;
       }
-    );
+      if (removed && removed.length > 0) {
+        this.logout();
+        return;
+      }
+    });
   }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -108,12 +112,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private initState() {
-    this.authenticationProvider.getSessions().then((sessions) => {
-      if (sessions.length > 0) {
-        this.login(sessions[0]);
-      }
+  private async initState() {
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: false,
     });
+    if (session) {
+      this.login(session);
+    }
 
     if (state.displayedCourse && state.displayedExercise) {
       const showSubmitButton =

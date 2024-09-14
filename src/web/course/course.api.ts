@@ -1,42 +1,65 @@
-import { settings } from "../config";
+import { settings } from "../shared/config";
 import { Course } from "./course.model";
 
-export async function  fetch_course_by_courseId(token:string, courseId: number): Promise<Course> {
-	const url = `${settings.base_url}/api/courses/${courseId}`;
+export async function fetch_course_by_courseId(
+  token: string,
+  courseId: number
+): Promise<Course> {
+  const url = `${settings.base_url}/api/courses/${courseId}`;
 
-	  const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status} message: ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+      return data as Course;
     })
+    .catch((error) => {
+      if (error instanceof TypeError) {
+        throw new Error(`Could not reach the server: ${error.message}`);
+      }
 
-    if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
-    }
-        
-    const data = await response.json();
-    return data as Course;
+      throw error;
+    });
 }
 
-export async function  fetch_all_courses(token:string): Promise<Course[]> {
-	const url = `${settings.base_url}/api/courses`;
+export async function fetch_all_courses(token: string): Promise<Course[]> {
+  const url = `${settings.base_url}/api/courses`;
 
-	  const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status} message: ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+      return data as Course[];
     })
+    .catch((error) => {
+      if (error instanceof TypeError) {
+        throw new Error(`Could not reach the server: ${error.message}`);
+      }
 
-    if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
-    }
-        
-    const data = await response.json();
-    return data as Course[];
+      throw error;
+    });
 }

@@ -42,18 +42,6 @@
           "editPresentation": "singlelineText",
           "default": "http://localhost:9000"
         },
-        "scorpio.credentials.username": {
-          "description": "The username for login to Artemis",
-          "editPresentation": "singlelineText",
-          "type": "string",
-          "order": 0
-        },
-        "scorpio.credentials.password": {
-          "description": "The password for login to Artemis",
-          "editPresentation": "singlelineText",
-          "type": "string",
-          "order": 1
-        },
         "scorpio.defaults.repoPath": {
           "description": "The default to search for and clone repositories into - has to be an absolute path",
           "editPresentation": "singlelineText",
@@ -107,6 +95,11 @@
         "category": "Artemis",
         "title": "Submit Workspace",
         "icon": "$(repo-push)"
+      },
+      {
+        "command": "scorpio.workspace.detectRepo",
+        "category": "Artemis",
+        "title": "Detect Repository in Workspace"
       },
       {
         "command": "scorpio.workspace.sync",
