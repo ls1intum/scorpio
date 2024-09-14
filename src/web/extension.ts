@@ -114,7 +114,7 @@ function registerCommands(
         .showWarningMessage(
           "Sign out from Artemis - Scorpio",
           { modal: true },
-          "Sign out",
+          "Sign out"
         )
         .then((value) => {
           if (value === "Sign out") {
@@ -173,7 +173,7 @@ function registerCommands(
           );
         })
         .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
+          _errorMessage(e, LogLevel.WARN, "Failed to submit workspace");
         });
     })
   );
@@ -184,19 +184,23 @@ function registerCommands(
       "scorpio.workspace.detectRepo",
       async () => {
         detectRepoCourseAndExercise()
-          .then(() => {
+          .then((projectKey: string | undefined) => {
+            if(!projectKey){
+              return;
+            }
+
             vscode.commands.executeCommand(
               "setContext",
-              "scorpio.repoDetected",
-              true
+              "scorpio.repoKey",
+              projectKey
             );
             vscode.window.showInformationMessage(`Repo detected successfully.`);
           })
           .catch((e) => {
             vscode.commands.executeCommand(
               "setContext",
-              "scorpio.repoDetected",
-              false
+              "scorpio.repoKey",
+              null
             );
             _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
           });

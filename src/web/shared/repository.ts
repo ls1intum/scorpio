@@ -77,11 +77,11 @@ export async function submitCurrentWorkspace() {
     throw new Error("No repository in workspace");
   }
 
-  if (!(await currentRepo.diffWithHEAD())) {
+  const diff = await currentRepo.diffWithHEAD();
+  if (!diff || diff.length == 0) {
     throw new Error("No changes to commit");
   }
 
-  await currentRepo.add([]);
   const commitMessage = await vscode.window.showInputBox({
     placeHolder: "Enter commit message",
     prompt: "Enter commit message",
@@ -90,11 +90,24 @@ export async function submitCurrentWorkspace() {
   if (!commitMessage) {
     throw new Error("Commit process cancelled");
   }
+
+  const confirm = await vscode.window.showWarningMessage(
+    `Are you sure you want to submit your workspace with the following message? \n "${commitMessage}"`,
+    { modal: true },
+    "Confirm"
+  );
+
+  if (confirm !== "Confirm") {
+    throw new Error("Commit process cancelled");
+  }
+  await currentRepo.add([]);
   await currentRepo.commit(commitMessage);
   await currentRepo.push();
 }
 
-export async function detectRepoCourseAndExercise() {
+export async function detectRepoCourseAndExercise(): Promise<
+  string | undefined
+> {
   if (currentRepo) {
     console.log("Repo already detected");
     return;
@@ -133,9 +146,11 @@ export async function detectRepoCourseAndExercise() {
     displayedCourse: state.displayedCourse,
     displayedExercise: state.displayedExercise,
   });
+
+  return projectKey;
 }
 
-function getArtemisRepo(): {repo: Repository, remote: Remote} | undefined {
+function getArtemisRepo(): { repo: Repository; remote: Remote } | undefined {
   if (!gitAPI) {
     initGitExtension();
   }
@@ -154,7 +169,7 @@ function getArtemisRepo(): {repo: Repository, remote: Remote} | undefined {
           continue;
         }
 
-        return {repo: repo, remote: remote};
+        return { repo: repo, remote: remote };
       }
     }
   }
