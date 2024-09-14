@@ -12,7 +12,7 @@ import {
 import { authenticateToken } from "./authentication_api";
 
 export const AUTH_ID = "artemis";
-const AUTH_NAME = `Artemis`;
+const AUTH_NAME = `Credentials`; // what is displayed on the profile button
 const SESSIONS_SECRET_KEY = `${AUTH_ID}.sessions`;
 
 class ArtemisSession implements AuthenticationSession {
@@ -80,7 +80,7 @@ export class ArtemisAuthenticationProvider
   public async createSession(scopes: string[]): Promise<AuthenticationSession> {
     const username = await window.showInputBox({
       ignoreFocusOut: true,
-      prompt: "Enter your username",
+      prompt: "Enter your Artemis username",
     });
     if (!username) {
       throw new Error("No username provided");
@@ -88,7 +88,7 @@ export class ArtemisAuthenticationProvider
 
     const password = await window.showInputBox({
       ignoreFocusOut: true,
-      prompt: "Enter your password",
+      prompt: "Enter your Artemis password",
       password: true,
     });
     if (!password) {

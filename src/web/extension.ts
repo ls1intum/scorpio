@@ -26,6 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "scorpio" is now active!');
 
   const authenticationProvider = initAuthentication(context);
+  vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
 
   const sidebar = initSidebar(context, authenticationProvider);
 
@@ -48,6 +51,15 @@ function initAuthentication(
   );
 
   context.subscriptions.push(authenticationProvider);
+
+  authenticationProvider.onAuthSessionsChange.event(
+    async ({ added, removed, changed }) => {
+      if (added && added.length > 0) {
+        vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+        return;
+      }
+    }
+  );
 
   return authenticationProvider;
 }
@@ -89,7 +101,6 @@ function registerCommands(
         }
 
         vscode.window.showInformationMessage("You are logged in now");
-        vscode.commands.executeCommand("scorpio.workspace.detectRepo");
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to login");
       }
@@ -99,8 +110,18 @@ function registerCommands(
   // command to logout
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.logout", async () => {
-      authenticationProvider.removeSession();
-      vscode.window.showInformationMessage("You have been logged out");
+      vscode.window
+        .showWarningMessage(
+          "Sign out from Artemis - Scorpio",
+          { modal: true },
+          "Sign out",
+        )
+        .then((value) => {
+          if (value === "Sign out") {
+            authenticationProvider.removeSession();
+            vscode.window.showInformationMessage("You have been logged out");
+          }
+        });
     })
   );
 
@@ -169,9 +190,7 @@ function registerCommands(
               "scorpio.repoDetected",
               true
             );
-            vscode.window.showInformationMessage(
-              `Repo detected successfully.`
-            );
+            vscode.window.showInformationMessage(`Repo detected successfully.`);
           })
           .catch((e) => {
             vscode.commands.executeCommand(
@@ -221,54 +240,67 @@ enum LogLevel {
   ERROR = "error",
   WARN = "warn",
 }
-function _errorMessage(e: any, logLevel: LogLevel = LogLevel.ERROR, messagePrefix: string = "") {
+function _errorMessage(
+  e: any,
+  logLevel: LogLevel = LogLevel.ERROR,
+  messagePrefix: string = ""
+) {
   switch (logLevel) {
     case LogLevel.INFO:
       console.info(e);
-      if(e instanceof NotAuthenticatedError) {
-        vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
-          if(value === "Login") {
-            vscode.commands.executeCommand("scorpio.login");
-          }});
-          return;
+      if (e instanceof NotAuthenticatedError) {
+        vscode.window
+          .showInformationMessage(`${messagePrefix}: ${e.message}`, "Login")
+          .then((value) => {
+            if (value === "Login") {
+              vscode.commands.executeCommand("scorpio.login");
+            }
+          });
+        return;
       }
       if (e instanceof Error) {
         vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`);
         return;
       }
-    
+
       vscode.window.showInformationMessage(`${messagePrefix}: ${e}`);
       break;
     case LogLevel.ERROR:
       console.error(e);
-      if(e instanceof NotAuthenticatedError) {
-        vscode.window.showErrorMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
-          if(value === "Login") {
-            vscode.commands.executeCommand("scorpio.login");
-          }});
-          return;
+      if (e instanceof NotAuthenticatedError) {
+        vscode.window
+          .showErrorMessage(`${messagePrefix}: ${e.message}`, "Login")
+          .then((value) => {
+            if (value === "Login") {
+              vscode.commands.executeCommand("scorpio.login");
+            }
+          });
+        return;
       }
       if (e instanceof Error) {
         vscode.window.showErrorMessage(`${messagePrefix}: ${e.message}`);
         return;
       }
-    
+
       vscode.window.showErrorMessage(`${messagePrefix}: ${e}`);
       break;
     case LogLevel.WARN:
       console.warn(e);
-      if(e instanceof NotAuthenticatedError) {
-        vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
-          if(value === "Login") {
-            vscode.commands.executeCommand("scorpio.login");
-          }});
-          return;
+      if (e instanceof NotAuthenticatedError) {
+        vscode.window
+          .showWarningMessage(`${messagePrefix}: ${e.message}`, "Login")
+          .then((value) => {
+            if (value === "Login") {
+              vscode.commands.executeCommand("scorpio.login");
+            }
+          });
+        return;
       }
       if (e instanceof Error) {
         vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`);
         return;
       }
-    
+
       vscode.window.showWarningMessage(`${messagePrefix}: ${e}`);
       break;
   }
