@@ -24,7 +24,7 @@
     "authentication": [
       {
         "id": "artemis",
-        "label": "Artemis"
+        "label": "Credentials"
       }
     ],
     "configuration": {
