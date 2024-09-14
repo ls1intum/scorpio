@@ -39,6 +39,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           e.displayedExercise.id,
           showSubmitButton
         );
+
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.displayedKey",
+          e.displayedCourse.shortName.toUpperCase() +
+            e.displayedExercise.shortName.toUpperCase()
+        );
       }
     });
 
@@ -128,6 +135,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         state.displayedCourse.id,
         state.displayedExercise.id,
         showSubmitButton
+      );
+
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.displayedKey",
+        state.displayedCourse.shortName.toUpperCase() +
+          state.displayedExercise.shortName.toUpperCase()
       );
     }
   }

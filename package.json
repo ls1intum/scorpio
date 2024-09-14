@@ -88,7 +88,8 @@
       {
         "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
-        "title": "Clone Displayed Exercise"
+        "title": "Clone Displayed Exercise",
+        "icon": "$(repo-clone)"
       },
       {
         "command": "scorpio.workspace.submit",
@@ -118,13 +119,23 @@
         {
           "command": "scorpio.workspace.submit",
           "group": "navigation",
-          "when": "scorpio.repoDetected"
+          "when": "scorpio.repoKey"
         }
       ],
       "view/title": [
         {
           "command": "scorpio.sidebar.refresh",
           "when": "view == artemis-sidebar",
+          "group": "navigation"
+        },
+        {
+          "command": "scorpio.workspace.submit",
+          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.repoKey == scorpio.displayedKey)",
+          "group": "navigation"
+        },
+        {
+          "command": "scorpio.displayedExercise.clone",
+          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey && scorpio.repoKey != scorpio.displayedKey)",
           "group": "navigation"
         }
       ]
