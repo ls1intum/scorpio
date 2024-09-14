@@ -58,25 +58,33 @@ function changeState() {
 
 async function setCookie(token) {
   try {
-    const response = await fetch(`http://localhost:8080/api/public/re-key`, {
+    fetch(`http://localhost:8080/api/public/re-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    });
-    if (response.ok) {
-      loggedIn = true;
-      postInfo("Login successful!");
-    } else {
-      throw new Error(response.statusText);
-    }
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        loggedIn = true;
+        postInfo("Login successful!");
+        changeState();
+      })
+      .catch((error) => {
+        if (error instanceof TypeError) {
+          throw new Error(`Could not reach the server: ${error.message}`);
+        }
+
+        throw error;
+      });
   } catch (error) {
     postError("Login failed: " + error);
     return;
   }
-
-  changeState();
 }
 
 function deleteCookie() {

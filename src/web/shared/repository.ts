@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { API as GitAPI, GitExtension, Repository } from "../git"; // Path where you saved git.d.ts
-import { settings } from "../config";
+import { API as GitAPI, GitExtension, Remote, Repository } from "../git"; // Path where you saved git.d.ts
+import { settings } from "../shared/config";
+import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "../course/course.model";
 import { Exercise } from "../exercise/exercise.model";
@@ -94,21 +95,38 @@ export async function submitCurrentWorkspace() {
 }
 
 export async function detectRepoCourseAndExercise() {
-  if(currentRepo){
+  if (currentRepo) {
+    console.log("Repo already detected");
     return;
   }
-  
-  const projectKey: string = await getProjectKeyFromRepos();
+
+  const repoAndRemote = getArtemisRepo();
+  if (!repoAndRemote || !repoAndRemote.repo || !repoAndRemote.remote) {
+    currentRepo = undefined;
+    set_state({
+      repoCourse: undefined,
+      repoExercise: undefined,
+      displayedCourse: state.displayedCourse,
+      displayedExercise: state.displayedExercise,
+    });
+    throw new Error("No Artemis repository found");
+  }
 
   const token = (
     await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: true,
+      createIfNone: false,
     })
-  ).accessToken;
+  )?.accessToken;
+  if (!token) {
+    throw new NotAuthenticatedError();
+  }
+
+  const projectKey = getProjectKeyFromRepoUrl(repoAndRemote.remote.fetchUrl!);
 
   const course_exercise: { course: Course; exercise: Exercise } =
     await fetch_course_exercise_projectKey(token, projectKey);
 
+  currentRepo = repoAndRemote.repo;
   set_state({
     repoCourse: course_exercise.course,
     repoExercise: course_exercise.exercise,
@@ -117,7 +135,7 @@ export async function detectRepoCourseAndExercise() {
   });
 }
 
-async function getProjectKeyFromRepos(): Promise<string> {
+function getArtemisRepo(): {repo: Repository, remote: Remote} | undefined {
   if (!gitAPI) {
     initGitExtension();
   }
@@ -136,14 +154,13 @@ async function getProjectKeyFromRepos(): Promise<string> {
           continue;
         }
 
-        const projectKey = getProjectKeyFromRepoUrl(remote.fetchUrl);
-        currentRepo = repo;
-        return projectKey;
+        return {repo: repo, remote: remote};
       }
     }
   }
 
-  throw new Error("No Artemis repository URL found");
+  console.log("No Artemis repository URL found");
+  return undefined;
 }
 
 function getProjectKeyFromRepoUrl(repoUrl: string): string {

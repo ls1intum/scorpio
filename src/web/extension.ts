@@ -17,6 +17,7 @@ import {
   submitCurrentWorkspace,
 } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
+import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -30,33 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   registerCommands(context, authenticationProvider, sidebar);
 
+  listenToEvents();
+
   (async () => {
     // TODO make wait until everything else is initialized
     await new Promise((resolve) => setTimeout(resolve, 2500));
-    detectRepoCourseAndExercise()
-      .then(() => {
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.repoDetected",
-          true
-        );
-      })
-      .catch((e) => {
-        set_state({
-          repoCourse: undefined,
-          repoExercise: undefined,
-          displayedCourse: state.displayedCourse,
-          displayedExercise: state.displayedExercise,
-        });
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.repoDetected",
-          false
-        );
-
-        console.warn(e);
-        vscode.window.showWarningMessage(`${e}`);
-      });
+    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   })();
 }
 
@@ -79,7 +59,7 @@ function initSidebar(
   // register sidebar for problem statement
   const sidebarProvider = new SidebarProvider(
     context.extensionUri,
-    authenticationProvider
+    authenticationProvider.onAuthSessionsChange
   );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -99,11 +79,20 @@ function registerCommands(
   // command to login
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.login", async () => {
-      vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: true,
-      });
+      try {
+        const token = await vscode.authentication.getSession(AUTH_ID, [], {
+          createIfNone: true,
+        });
+        if (!token) {
+          vscode.window.showErrorMessage("Login failed");
+          return;
+        }
 
-      vscode.window.showInformationMessage("You are logged in now");
+        vscode.window.showInformationMessage("You are logged in now");
+        vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+      } catch (e) {
+        _errorMessage(e, LogLevel.ERROR, "Failed to login");
+      }
     })
   );
 
@@ -130,9 +119,7 @@ function registerCommands(
           repoExercise: state.repoExercise,
         });
       } catch (e) {
-        console.error(e);
-        vscode.window.showErrorMessage(`${e}`);
-        return;
+        _errorMessage(e, LogLevel.ERROR, "Failed to display Exercise");
       }
     })
   );
@@ -149,10 +136,7 @@ function registerCommands(
             );
           })
           .catch((e) => {
-            console.error(e);
-            vscode.window.showErrorMessage(
-              `Failed to clone repository: ${(e as Error).message}`
-            );
+            _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
           });
       }
     )
@@ -168,12 +152,37 @@ function registerCommands(
           );
         })
         .catch((e) => {
-          console.error(e);
-          vscode.window.showErrorMessage(
-            `Failed to submit workspace: ${(e as Error).message}`
-          );
+          _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
         });
     })
+  );
+
+  // command to detect repo in workspace
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "scorpio.workspace.detectRepo",
+      async () => {
+        detectRepoCourseAndExercise()
+          .then(() => {
+            vscode.commands.executeCommand(
+              "setContext",
+              "scorpio.repoDetected",
+              true
+            );
+            vscode.window.showInformationMessage(
+              `Repo detected successfully.`
+            );
+          })
+          .catch((e) => {
+            vscode.commands.executeCommand(
+              "setContext",
+              "scorpio.repoDetected",
+              false
+            );
+            _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
+          });
+      }
+    )
   );
 
   // command to sync problem statement with workspace
@@ -186,10 +195,7 @@ function registerCommands(
           );
         })
         .catch((e) => {
-          console.error(e);
-          vscode.window.showErrorMessage(
-            `Failed to sync workspace: ${(e as Error).message}`
-          );
+          _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
         });
     })
   );
@@ -206,22 +212,66 @@ function registerCommands(
 function listenToEvents() {
   // listen to workspace changes to display problem statement
   vscode.workspace.onDidChangeWorkspaceFolders((event) => {
-    if (event.added.length === 0) {
-      console.warn("No workspace added");
-    }
-
-    detectRepoCourseAndExercise()
-      .then(() => {
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.repoDetected",
-          true
-        );
-      })
-      .catch((e) => {
-        console.warn(e);
-      });
+    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   });
+}
+
+enum LogLevel {
+  INFO = "info",
+  ERROR = "error",
+  WARN = "warn",
+}
+function _errorMessage(e: any, logLevel: LogLevel = LogLevel.ERROR, messagePrefix: string = "") {
+  switch (logLevel) {
+    case LogLevel.INFO:
+      console.info(e);
+      if(e instanceof NotAuthenticatedError) {
+        vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if(value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }});
+          return;
+      }
+      if (e instanceof Error) {
+        vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`);
+        return;
+      }
+    
+      vscode.window.showInformationMessage(`${messagePrefix}: ${e}`);
+      break;
+    case LogLevel.ERROR:
+      console.error(e);
+      if(e instanceof NotAuthenticatedError) {
+        vscode.window.showErrorMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if(value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }});
+          return;
+      }
+      if (e instanceof Error) {
+        vscode.window.showErrorMessage(`${messagePrefix}: ${e.message}`);
+        return;
+      }
+    
+      vscode.window.showErrorMessage(`${messagePrefix}: ${e}`);
+      break;
+    case LogLevel.WARN:
+      console.warn(e);
+      if(e instanceof NotAuthenticatedError) {
+        vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if(value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }});
+          return;
+      }
+      if (e instanceof Error) {
+        vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`);
+        return;
+      }
+    
+      vscode.window.showWarningMessage(`${messagePrefix}: ${e}`);
+      break;
+  }
 }
 
 // This method is called when your extension is deactivated

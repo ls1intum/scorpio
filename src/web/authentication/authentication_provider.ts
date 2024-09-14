@@ -9,7 +9,6 @@ import {
   authentication,
   window,
 } from "vscode";
-import { settings } from "../config";
 import { authenticateToken } from "./authentication_api";
 
 export const AUTH_ID = "artemis";
@@ -79,57 +78,42 @@ export class ArtemisAuthenticationProvider
    * @returns
    */
   public async createSession(scopes: string[]): Promise<AuthenticationSession> {
-    try {
-      var username = settings.user;
-      if (!username) {
-        username = await window.showInputBox({
-          ignoreFocusOut: true,
-          prompt: "Enter your username",
-        });
-      }
-      if (!username) {
-        throw new Error("No username provided");
-      }
-
-      var password = settings.password;
-      if (!password) {
-        password = await window.showInputBox({
-          ignoreFocusOut: true,
-          prompt: "Enter your password",
-          password: true,
-        });
-      }
-      if (!password) {
-        throw new Error("No password provided");
-      }
-
-      const token = await this.login(username, password);
-      if (!token) {
-        throw new Error(`login failure`);
-      }
-
-      const session = new ArtemisSession(token, username, scopes);
-
-      await this.secretStorage.store(
-        SESSIONS_SECRET_KEY,
-        JSON.stringify(session)
-      );
-
-      this.onAuthSessionsChange.fire({
-        added: [session],
-        removed: [],
-        changed: [],
-      });
-
-      return session;
-    } catch (e) {
-      window.showErrorMessage(`Sign in failed: ${e}`);
-      throw e;
+    const username = await window.showInputBox({
+      ignoreFocusOut: true,
+      prompt: "Enter your username",
+    });
+    if (!username) {
+      throw new Error("No username provided");
     }
-  }
 
-  private async login(username: string, password: string) {
-    return authenticateToken(username, password);
+    const password = await window.showInputBox({
+      ignoreFocusOut: true,
+      prompt: "Enter your password",
+      password: true,
+    });
+    if (!password) {
+      throw new Error("No password provided");
+    }
+
+    const token = await authenticateToken(username, password);
+    if (!token) {
+      throw new Error(`login failure`);
+    }
+
+    const session = new ArtemisSession(token, username, scopes);
+
+    await this.secretStorage.store(
+      SESSIONS_SECRET_KEY,
+      JSON.stringify(session)
+    );
+
+    this.onAuthSessionsChange.fire({
+      added: [session],
+      removed: [],
+      changed: [],
+    });
+
+    return session;
   }
 
   // This function is called when the end user signs out of the account.

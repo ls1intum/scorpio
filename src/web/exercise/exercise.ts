@@ -10,13 +10,14 @@ import {
 } from "../participation/participation.api";
 import { Participation } from "../participation/participation.model";
 import { cloneRepository } from "../shared/repository";
+import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 
 export async function fetch_exercise_by_id(exerciseId: number): Promise<Exercise> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: true,
+    createIfNone: false,
   });
   if (!session) {
-    throw new Error(`Please sign in`);
+    throw new NotAuthenticatedError();
   }
 
   return await fetch_exercise_by_exerciseId(session.accessToken, exerciseId);
@@ -26,11 +27,11 @@ export async function build_exercise_options(
   course: Course
 ): Promise<Exercise> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: true,
+    createIfNone: false,
   });
 
   if (!session) {
-    throw new Error(`Please sign in`);
+    throw new NotAuthenticatedError();
   }
   const exercises = await fetch_programming_exercises_by_courseId(session.accessToken, course.id);
 
@@ -56,11 +57,11 @@ export async function cloneCurrentExercise() {
   }
 
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: true,
+    createIfNone: false,
   });
 
   if (!session) {
-    throw new Error("Please sign in");
+    throw new NotAuthenticatedError();
   }
 
   let participation: Participation;

@@ -1,29 +1,36 @@
-import { settings } from "../config";
+import { settings } from "../shared/config";
 
-export async function authenticateToken(username: string | undefined, password: string | undefined) {
-	if (!username || !password) {
-		throw new Error('Username and Password are required');
-	}
+export async function authenticateToken(
+  username: string,
+  password: string
+): Promise<string> {
+  var url = new URL(`${settings.base_url}/api/public/authenticate`);
+  url.searchParams.append("as-bearer", "true");
 
-	var url = new URL(`${settings.base_url}/api/public/authenticate`);
-	url.searchParams.append('as-bearer', 'true');
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: username,
+      password: password,
+      rememberMe: true,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error with status: ${response.status} ${response.body}`
+        );
+      }
+      return response.text();
+    })
+    .catch((error) => {
+      if (error instanceof TypeError) {
+        throw new Error(`Could not reach the server: ${error.message}`);
+      }
 
-	const response = await fetch(url, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			"username": username,
-			"password": password,
-			"rememberMe": true
-		})
-	})
-
-	if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status} message: ${response.body}`);
-	}
-	
-	const data = await response.text()
-	return data;
-}	
+      throw error;
+    });
+}
