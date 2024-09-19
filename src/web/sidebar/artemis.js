@@ -31,8 +31,8 @@ function postError(text) {
   });
 }
 
-let exercise = null;
-let loggedIn = false;
+let courseIdExerciseId = undefined;
+let token = undefined;
 
 function showSection(section) {
   const sections = Object.values(SectionsToDisplay);
@@ -47,22 +47,22 @@ function showSection(section) {
 }
 
 function changeState() {
-  if (!loggedIn) {
+  if (!token) {
     showSection(SectionsToDisplay.login);
-  } else if (!exercise) {
+  } else if (!courseIdExerciseId) {
     showSection(SectionsToDisplay.noExercise);
   } else {
     showSection(SectionsToDisplay.problemStatement);
   }
 }
 
-async function setCookie(token) {
+async function setCookie(tk) {
   try {
-    fetch(`http://localhost:8080/api/public/re-key`, {
+    await fetch(`http://localhost:8080/api/public/re-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tk}`,
       },
     })
       .then((response) => {
@@ -70,7 +70,7 @@ async function setCookie(token) {
           throw new Error(response.statusText);
         }
 
-        loggedIn = true;
+        token = tk;
         postInfo("Login successful!");
         changeState();
       })
@@ -82,7 +82,7 @@ async function setCookie(token) {
         throw error;
       });
   } catch (error) {
-    postError("Login failed: " + error);
+    postError(`Login failed: ${error}`);
     return;
   }
 }
@@ -90,16 +90,67 @@ async function setCookie(token) {
 function deleteCookie() {
   document.cookie = "";
   // TODO make logout request to Artemis
-  loggedIn = false;
+  token = undefined;
   showSection(SectionsToDisplay.login);
 }
 
-function setCurrentExercise(courseId, exerciseId, showSubmitButton = false) {
-  exercise = { courseId, exerciseId };
+async function fetchParticipation(courseId, exerciseId) {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/exercises/${exerciseId}/participation`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
 
-  document.getElementById(
-    "problemStatementIframe"
-  ).src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+    participation = await response.json();
+    if (!participation || !participation.results) {
+      return undefined;
+    }
+    latestResult = participation.results.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))[0];
+    if(!latestResult){
+      return undefined;
+    }
+
+    document.getElementById("scoreButton").textContent = `${latestResult.score} %`;
+    document.getElementById("scoreIframe").src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
+    document.getElementById("score").hidden = false;
+
+    return participation;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      postError(`Could not reach the server: ${error.message}`);
+    }
+
+    postError(`Fetch participation failed: ${error}`);
+    return undefined;
+  }
+}
+
+async function setCurrentExercise(
+  courseId,
+  exerciseId,
+  showSubmitButton = false
+) {
+  let url = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+
+  const participation = await fetchParticipation(courseId, exerciseId);
+  if (participation) {
+    url += `/${participation.id}`;
+  } else {
+    document.getElementById("score").hidden = true;
+  }
+
+  document.getElementById("problemStatementIframe").src = url;
+
+  courseIdExerciseId = { courseId, exerciseId };
 
   const button = document.getElementById("cloneButton");
   if (showSubmitButton) {
@@ -142,7 +193,7 @@ window.addEventListener("message", (event) => {
       deleteCookie();
       break;
     case IncomingCommand.setExercise:
-      const messageText = message.text; // e.g., '{"courseId": 123, "exerciseId": 456}'
+      const messageText = message.text; // e.g., '{"courseId": 123, "exerciseId": 456, "showSubmitButton": true}'
       try {
         const deserializedObject = JSON.parse(messageText);
         setCurrentExercise(
