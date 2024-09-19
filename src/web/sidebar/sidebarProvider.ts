@@ -29,12 +29,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
   ) {
     onStateChange.event((e) => {
-      console.log(e);
       if (e.displayedCourse && e.displayedExercise) {
         const showSubmitButton =
           e.displayedCourse.id == e.repoCourse?.id &&
           e.displayedExercise.id == e.repoExercise?.id;
-        this.setExercise(
+        this.displayExercise(
           e.displayedCourse.id,
           e.displayedExercise.id,
           showSubmitButton
@@ -131,7 +130,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       const showSubmitButton =
         state.displayedCourse.id == state.repoCourse?.id &&
         state.displayedExercise.id == state.repoExercise?.id;
-      this.setExercise(
+      this.displayExercise(
         state.displayedCourse.id,
         state.displayedExercise.id,
         showSubmitButton
@@ -159,7 +158,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private async setExercise(
+  private async displayExercise(
     courseId: number,
     exerciseId: number,
     showSubmitButton: boolean
