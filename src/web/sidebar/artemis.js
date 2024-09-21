@@ -17,6 +17,21 @@ const SectionsToDisplay = {
   problemStatement: "problemStatement",
 };
 
+// Store the original fetch function
+const originalFetch = window.fetch;
+
+// Custom fetch function to intercept and modify requests
+window.fetch = async function(input, init) {
+  init = init || {};
+  init.headers = {
+    ...init.headers, // Keep the original headers
+    "X-ARTEMIS-CSRF": "Dennis ist schuld",
+  };
+
+  // Call the original fetch with the modified init object
+  return originalFetch(input, init);
+};
+
 function postInfo(text) {
   vscode.postMessage({
     command: OutgoingCommand.info,
@@ -63,6 +78,7 @@ async function setCookie(tk) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${tk}`,
+        // "X-ARTEMIS-CSRF": "Dennis ist schuld",
       },
     })
       .then((response) => {
@@ -103,6 +119,7 @@ async function fetchParticipation(courseId, exerciseId) {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          // "X-ARTEMIS-CSRF": "Dennis ist schuld",
         },
       }
     );
