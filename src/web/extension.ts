@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import "./utils/fetch.interceptor";
 import { build_course_options } from "./course/course";
 import {
   build_exercise_options,
