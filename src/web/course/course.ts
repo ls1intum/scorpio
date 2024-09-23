@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
 import { fetch_all_courses, fetch_course_by_courseId } from "./course.api";
-import { Course } from "./course.model";
+import { Course, TotalScores } from "./course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 
 export type CourseOption = {
   label: string;
   description: string;
+  detail: string;
   course: Course;
 };
 
@@ -29,16 +30,23 @@ export async function build_course_options(): Promise<Course> {
   if (!session) {
     throw new NotAuthenticatedError();
   }
-  const courses: Course[] = await fetch_all_courses(session.accessToken);
+  const coursesWithScore: {course: Course, totalScores: TotalScores}[] = await fetch_all_courses(session.accessToken);
+  console.log(coursesWithScore);
 
-  const courseOptions: CourseOption[] = courses.map((course) => ({
-    label: course.title, // Adjust based on your data structure
-    description: course.description, // Adjust based on your data structure
-    course: course, // Use a unique identifier
+  const courseOptions: CourseOption[] = coursesWithScore.map((courseWithScore) => ({
+    label: courseWithScore.course.title,
+    detail: (() => {
+      const nextExercise = (courseWithScore.course?.exercises ?? [])
+      .filter((exercise) => exercise.dueDate && new Date(exercise.dueDate) > new Date())
+      .sort((a, b) => a.dueDate! > b.dueDate! ? 1 : -1).at(0);
+      return nextExercise ? `Next exercise: ${nextExercise.title} due on ${new Date(nextExercise.dueDate!).toLocaleString()}` : "No upcoming exercise";
+    })(),
+    description: `${courseWithScore.totalScores.studentScores.absoluteScore}/${courseWithScore.totalScores.reachablePoints} Points`,
+    course: courseWithScore.course,
   }));
 
   const selectedCourse = await vscode.window.showQuickPick(courseOptions, {
-    placeHolder: "Select an item",
+    placeHolder: "Select a course",
   });
   if (!selectedCourse) {
     throw new Error("No course was selected");

@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
-import { fetch_exercise_by_exerciseId, fetch_programming_exercises_by_courseId } from "./exercise.api";
+import {
+  fetch_exercise_by_exerciseId,
+  fetch_programming_exercises_by_courseId,
+} from "./exercise.api";
 import { state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "../course/course.model";
@@ -12,7 +15,9 @@ import { Participation } from "../participation/participation.model";
 import { cloneRepository } from "../shared/repository";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 
-export async function fetch_exercise_by_id(exerciseId: number): Promise<Exercise> {
+export async function fetch_exercise_by_id(
+  exerciseId: number
+): Promise<Exercise> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
   });
@@ -21,6 +26,15 @@ export async function fetch_exercise_by_id(exerciseId: number): Promise<Exercise
   }
 
   return await fetch_exercise_by_exerciseId(session.accessToken, exerciseId);
+}
+
+function _getScoreString(exercise: Exercise): string {
+  const score = exercise.studentParticipations
+    ?.at(0)
+    ?.results?.filter((result) => result.rated)
+    .sort((a, b) => b.completionDate.getTime() - a.completionDate.getTime())
+    .at(0)?.score;
+  return score ? `${score} %` : "No graded result";
 }
 
 export async function build_exercise_options(
@@ -33,17 +47,75 @@ export async function build_exercise_options(
   if (!session) {
     throw new NotAuthenticatedError();
   }
-  const exercises = await fetch_programming_exercises_by_courseId(session.accessToken, course.id);
+  const exercises = await fetch_programming_exercises_by_courseId(
+    session.accessToken,
+    course.id
+  );
 
-  const exerciseOptions = exercises.map((exercise) => ({
-    label: exercise.title, // Adjust based on your data structure
-    description: "", // Adjust based on your data structure
-    exercise: exercise, // Use a unique identifier
-  }));
-  const selectedExercise = await vscode.window.showQuickPick(exerciseOptions, {
-    placeHolder: "Select an item",
-  });
-  if (!selectedExercise) {
+  const now = new Date();
+  console.log(now);
+  const exerciseOptionsNoDueDate = exercises
+    .filter((exercise) => !exercise.dueDate)
+    .map((exercise) => ({
+      kind: vscode.QuickPickItemKind.Default,
+      label: exercise.title,
+      description: _getScoreString(exercise),
+      detail: "No due date",
+      exercise: exercise,
+    }));
+
+  const exerciseOptionsPastDueDate = exercises
+    .filter((exercise) => exercise.dueDate && exercise.dueDate < now)
+    .map((exercise) => ({
+      kind: vscode.QuickPickItemKind.Default,
+      label: exercise.title,
+      description: _getScoreString(exercise),
+      detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
+      exercise: exercise,
+    }))
+    .sort(
+      (a, b) => b.exercise.dueDate!.getTime() - a.exercise.dueDate!.getTime()
+    );
+
+  const exerciseOptionsDue = exercises
+    .filter((exercise) => exercise.dueDate && exercise.dueDate >= now)
+    .map((exercise) => ({
+      kind: vscode.QuickPickItemKind.Default,
+      label: exercise.title,
+      description: _getScoreString(exercise),
+      detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
+      exercise: exercise,
+    }))
+    .sort(
+      (a, b) => a.exercise.dueDate!.getTime() - b.exercise.dueDate!.getTime()
+    );
+
+  const selectedExercise = await vscode.window.showQuickPick(
+    [
+      {
+        kind: vscode.QuickPickItemKind.Separator,
+        label: "Due coming up",
+        exercise: undefined,
+      },
+      ...exerciseOptionsDue,
+      {
+        kind: vscode.QuickPickItemKind.Separator,
+        label: "Past due date",
+        exercise: undefined,
+      },
+      ...exerciseOptionsPastDueDate,
+      {
+        kind: vscode.QuickPickItemKind.Separator,
+        label: "No due date",
+        exercise: undefined,
+      },
+      ...exerciseOptionsNoDueDate,
+    ],
+    {
+      placeHolder: "Select an exercise",
+    }
+  );
+  if (!selectedExercise || !selectedExercise.exercise) {
     throw new Error("No exercise was selected");
   }
 
