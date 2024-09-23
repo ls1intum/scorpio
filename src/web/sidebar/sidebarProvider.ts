@@ -6,6 +6,7 @@ import {
 } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
+import { settings } from "../shared/config";
 
 enum IncomingCommands {
   INFO = "info",
@@ -37,13 +38,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           e.displayedCourse.id,
           e.displayedExercise.id,
           showSubmitButton
-        );
-
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.displayedKey",
-          e.displayedCourse.shortName.toUpperCase() +
-            e.displayedExercise.shortName.toUpperCase()
         );
       }
     });
@@ -107,15 +101,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private initHTML() {
+    if (!this._view) {
+      return;
+    }
+
     this.htmlContent = artemisHTML;
+    const styleResetUri = this._view.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
+    );
+    const styleVSCodeUri = this._view.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
+    );
 
     // import JS File
-    const scriptUri = artemisJS;
-    this.htmlContent = this.htmlContent!.replace("scriptUri", scriptUri);
+    const script = artemisJS;
+    this.htmlContent = this.htmlContent!.replace("${script}", script);
+    this.htmlContent = this.htmlContent!.replace(
+      /\$\{base_url\}/g,
+      settings.base_url!
+    );
+    this.htmlContent = this.htmlContent!.replace(
+      /\$\{client_url\}/g,
+      settings.client_url!
+    );
+    this.htmlContent = this.htmlContent!.replace("${styleResetUri}", styleResetUri.toString());
+    this.htmlContent = this.htmlContent!.replace("${styleVSCodeUri}", styleVSCodeUri.toString());
 
-    if (this._view) {
-      this._view.webview.html = this.htmlContent;
-    }
+    this._view.webview.html = this.htmlContent;
   }
 
   private async initState() {
@@ -134,13 +146,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         state.displayedCourse.id,
         state.displayedExercise.id,
         showSubmitButton
-      );
-
-      vscode.commands.executeCommand(
-        "setContext",
-        "scorpio.displayedKey",
-        state.displayedCourse.shortName.toUpperCase() +
-          state.displayedExercise.shortName.toUpperCase()
       );
     }
   }

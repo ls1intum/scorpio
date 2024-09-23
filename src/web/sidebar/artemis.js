@@ -73,7 +73,7 @@ function changeState() {
 
 async function setCookie(tk) {
   try {
-    await fetch(`http://localhost:8080/api/public/re-key`, {
+    await fetch(`\${base_url}/api/public/re-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +113,7 @@ function deleteCookie() {
 async function fetchParticipation(courseId, exerciseId) {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/exercises/${exerciseId}/participation`,
+      `\${base_url}/api/exercises/${exerciseId}/participation`,
       {
         method: "GET",
         headers: {
@@ -137,7 +137,7 @@ async function fetchParticipation(courseId, exerciseId) {
     }
 
     document.getElementById("scoreButton").textContent = `${latestResult.score} %`;
-    document.getElementById("scoreIframe").src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
+    document.getElementById("scoreIframe").src = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
     document.getElementById("score").hidden = false;
 
     return participation;
@@ -156,7 +156,7 @@ async function setCurrentExercise(
   exerciseId,
   showSubmitButton = false
 ) {
-  let url = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+  let url = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
 
   const participation = await fetchParticipation(courseId, exerciseId);
   if (participation) {
