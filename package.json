@@ -105,12 +105,13 @@
       {
         "command": "scorpio.workspace.sync",
         "category": "Artemis",
-        "title": "Sync Problem Statement with Workspace"
+        "title": "Sync Problem Statement with Workspace",
+        "icon": "$(repo-sync)"
       },
       {
         "command": "scorpio.sidebar.refresh",
         "category": "Artemis",
-        "title": "Refresh the Artemis Window",
+        "title": "Refresh Artemis Window",
         "icon": "$(refresh)"
       }
     ],
@@ -126,17 +127,22 @@
         {
           "command": "scorpio.sidebar.refresh",
           "when": "view == artemis-sidebar",
-          "group": "navigation"
+          "group": "navigation@3"
         },
         {
           "command": "scorpio.workspace.submit",
           "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey in scorpio.repoKey)",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "scorpio.displayedExercise.clone",
           "when": "(view == artemis-sidebar) && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "scorpio.workspace.sync",
+          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "group": "navigation@1"
         }
       ]
     }

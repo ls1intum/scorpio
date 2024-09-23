@@ -1,5 +1,5 @@
 import { settings } from "../shared/config";
-import { Course } from "./course.model";
+import { Course, TotalScores } from "./course.model";
 
 export async function fetch_course_by_courseId(
   token: string,
@@ -34,8 +34,10 @@ export async function fetch_course_by_courseId(
     });
 }
 
-export async function fetch_all_courses(token: string): Promise<Course[]> {
-  const url = `${settings.base_url}/api/courses`;
+export async function fetch_all_courses(
+  token: string
+): Promise<{ course: Course; totalScores: TotalScores }[]> {
+  const url = `${settings.base_url}/api/courses/for-dashboard`;
 
   return fetch(url, {
     method: "GET",
@@ -53,7 +55,9 @@ export async function fetch_all_courses(token: string): Promise<Course[]> {
       }
 
       const data = await response.json();
-      return data as Course[];
+      return data.courses?.map((courseAndScore: any) => ({
+        course: courseAndScore.course, totalScores: courseAndScore.totalScores
+      })) ?? [] as { course: Course; totalScores: TotalScores }[];
     })
     .catch((error) => {
       if (error instanceof TypeError) {

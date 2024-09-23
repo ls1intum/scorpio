@@ -39,7 +39,7 @@ export async function fetch_programming_exercises_by_courseId(
   token: string,
   courseId: number
 ): Promise<Exercise[]> {
-  const url = `${settings.base_url}/api/courses/${courseId}/programming-exercises`;
+  const url = `${settings.base_url}/api/courses/${courseId}/for-dashboard`;
 
   return fetch(url, {
     method: "GET",
@@ -57,7 +57,13 @@ export async function fetch_programming_exercises_by_courseId(
 
       const data = await response.json();
 
-      return data as Exercise[];
+      return data.course.exercises?.filter((exercise: Exercise) => exercise.type == "programming")
+      .map((exercise : Exercise) => {
+        // date string is not cast correctly to interface Date before
+        exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
+        return exercise;
+      }) 
+      ?? [] as Exercise[];
     })
     .catch((error) => {
       if (error instanceof TypeError) {
