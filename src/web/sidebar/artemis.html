@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <title>Artemis</title> -->
+    <link href="${styleResetUri}" rel="stylesheet" />
+    <link href="${styleVSCodeUri}" rel="stylesheet" />
     <style>
       html,
       body {
@@ -37,39 +39,61 @@
       dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
       }
+      #buttonRow {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px;
+      }
+      #cloneButton {
+        width: 80px;
+      }
+      #scoreButton {
+        width: 80px;
+      }
       #closeScorePopup {
         position: absolute;
         top: 5px;
         right: 5px;
         z-index: 1;
         border: none;
+        width: 30px;
         background: transparent;
       }
     </style>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'unsafe-inline'; connect-src http://localhost:8080; frame-src http://localhost:9000;"
+      content="default-src 'none'; 
+      script-src 'unsafe-inline';
+      style-src-elem 'self' vscode-resource:; 
+      connect-src ${base_url}; 
+      frame-src ${client_url};"
     />
   </head>
   <body>
     <div id="problemStatement">
       <!-- TODO add clone button -->
-      <button id="cloneButton" onclick="cloneRepository()">Clone</button>
+      <div id="buttonRow">
+        <button id="cloneButton" onclick="cloneRepository()">Clone</button>
 
-      <div id="score">
-        <button id="scoreButton" onclick="scorePopup.showModal()">Score</button>
-        <dialog id="scorePopup">
-          <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
-          <iframe
-            id="scoreIframe"
-            sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"
-          ></iframe>
-        </dialog>
+        <div id="score">
+          <button id="scoreButton" onclick="scorePopup.showModal()">
+            Score
+          </button>
+          <dialog id="scorePopup">
+            <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
+            <iframe
+              id="scoreIframe"
+              referrerpolicy="origin-when-cross-origin"
+              sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
+            ></iframe>
+          </dialog>
+        </div>
       </div>
 
       <iframe
         id="problemStatementIframe"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-downloads"
+        referrerpolicy="origin-when-cross-origin"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
       ></iframe>
     </div>
 
@@ -82,7 +106,7 @@
     </div>
 
     <script>
-      scriptUri;
+      ${script}
     </script>
   </body>
 </html>

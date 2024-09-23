@@ -21,7 +21,7 @@ const SectionsToDisplay = {
 const originalFetch = window.fetch;
 
 // Custom fetch function to intercept and modify requests
-window.fetch = async function(input, init) {
+window.fetch = async function (input, init) {
   init = init || {};
   init.headers = {
     ...init.headers, // Keep the original headers
@@ -73,12 +73,11 @@ function changeState() {
 
 async function setCookie(tk) {
   try {
-    await fetch(`http://localhost:8080/api/public/re-key`, {
+    await fetch(`\${base_url}/api/public/re-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${tk}`,
-        // "X-ARTEMIS-CSRF": "Dennis ist schuld",
       },
     })
       .then((response) => {
@@ -103,23 +102,46 @@ async function setCookie(tk) {
   }
 }
 
-function deleteCookie() {
-  document.cookie = "";
-  // TODO make logout request to Artemis
-  token = undefined;
-  showSection(SectionsToDisplay.login);
+async function deleteCookie() {
+  try {
+    await fetch(`\${base_url}/api/public/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        postInfo("Logout successful!");
+        token = undefined;
+        document.cookie = "";
+        showSection(SectionsToDisplay.login);
+      })
+      .catch((error) => {
+        if (error instanceof TypeError) {
+          throw new Error(`Could not reach the server: ${error.message}`);
+        }
+
+        throw error;
+      });
+  } catch (error) {
+    postError(`Logout failed: ${error}`);
+    return;
+  }
 }
 
 async function fetchParticipation(courseId, exerciseId) {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/exercises/${exerciseId}/participation`,
+      `\${base_url}/api/exercises/${exerciseId}/participation`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-          // "X-ARTEMIS-CSRF": "Dennis ist schuld",
         },
       }
     );
@@ -131,13 +153,19 @@ async function fetchParticipation(courseId, exerciseId) {
     if (!participation || !participation.results) {
       return undefined;
     }
-    latestResult = participation.results.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))[0];
-    if(!latestResult){
+    latestResult = participation.results.sort(
+      (a, b) => new Date(b.completionDate) - new Date(a.completionDate)
+    )[0];
+    if (!latestResult) {
       return undefined;
     }
 
-    document.getElementById("scoreButton").textContent = `${latestResult.score} %`;
-    document.getElementById("scoreIframe").src = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
+    document.getElementById(
+      "scoreButton"
+    ).textContent = `${latestResult.score} %`;
+    document.getElementById(
+      "scoreIframe"
+    ).src = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
     document.getElementById("score").hidden = false;
 
     return participation;
@@ -156,7 +184,7 @@ async function setCurrentExercise(
   exerciseId,
   showSubmitButton = false
 ) {
-  let url = `http://localhost:9000/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+  let url = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
 
   const participation = await fetchParticipation(courseId, exerciseId);
   if (participation) {

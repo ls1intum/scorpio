@@ -89,7 +89,7 @@
         "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
         "title": "Clone Displayed Exercise",
-        "icon": "$(repo-clone)"
+        "icon": "$(repo-pull)"
       },
       {
         "command": "scorpio.workspace.submit",
@@ -130,12 +130,12 @@
         },
         {
           "command": "scorpio.workspace.submit",
-          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.repoKey == scorpio.displayedKey)",
+          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey in scorpio.repoKey)",
           "group": "navigation"
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey && scorpio.repoKey != scorpio.displayedKey)",
+          "when": "(view == artemis-sidebar) && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
           "group": "navigation"
         }
       ]

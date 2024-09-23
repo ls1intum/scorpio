@@ -190,19 +190,9 @@ function registerCommands(
               return;
             }
 
-            vscode.commands.executeCommand(
-              "setContext",
-              "scorpio.repoKey",
-              projectKey
-            );
             vscode.window.showInformationMessage(`Repo detected successfully.`);
           })
           .catch((e) => {
-            vscode.commands.executeCommand(
-              "setContext",
-              "scorpio.repoKey",
-              null
-            );
             _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
           });
       }
