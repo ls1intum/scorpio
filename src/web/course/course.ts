@@ -30,20 +30,29 @@ export async function build_course_options(): Promise<Course> {
   if (!session) {
     throw new NotAuthenticatedError();
   }
-  const coursesWithScore: {course: Course, totalScores: TotalScores}[] = await fetch_all_courses(session.accessToken);
-  console.log(coursesWithScore);
+  const coursesWithScore: { course: Course; totalScores: TotalScores }[] =
+    await fetch_all_courses(session.accessToken);
 
-  const courseOptions: CourseOption[] = coursesWithScore.map((courseWithScore) => ({
-    label: courseWithScore.course.title,
-    detail: (() => {
-      const nextExercise = (courseWithScore.course?.exercises ?? [])
-      .filter((exercise) => exercise.dueDate && new Date(exercise.dueDate) > new Date())
-      .sort((a, b) => a.dueDate! > b.dueDate! ? 1 : -1).at(0);
-      return nextExercise ? `Next exercise: ${nextExercise.title} due on ${new Date(nextExercise.dueDate!).toLocaleString()}` : "No upcoming exercise";
-    })(),
-    description: `${courseWithScore.totalScores.studentScores.absoluteScore}/${courseWithScore.totalScores.reachablePoints} Points`,
-    course: courseWithScore.course,
-  }));
+  const courseOptions: CourseOption[] = coursesWithScore
+    .filter((courseWithScore) => courseWithScore.course.exercises)
+    .map((courseWithScore) => ({
+      label: courseWithScore.course.title,
+      detail: (() => {
+        const nextExercise = courseWithScore.course?.exercises
+          ?.filter(
+            (exercise) =>
+              exercise.dueDate && exercise.dueDate > new Date()
+          )
+          .sort((a, b) => (a.dueDate! > b.dueDate! ? 1 : -1))
+          .at(0);
+        return nextExercise
+          ? `Next exercise: ${nextExercise.title} due on ${
+              nextExercise.dueDate!.toLocaleString()}`
+          : "No upcoming exercise";
+      })(),
+      description: `${courseWithScore.totalScores.studentScores.absoluteScore}/${courseWithScore.totalScores.reachablePoints} Points`,
+      course: courseWithScore.course,
+    }));
 
   const selectedCourse = await vscode.window.showQuickPick(courseOptions, {
     placeHolder: "Select a course",
