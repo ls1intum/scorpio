@@ -10,13 +10,20 @@ const OutgoingCommand = {
   login: "login",
   cloneRepository: "cloneRepository",
   submit: "submit",
+  setExercise: "setExercise",
 };
 
 const SectionsToDisplay = {
   login: "login",
+  courseSelection: "courseSelection",
   exerciseSelection: "exerciseSelection",
   problemStatement: "problemStatement",
 };
+
+let course = undefined;
+let exercise = undefined;
+let repoKey = undefined;
+let token = undefined;
 
 // Store the original fetch function
 const originalFetch = window.fetch;
@@ -47,9 +54,6 @@ function postError(text) {
   });
 }
 
-let courseIdExerciseId = undefined;
-let token = undefined;
-
 function showSection(section) {
   const sections = Object.values(SectionsToDisplay);
   for (const s of sections) {
@@ -65,26 +69,31 @@ function showSection(section) {
 function changeState() {
   if (!token) {
     showSection(SectionsToDisplay.login);
-  } else if (!courseIdExerciseId) {
+  } else if (!course) {
+    displayCourseOptions();
+    showSection(SectionsToDisplay.courseSelection);
+  } else if (!exercise) {
+    displayExerciseOptions();
     showSection(SectionsToDisplay.exerciseSelection);
   } else {
+    displayProblemStatement();
     showSection(SectionsToDisplay.problemStatement);
   }
 }
 
-async function loginOut() {
+function loginOut() {
   vscode.postMessage({
     command: OutgoingCommand.login,
   });
 }
 
-async function setCookie(tk) {
+async function setCookie(_token) {
   try {
     await fetch(`\${base_url}/api/public/re-key`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${tk}`,
+        Authorization: `Bearer ${_token}`,
       },
     })
       .then((response) => {
@@ -92,7 +101,7 @@ async function setCookie(tk) {
           throw new Error(response.statusText);
         }
 
-        token = tk;
+        token = _token;
         postInfo("Login successful!");
         changeState();
       })
@@ -125,7 +134,7 @@ async function deleteCookie() {
         postInfo("Logout successful!");
         token = undefined;
         document.cookie = "";
-        showSection(SectionsToDisplay.login);
+        changeState();
       })
       .catch((error) => {
         if (error instanceof TypeError) {
@@ -140,18 +149,119 @@ async function deleteCookie() {
   }
 }
 
-function displayCourseOptions(courses){
-  return courses
+/** returns all courses that have at least one programming exercise with their total scores
+ *  TODO combine with course.api.ts
+ * @see course.model.ts
+ * @returns Promise<{ course: Course; totalScores: TotalScores }[]>
+ */
+async function fetch_all_courses() {
+  const url = `\${base_url}/api/courses/for-dashboard`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status} message: ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+      return (
+        data.courses
+          ?.map((courseAndScore) => ({
+            course: courseAndScore.course,
+            totalScores: courseAndScore.totalScores,
+          }))
+          .map((courseWithScore) => {
+            courseWithScore.course.exercises = courseWithScore.course.exercises
+              ?.filter((exercise) => exercise.type == "programming")
+              .map((exercise) => {
+                exercise.dueDate = exercise.dueDate
+                  ? new Date(exercise.dueDate)
+                  : undefined;
+                return exercise;
+              });
+            return courseWithScore;
+          })
+          .filter(
+            (courseWithScore) =>
+              courseWithScore.course.exercises &&
+              courseWithScore.course.exercises.length > 0
+          ) ?? []
+      );
+    })
+    .catch((error) => {
+      if (error instanceof TypeError) {
+        throw new Error(`Could not reach the server: ${error.message}`);
+      }
+
+      throw error;
+    });
 }
 
-function displayExerciseOptions(exercises){
- return exercises
+function buildCourseItem(_courseWithScore, itemTemplate) {
+  const item = itemTemplate.cloneNode(true);
+  item.hidden = false;
+  item.textContent = _courseWithScore.course.title;
+  item.onclick = () => {
+    course = _courseWithScore.course;
+    changeState();
+  };
+
+  return item;
 }
 
-async function fetchParticipation(courseId, exerciseId) {
+async function displayCourseOptions() {
+  const coursesWithScores = await fetch_all_courses();
+  const courseGrid = document.getElementById("courseGrid");
+  courseGrid.innerHTML = "";
+  const courseItemTemplate = document.getElementById("courseItem");
+  coursesWithScores.forEach((courseWithScore) => {
+    const item = buildCourseItem(courseWithScore, courseItemTemplate);
+    courseGrid.appendChild(item);
+  });
+}
+
+function buildExerciseItem(_exercise, itemTemplate) {
+  const item = itemTemplate.cloneNode(true);
+  item.textContent = _exercise.title;
+  item.hidden = false;
+  item.onclick = () => {
+    // dont set exercise here, because postMessage will trigger a setExercise from plugin side
+
+    vscode.postMessage({
+      command: OutgoingCommand.setExercise,
+      text: JSON.stringify({
+        course: course,
+        exercise: _exercise,
+      }),
+    });
+  };
+
+  return item;
+}
+
+function displayExerciseOptions() {
+  const exerciseGrid = document.getElementById("exerciseGrid");
+  exerciseGrid.innerHTML = "";
+  const exerciseItemTemplate = document.getElementById("exerciseItem");
+  course.exercises.forEach((exercise) => {
+    const item = buildExerciseItem(exercise, exerciseItemTemplate);
+    exerciseGrid.appendChild(item);
+  });
+}
+
+async function fetchParticipation(_courseId, _exerciseId) {
   try {
     const response = await fetch(
-      `\${base_url}/api/exercises/${exerciseId}/participation`,
+      `\${base_url}/api/exercises/${_exerciseId}/participation`,
       {
         method: "GET",
         headers: {
@@ -180,7 +290,7 @@ async function fetchParticipation(courseId, exerciseId) {
     ).textContent = `${latestResult.score} %`;
     document.getElementById(
       "scoreIframe"
-    ).src = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
+    ).src = `\${client_url}/courses/${_courseId}/exercises/${_exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
     document.getElementById("score").hidden = false;
 
     return participation;
@@ -194,14 +304,10 @@ async function fetchParticipation(courseId, exerciseId) {
   }
 }
 
-async function setCurrentExercise(
-  courseId,
-  exerciseId,
-  showSubmitButton = false
-) {
-  let url = `\${client_url}/courses/${courseId}/exercises/${exerciseId}/problem-statement`;
+async function displayProblemStatement() {
+  let url = `\${client_url}/courses/${course.id}/exercises/${exercise.id}/problem-statement`;
 
-  const participation = await fetchParticipation(courseId, exerciseId);
+  const participation = await fetchParticipation(course.id, exercise.id);
   if (participation) {
     url += `/${participation.id}`;
   } else {
@@ -210,18 +316,15 @@ async function setCurrentExercise(
 
   document.getElementById("problemStatementIframe").src = url;
 
-  courseIdExerciseId = { courseId, exerciseId };
-
-  const button = document.getElementById("cloneButton");
-  if (showSubmitButton) {
+  const button = document.getElementById("cloneSubmitButton");
+  if (course.shortName.toUpperCase() + exercise.shortName.toUpperCase() === repoKey) {
     button.textContent = "Submit";
     button.onclick = submit;
   } else {
     button.textContent = "Clone";
     button.onclick = cloneRepository;
   }
-
-  changeState();
+  
 }
 
 function cloneRepository() {
@@ -237,7 +340,6 @@ function submit() {
 }
 
 const vscode = acquireVsCodeApi();
-
 changeState();
 
 // Listen for messages from the extension
@@ -250,15 +352,19 @@ window.addEventListener("message", (event) => {
     case IncomingCommand.logout:
       deleteCookie();
       break;
+    case IncomingCommand.back:
+      course = undefined;
+      exercise = undefined;
+      changeState();
+      break;
     case IncomingCommand.setExercise:
-      const messageText = message.text; // e.g., '{"courseId": 123, "exerciseId": 456, "showSubmitButton": true}'
+      const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
-        setCurrentExercise(
-          deserializedObject.courseId,
-          deserializedObject.exerciseId,
-          deserializedObject.showSubmitButton
-        );
+        course = deserializedObject.course;
+        exercise = deserializedObject.exercise;
+        repoKey = deserializedObject.repoKey;
+        changeState();
       } catch (error) {
         console.error("Failed to deserialize message text:", error);
         vscode.postMessage({

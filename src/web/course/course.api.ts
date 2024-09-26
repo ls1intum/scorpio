@@ -55,24 +55,31 @@ export async function fetch_all_courses(
       }
 
       const data = await response.json();
-      return data.courses
-        ?.map((courseAndScore: any) => ({
-          course: courseAndScore.course,
-          totalScores: courseAndScore.totalScores,
-        }))
-        .map(
-          (courseWithScore: { course: Course; totalScores: TotalScores }) => {
-            courseWithScore.course.exercises = courseWithScore.course.exercises
-              ?.filter((exercise) => exercise.type == "programming")
-              .map((exercise) => {
-                exercise.dueDate = exercise.dueDate
-                  ? new Date(exercise.dueDate!)
-                  : undefined;
-                return exercise;
-              });
+      return (
+        data.courses
+          ?.map((courseAndScore: any) => ({
+            course: courseAndScore.course,
+            totalScores: courseAndScore.totalScores,
+          }))
+          .map(
+            (courseWithScore: { course: Course; totalScores: TotalScores }) => {
+              courseWithScore.course.exercises =
+                courseWithScore.course.exercises
+                  ?.filter((exercise) => exercise.type == "programming")
+                  .map((exercise) => {
+                    exercise.dueDate = exercise.dueDate
+                      ? new Date(exercise.dueDate!)
+                      : undefined;
+                    return exercise;
+                  });
               return courseWithScore;
-          }
-        ) ?? [];
+            }
+          )
+          .filter(
+            (courseWithScore: { course: Course; totalScores: TotalScores }) =>
+              courseWithScore.course.exercises && courseWithScore.course.exercises.length > 0
+          ) ?? []
+      );
     })
     .catch((error) => {
       if (error instanceof TypeError) {

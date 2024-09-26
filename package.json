@@ -86,6 +86,12 @@
         "title": "Display Exercise"
       },
       {
+        "command": "scorpio.displayedExercise.remove",
+        "category": "Artemis",
+        "title": "Show Course Selection",
+        "icon": "$(arrow-left)"
+      },
+      {
         "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
         "title": "Clone Displayed Exercise",
@@ -130,6 +136,10 @@
           "when": "scorpio.authenticated"
         },
         {
+          "command": "scorpio.displayedExercise.remove",
+          "when": "false"
+        },
+        {
           "command": "scorpio.displayedExercise.clone",
           "when": "scorpio.authenticated && scorpio.displayedKey"
         },
@@ -157,21 +167,26 @@
         {
           "command": "scorpio.sidebar.refresh",
           "when": "view == artemis-sidebar",
-          "group": "navigation@3"
+          "group": "navigation@4"
         },
         {
           "command": "scorpio.workspace.submit",
           "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey in scorpio.repoKey)",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "scorpio.displayedExercise.clone",
           "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "scorpio.workspace.sync",
           "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "scorpio.displayedExercise.remove",
+          "when": "(view == artemis-sidebar) && scorpio.displayedKey",
           "group": "navigation@1"
         }
       ]

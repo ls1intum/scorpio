@@ -34,7 +34,6 @@ export async function build_course_options(): Promise<Course> {
     await fetch_all_courses(session.accessToken);
 
   const courseOptions: CourseOption[] = coursesWithScore
-    .filter((courseWithScore) => courseWithScore.course.exercises)
     .map((courseWithScore) => ({
       label: courseWithScore.course.title,
       detail: (() => {
