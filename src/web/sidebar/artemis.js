@@ -7,13 +7,14 @@ const IncomingCommand = {
 const OutgoingCommand = {
   info: "info",
   error: "error",
+  login: "login",
   cloneRepository: "cloneRepository",
   submit: "submit",
 };
 
 const SectionsToDisplay = {
   login: "login",
-  noExercise: "noExercise",
+  exerciseSelection: "exerciseSelection",
   problemStatement: "problemStatement",
 };
 
@@ -65,10 +66,16 @@ function changeState() {
   if (!token) {
     showSection(SectionsToDisplay.login);
   } else if (!courseIdExerciseId) {
-    showSection(SectionsToDisplay.noExercise);
+    showSection(SectionsToDisplay.exerciseSelection);
   } else {
     showSection(SectionsToDisplay.problemStatement);
   }
+}
+
+async function loginOut() {
+  vscode.postMessage({
+    command: OutgoingCommand.login,
+  });
 }
 
 async function setCookie(tk) {
@@ -131,6 +138,14 @@ async function deleteCookie() {
     postError(`Logout failed: ${error}`);
     return;
   }
+}
+
+function displayCourseOptions(courses){
+  return courses
+}
+
+function displayExerciseOptions(exercises){
+ return exercises
 }
 
 async function fetchParticipation(courseId, exerciseId) {
@@ -212,14 +227,12 @@ async function setCurrentExercise(
 function cloneRepository() {
   vscode.postMessage({
     command: OutgoingCommand.cloneRepository,
-    text: "",
   });
 }
 
 function submit() {
   vscode.postMessage({
     command: OutgoingCommand.submit,
-    text: "",
   });
 }
 

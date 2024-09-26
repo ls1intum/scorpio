@@ -11,6 +11,7 @@ import { settings } from "../shared/config";
 enum IncomingCommands {
   INFO = "info",
   ERROR = "error",
+  LOGIN = "login",
   CLONE_REPOSITORY = "cloneRepository",
   SUBMIT = "submit",
 }
@@ -88,6 +89,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           vscode.window.showErrorMessage(`Sidebar: ${data.text}`);
           break;
         }
+        case IncomingCommands.LOGIN: {
+          vscode.commands.executeCommand("scorpio.login");
+          break;
+        }
         case IncomingCommands.CLONE_REPOSITORY: {
           vscode.commands.executeCommand("scorpio.displayedExercise.clone");
           break;
@@ -106,9 +111,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     this.htmlContent = artemisHTML;
-    const styleResetUri = this._view.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
     const styleVSCodeUri = this._view.webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
@@ -124,7 +126,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       /\$\{client_url\}/g,
       settings.client_url!
     );
-    this.htmlContent = this.htmlContent!.replace("${styleResetUri}", styleResetUri.toString());
     this.htmlContent = this.htmlContent!.replace("${styleVSCodeUri}", styleVSCodeUri.toString());
 
     this._view.webview.html = this.htmlContent;

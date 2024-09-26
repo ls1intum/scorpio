@@ -73,12 +73,14 @@
       {
         "command": "scorpio.login",
         "category": "Artemis",
-        "title": "Login"
+        "title": "Login",
+        "when": "!scorpio.authenticated"
       },
       {
         "command": "scorpio.logout",
         "category": "Artemis",
-        "title": "Logout"
+        "title": "Logout",
+        "when": "scorpio.authenticated"
       },
       {
         "command": "scorpio.displayExercise",
@@ -89,6 +91,7 @@
         "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
         "title": "Clone Displayed Exercise",
+        "when": "scorpio.displayedKey",
         "icon": "$(repo-pull)"
       },
       {
@@ -106,6 +109,7 @@
         "command": "scorpio.workspace.sync",
         "category": "Artemis",
         "title": "Sync Problem Statement with Workspace",
+        "when": "scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey",
         "icon": "$(repo-sync)"
       },
       {

@@ -186,7 +186,7 @@ function registerCommands(
       async () => {
         detectRepoCourseAndExercise()
           .then((projectKey: string | undefined) => {
-            if(!projectKey){
+            if (!projectKey) {
               return;
             }
 
