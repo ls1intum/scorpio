@@ -1,21 +1,11 @@
-import {
-  AuthenticationProvider,
-  AuthenticationProviderAuthenticationSessionsChangeEvent,
-  AuthenticationSession,
-  Disposable,
-  Event,
-  EventEmitter,
-  SecretStorage,
-  authentication,
-  window,
-} from "vscode";
+import * as vscode from "vscode";
 import { authenticateToken } from "./authentication_api";
 
 export const AUTH_ID = "artemis";
 const AUTH_NAME = `Credentials`; // what is displayed on the profile button
 const SESSIONS_SECRET_KEY = `${AUTH_ID}.sessions`;
 
-class ArtemisSession implements AuthenticationSession {
+class ArtemisSession implements vscode.AuthenticationSession {
   id: string = AUTH_ID;
   accessToken: string;
   account: { label: string; id: string };
@@ -32,23 +22,23 @@ class ArtemisSession implements AuthenticationSession {
 }
 
 export class ArtemisAuthenticationProvider
-  implements AuthenticationProvider, Disposable
+  implements vscode.AuthenticationProvider, vscode.Disposable
 {
-  private readonly _disposable: Disposable | undefined;
+  private readonly _disposable: vscode.Disposable | undefined;
   private sessionPromise: Promise<ArtemisSession | undefined>;
 
-  constructor(private readonly secretStorage: SecretStorage) {
+  constructor(private readonly secretStorage: vscode.SecretStorage) {
     this.sessionPromise = this.getSessionFromStorage();
 
-    this._disposable = Disposable.from(
-      authentication.registerAuthenticationProvider(AUTH_ID, AUTH_NAME, this),
+    this._disposable = vscode.Disposable.from(
+      vscode.authentication.registerAuthenticationProvider(AUTH_ID, AUTH_NAME, this),
       secretStorage.onDidChange(() => this.checkForUpdates())
     );
   }
 
   public onAuthSessionsChange =
-    new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
-  get onDidChangeSessions(): Event<AuthenticationProviderAuthenticationSessionsChangeEvent> {
+    new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>();
+  get onDidChangeSessions(): vscode.Event<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent> {
     return this.onAuthSessionsChange.event;
   }
 
@@ -59,7 +49,7 @@ export class ArtemisAuthenticationProvider
    */
   public async getSessions(
     scopes: string[] = []
-  ): Promise<AuthenticationSession[]> {
+  ): Promise<vscode.AuthenticationSession[]> {
     const session = await this.getSessionFromStorage();
     return session ? [session] : [];
   }
@@ -77,8 +67,8 @@ export class ArtemisAuthenticationProvider
    * @param scopes
    * @returns
    */
-  public async createSession(scopes: string[]): Promise<AuthenticationSession> {
-    const username = await window.showInputBox({
+  public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
+    const username = await vscode.window.showInputBox({
       ignoreFocusOut: true,
       prompt: "Enter your Artemis username",
     });
@@ -86,7 +76,7 @@ export class ArtemisAuthenticationProvider
       throw new Error("No username provided");
     }
 
-    const password = await window.showInputBox({
+    const password = await vscode.window.showInputBox({
       ignoreFocusOut: true,
       prompt: "Enter your Artemis password",
       password: true,
@@ -107,6 +97,11 @@ export class ArtemisAuthenticationProvider
       JSON.stringify(session)
     );
 
+    vscode.commands.executeCommand(
+      "setContext",
+      "scorpio.authenticated",
+      true
+    );
     this.onAuthSessionsChange.fire({
       added: [session],
       removed: [],
@@ -123,6 +118,12 @@ export class ArtemisAuthenticationProvider
       return;
     }
     await this.secretStorage.delete(SESSIONS_SECRET_KEY);
+
+    vscode.commands.executeCommand(
+      "setContext",
+      "scorpio.authenticated",
+      false
+    );
     this.onAuthSessionsChange.fire({
       added: [],
       removed: [session],
@@ -133,8 +134,8 @@ export class ArtemisAuthenticationProvider
   // This is a crucial function that handles whether or not the token has changed in
   // a different window of VS Code and sends the necessary event if it has.
   private async checkForUpdates(): Promise<void> {
-    const added: AuthenticationSession[] = [];
-    const removed: AuthenticationSession[] = [];
+    const added: vscode.AuthenticationSession[] = [];
+    const removed: vscode.AuthenticationSession[] = [];
 
     const previousSession = await this.sessionPromise;
     this.sessionPromise = this.getSessionFromStorage();

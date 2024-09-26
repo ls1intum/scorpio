@@ -3,8 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <title>Artemis</title> -->
-    <link href="${styleResetUri}" rel="stylesheet" />
     <link href="${styleVSCodeUri}" rel="stylesheet" />
     <style>
       html,
@@ -13,6 +11,14 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+      }
+      #login {
+        margin: 20px;
+        max-width: 500px;
+      }
+      #loginButton {
+        max-width: 400px;
+        margin-top: 10px;
       }
       #problemStatement {
         height: 93%;
@@ -70,6 +76,18 @@
     />
   </head>
   <body>
+    <div id="login">
+      <p>
+        In order to use the Artemis Scorpio Plugin, you need to be authenticated
+        with your Artemis credentials
+      </p>
+      <button id="loginButton" onclick="loginOut()">Login</button>
+    </div>
+
+    <div id="exerciseSelection">
+      <p>Please select a course and exercise</p>
+    </div>
+
     <div id="problemStatement">
       <!-- TODO add clone button -->
       <div id="buttonRow">
@@ -95,14 +113,6 @@
         referrerpolicy="origin-when-cross-origin"
         sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
       ></iframe>
-    </div>
-
-    <div id="noExercise">
-      <p>Please select a course and exercise</p>
-    </div>
-
-    <div id="login">
-      <p>Please login</p>
     </div>
 
     <script>
