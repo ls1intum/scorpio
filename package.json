@@ -73,14 +73,12 @@
       {
         "command": "scorpio.login",
         "category": "Artemis",
-        "title": "Login",
-        "when": "!scorpio.authenticated"
+        "title": "Login"
       },
       {
         "command": "scorpio.logout",
         "category": "Artemis",
-        "title": "Logout",
-        "when": "scorpio.authenticated"
+        "title": "Logout"
       },
       {
         "command": "scorpio.displayExercise",
@@ -88,10 +86,15 @@
         "title": "Display Exercise"
       },
       {
+        "command": "scorpio.displayedExercise.remove",
+        "category": "Artemis",
+        "title": "Show Course Selection",
+        "icon": "$(arrow-left)"
+      },
+      {
         "command": "scorpio.displayedExercise.clone",
         "category": "Artemis",
         "title": "Clone Displayed Exercise",
-        "when": "scorpio.displayedKey",
         "icon": "$(repo-pull)"
       },
       {
@@ -109,7 +112,6 @@
         "command": "scorpio.workspace.sync",
         "category": "Artemis",
         "title": "Sync Problem Statement with Workspace",
-        "when": "scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey",
         "icon": "$(repo-sync)"
       },
       {
@@ -120,6 +122,40 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "scorpio.login",
+          "when": "!scorpio.authenticated"
+        },
+        {
+          "command": "scorpio.logout",
+          "when": "scorpio.authenticated"
+        },
+        {
+          "command": "scorpio.displayExercise",
+          "when": "scorpio.authenticated"
+        },
+        {
+          "command": "scorpio.displayedExercise.remove",
+          "when": "false"
+        },
+        {
+          "command": "scorpio.displayedExercise.clone",
+          "when": "scorpio.authenticated && scorpio.displayedKey"
+        },
+        {
+          "command": "scorpio.workspace.submit",
+          "when": "scorpio.repoKey"
+        },
+        {
+          "command": "scorpio.workspace.detectRepo",
+          "when": "scorpio.authenticated"
+        },
+        {
+          "command": "scorpio.workspace.sync",
+          "when": "scorpio.authenticated && scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey"
+        }
+      ],
       "editor/title": [
         {
           "command": "scorpio.workspace.submit",
@@ -131,21 +167,26 @@
         {
           "command": "scorpio.sidebar.refresh",
           "when": "view == artemis-sidebar",
-          "group": "navigation@3"
+          "group": "navigation@4"
         },
         {
           "command": "scorpio.workspace.submit",
           "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey in scorpio.repoKey)",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "(view == artemis-sidebar) && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
-          "group": "navigation@2"
+          "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "group": "navigation@3"
         },
         {
           "command": "scorpio.workspace.sync",
-          "when": "(view == artemis-sidebar) && (scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.repoKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "scorpio.displayedExercise.remove",
+          "when": "(view == artemis-sidebar) && scorpio.displayedKey",
           "group": "navigation@1"
         }
       ]

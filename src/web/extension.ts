@@ -27,9 +27,19 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "scorpio" is now active!');
 
   const authenticationProvider = initAuthentication(context);
-  vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
+  (async () => {
+    if (
+      await vscode.authentication.getSession(AUTH_ID, [], {
+        createIfNone: false,
+      })
+    ) {
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.authenticated",
+        true
+      );
+    }
+  })();
 
   const sidebar = initSidebar(context, authenticationProvider);
 
@@ -143,6 +153,17 @@ function registerCommands(
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to display Exercise");
       }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.displayedExercise.remove",  () => {
+      set_state({
+        displayedCourse: undefined,
+        displayedExercise: undefined,
+        repoCourse: state.repoCourse,
+        repoExercise: state.repoExercise,
+      });
     })
   );
 

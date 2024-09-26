@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { onStateChange, state } from "../shared/state";
+import { onStateChange, set_state, state } from "../shared/state";
 import {
   ArtemisAuthenticationProvider,
   AUTH_ID,
@@ -7,6 +7,8 @@ import {
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
 import { settings } from "../shared/config";
+import { Exercise } from "../exercise/exercise.model";
+import { Course } from "../course/course.model";
 
 enum IncomingCommands {
   INFO = "info",
@@ -14,6 +16,7 @@ enum IncomingCommands {
   LOGIN = "login",
   CLONE_REPOSITORY = "cloneRepository",
   SUBMIT = "submit",
+  SET_EXERCISE = "setExercise",
 }
 
 enum OutgoingCommands {
@@ -31,16 +34,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
   ) {
     onStateChange.event((e) => {
-      if (e.displayedCourse && e.displayedExercise) {
-        const showSubmitButton =
-          e.displayedCourse.id == e.repoCourse?.id &&
-          e.displayedExercise.id == e.repoExercise?.id;
-        this.displayExercise(
-          e.displayedCourse.id,
-          e.displayedExercise.id,
-          showSubmitButton
-        );
-      }
+      const repoKey =
+        e.repoCourse && e.repoExercise
+          ? e.repoCourse.shortName.toUpperCase() +
+            e.repoExercise.shortName.toUpperCase()
+          : undefined;
+      this.displayExercise(e.displayedCourse, e.displayedExercise, repoKey);
     });
 
     onAuthSessionsChange.event(async ({ added, removed, changed }) => {
@@ -101,6 +100,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           vscode.commands.executeCommand("scorpio.workspace.submit");
           break;
         }
+        case IncomingCommands.SET_EXERCISE: {
+          if (!data.text) {
+            return;
+          }
+          const { course, exercise } = JSON.parse(data.text);
+          set_state({
+            displayedCourse: course,
+            displayedExercise: exercise,
+            repoCourse: state.repoCourse,
+            repoExercise: state.repoExercise,
+          });
+          break;
+        }
       }
     });
   }
@@ -126,7 +138,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       /\$\{client_url\}/g,
       settings.client_url!
     );
-    this.htmlContent = this.htmlContent!.replace("${styleVSCodeUri}", styleVSCodeUri.toString());
+    this.htmlContent = this.htmlContent!.replace(
+      "${styleVSCodeUri}",
+      styleVSCodeUri.toString()
+    );
 
     this._view.webview.html = this.htmlContent;
   }
@@ -139,16 +154,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.login(session);
     }
 
-    if (state.displayedCourse && state.displayedExercise) {
-      const showSubmitButton =
-        state.displayedCourse.id == state.repoCourse?.id &&
-        state.displayedExercise.id == state.repoExercise?.id;
-      this.displayExercise(
-        state.displayedCourse.id,
-        state.displayedExercise.id,
-        showSubmitButton
-      );
-    }
+    const repoKey =
+      state.repoCourse && state.repoExercise
+        ? state.repoCourse.shortName.toUpperCase() +
+          state.repoExercise.shortName.toUpperCase()
+        : undefined;
+    this.displayExercise(
+      state.displayedCourse,
+      state.displayedExercise,
+      repoKey
+    );
   }
 
   private async login(session: vscode.AuthenticationSession) {
@@ -165,13 +180,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private async displayExercise(
-    courseId: number,
-    exerciseId: number,
-    showSubmitButton: boolean
+    course: Course | undefined,
+    exercise: Exercise | undefined,
+    repoKey: string | undefined
   ) {
     this._view?.webview.postMessage({
       command: OutgoingCommands.SET_EXERCISE,
-      text: `{"courseId": ${courseId}, "exerciseId": ${exerciseId}, "showSubmitButton": ${showSubmitButton}}`,
+      text: JSON.stringify({
+        course: course,
+        exercise: exercise,
+        repoKey: repoKey,
+      }),
     });
   }
 

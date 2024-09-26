@@ -20,6 +20,14 @@
         max-width: 400px;
         margin-top: 10px;
       }
+      #courseItem{
+        margin: 5px;
+        max-width: 100px;
+      }
+      #exerciseItem{
+        margin: 5px;
+        max-width: 100px;
+      }
       #problemStatement {
         height: 93%;
       }
@@ -50,7 +58,7 @@
         justify-content: space-between;
         margin: 5px;
       }
-      #cloneButton {
+      #cloneSubmitButton {
         width: 80px;
       }
       #scoreButton {
@@ -84,14 +92,29 @@
       <button id="loginButton" onclick="loginOut()">Login</button>
     </div>
 
+    <div id="courseSelection">
+      <p>Please select a course</p>
+      <button id="courseItem" hidden="true">
+
+      </button>
+      <div id="courseGrid">
+
+      </div>
+    </div>
     <div id="exerciseSelection">
-      <p>Please select a course and exercise</p>
+      <p>Please select an exercise</p>
+      <button id="exerciseItem" hidden="true">
+
+      </button>
+      <div id="exerciseGrid"></div>
+
+      </div>
     </div>
 
     <div id="problemStatement">
       <!-- TODO add clone button -->
       <div id="buttonRow">
-        <button id="cloneButton" onclick="cloneRepository()">Clone</button>
+        <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
 
         <div id="score">
           <button id="scoreButton" onclick="scorePopup.showModal()">

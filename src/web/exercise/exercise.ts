@@ -40,17 +40,10 @@ function _getScoreString(exercise: Exercise): string {
 export async function build_exercise_options(
   course: Course
 ): Promise<Exercise> {
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
-
-  if (!session) {
-    throw new NotAuthenticatedError();
+  const exercises = course.exercises;
+  if (!exercises) {
+    throw new Error("No exercises found in the course");
   }
-  const exercises = await fetch_programming_exercises_by_courseId(
-    session.accessToken,
-    course.id
-  );
 
   const now = new Date();
   console.log(now);
