@@ -46,7 +46,6 @@ export async function build_exercise_options(
   }
 
   const now = new Date();
-  console.log(now);
   const exerciseOptionsNoDueDate = exercises
     .filter((exercise) => !exercise.dueDate)
     .map((exercise) => ({
