@@ -89,29 +89,30 @@ function loginOut() {
 
 async function setCookie(_token) {
   try {
-    await fetch(`\${base_url}/api/public/re-key`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${_token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
+  await fetch(`\${base_url}/api/public/re-key`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${_token}`,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-        token = _token;
-        postInfo("Login successful!");
-        changeState();
-      })
-      .catch((error) => {
+      token = _token;
+      postInfo("Login successful!");
+      changeState();
+    })
+    .catch((error) => {
         if (error instanceof TypeError) {
           throw new Error(`Could not reach the server: ${error.message}`);
         }
 
-        throw error;
-      });
+      throw error;
+    });
   } catch (error) {
     postError(`Login failed: ${error}`);
     return;
@@ -122,6 +123,7 @@ async function deleteCookie() {
   try {
     await fetch(`\${base_url}/api/public/logout`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -133,6 +135,9 @@ async function deleteCookie() {
 
         postInfo("Logout successful!");
         token = undefined;
+        course = undefined;
+        exercise = undefined;
+        repoKey = undefined;
         document.cookie = "";
         changeState();
       })
@@ -317,14 +322,16 @@ async function displayProblemStatement() {
   document.getElementById("problemStatementIframe").src = url;
 
   const button = document.getElementById("cloneSubmitButton");
-  if (course.shortName.toUpperCase() + exercise.shortName.toUpperCase() === repoKey) {
+  if (
+    course.shortName.toUpperCase() + exercise.shortName.toUpperCase() ===
+    repoKey
+  ) {
     button.textContent = "Submit";
     button.onclick = submit;
   } else {
     button.textContent = "Clone";
     button.onclick = cloneRepository;
   }
-  
 }
 
 function cloneRepository() {
