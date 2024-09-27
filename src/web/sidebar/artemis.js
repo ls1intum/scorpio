@@ -142,9 +142,6 @@ async function deleteCookie() {
 
         postInfo("Logout successful!");
         token = undefined;
-        course = undefined;
-        exercise = undefined;
-        repoKey = undefined;
         document.cookie = "";
         changeState();
       })

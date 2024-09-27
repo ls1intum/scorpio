@@ -97,11 +97,6 @@ export class ArtemisAuthenticationProvider
       JSON.stringify(session)
     );
 
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.authenticated",
-      true
-    );
     this.onAuthSessionsChange.fire({
       added: [session],
       removed: [],
@@ -119,11 +114,6 @@ export class ArtemisAuthenticationProvider
     }
     await this.secretStorage.delete(SESSIONS_SECRET_KEY);
 
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.authenticated",
-      false
-    );
     this.onAuthSessionsChange.fire({
       added: [],
       removed: [session],

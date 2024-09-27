@@ -110,11 +110,18 @@ export async function detectRepoCourseAndExercise(): Promise<
 > {
   if (currentRepo) {
     console.log("Repo already detected");
-    return;
+    return undefined;
   }
 
-  const repoAndRemote = getArtemisRepo();
-  if (!repoAndRemote || !repoAndRemote.repo || !repoAndRemote.remote) {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
+  if (!session) {
+    throw new NotAuthenticatedError();
+  }
+
+  const repoAndRemote = getArtemisRepo(session.account.id);
+  if (!repoAndRemote) {
     currentRepo = undefined;
     set_state({
       repoCourse: undefined,
@@ -122,22 +129,15 @@ export async function detectRepoCourseAndExercise(): Promise<
       displayedCourse: state.displayedCourse,
       displayedExercise: state.displayedExercise,
     });
-    throw new Error("No Artemis repository found");
-  }
-
-  const token = (
-    await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: false,
-    })
-  )?.accessToken;
-  if (!token) {
-    throw new NotAuthenticatedError();
+    
+    console.log("No Artemis repository found");
+    return undefined;
   }
 
   const projectKey = getProjectKeyFromRepoUrl(repoAndRemote.remote.fetchUrl!);
 
   const course_exercise: { course: Course; exercise: Exercise } =
-    await fetch_course_exercise_projectKey(token, projectKey);
+    await fetch_course_exercise_projectKey(session.accessToken, projectKey);
 
   currentRepo = repoAndRemote.repo;
   set_state({
@@ -150,7 +150,9 @@ export async function detectRepoCourseAndExercise(): Promise<
   return projectKey;
 }
 
-function getArtemisRepo(): { repo: Repository; remote: Remote } | undefined {
+function getArtemisRepo(
+  username: string
+): { repo: Repository; remote: Remote } | undefined {
   if (!gitAPI) {
     initGitExtension();
   }
@@ -163,8 +165,11 @@ function getArtemisRepo(): { repo: Repository; remote: Remote } | undefined {
     for (const remote of repo.state.remotes) {
       if (remote.fetchUrl) {
         // check that artemis is really the repo host
+        const remoteUrl = new URL(remote.fetchUrl);
+        const artemisUrl = new URL(settings.base_url);
         if (
-          new URL(remote.fetchUrl).host !== new URL(settings.base_url!).host
+          remoteUrl.host !== artemisUrl.host ||
+          remoteUrl.username !== username
         ) {
           continue;
         }
@@ -174,7 +179,6 @@ function getArtemisRepo(): { repo: Repository; remote: Remote } | undefined {
     }
   }
 
-  console.log("No Artemis repository URL found");
   return undefined;
 }
 

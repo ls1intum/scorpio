@@ -64,9 +64,29 @@ function initAuthentication(
   context.subscriptions.push(authenticationProvider);
 
   authenticationProvider.onAuthSessionsChange.event(
-    async ({ added, removed, changed }) => {
+    ({ added, removed, changed }) => {
       if (added && added.length > 0) {
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.authenticated",
+          true
+        );
         vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+        return;
+      }
+
+      if (removed && removed.length > 0) {
+        vscode.commands.executeCommand(
+          "setContext",
+          "scorpio.authenticated",
+          false
+        );
+        set_state({
+          displayedCourse: undefined,
+          displayedExercise: undefined,
+          repoCourse: undefined,
+          repoExercise: undefined,
+        });
         return;
       }
     }
