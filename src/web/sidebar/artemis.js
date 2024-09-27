@@ -69,16 +69,21 @@ function showSection(section) {
 function changeState() {
   if (!token) {
     showSection(SectionsToDisplay.login);
-  } else if (!course) {
+    return;
+  }
+  if (!course) {
     displayCourseOptions();
     showSection(SectionsToDisplay.courseSelection);
-  } else if (!exercise) {
+    return;
+  }
+  if (!exercise) {
     displayExerciseOptions();
     showSection(SectionsToDisplay.exerciseSelection);
-  } else {
-    displayProblemStatement();
-    showSection(SectionsToDisplay.problemStatement);
+    return;
   }
+
+  displayProblemStatement();
+  showSection(SectionsToDisplay.problemStatement);
 }
 
 function loginOut() {
@@ -88,30 +93,33 @@ function loginOut() {
 }
 
 async function setCookie(_token) {
+  console.log("before set", token);
+  console.log("Setting cookie");
   try {
-    await fetch(`\${base_url}/api/public/re-key`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${_token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
+  await fetch(`\${base_url}/api/public/re-key`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${_token}`,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-        token = _token;
-        postInfo("Login successful!");
-        changeState();
-      })
-      .catch((error) => {
+      token = _token;
+      postInfo("Login successful!");
+      changeState();
+    })
+    .catch((error) => {
         if (error instanceof TypeError) {
           throw new Error(`Could not reach the server: ${error.message}`);
         }
 
-        throw error;
-      });
+      throw error;
+    });
   } catch (error) {
     postError(`Login failed: ${error}`);
     return;
@@ -122,6 +130,7 @@ async function deleteCookie() {
   try {
     await fetch(`\${base_url}/api/public/logout`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -133,6 +142,9 @@ async function deleteCookie() {
 
         postInfo("Logout successful!");
         token = undefined;
+        course = undefined;
+        exercise = undefined;
+        repoKey = undefined;
         document.cookie = "";
         changeState();
       })
@@ -275,24 +287,6 @@ async function fetchParticipation(_courseId, _exerciseId) {
     }
 
     participation = await response.json();
-    if (!participation || !participation.results) {
-      return undefined;
-    }
-    latestResult = participation.results.sort(
-      (a, b) => new Date(b.completionDate) - new Date(a.completionDate)
-    )[0];
-    if (!latestResult) {
-      return undefined;
-    }
-
-    document.getElementById(
-      "scoreButton"
-    ).textContent = `${latestResult.score} %`;
-    document.getElementById(
-      "scoreIframe"
-    ).src = `\${client_url}/courses/${_courseId}/exercises/${_exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
-    document.getElementById("score").hidden = false;
-
     return participation;
   } catch (error) {
     if (error instanceof TypeError) {
@@ -304,11 +298,32 @@ async function fetchParticipation(_courseId, _exerciseId) {
   }
 }
 
+function displayScore(_courseId, _exerciseId, participation) {
+  if (!participation || !participation.results) {
+    return false;
+  }
+  latestResult = participation.results.sort(
+    (a, b) => new Date(b.completionDate) - new Date(a.completionDate)
+  )[0];
+  if (!latestResult) {
+    return false;
+  }
+
+  document.getElementById(
+    "scoreButton"
+  ).textContent = `${latestResult.score} %`;
+  document.getElementById(
+    "scoreIframe"
+  ).src = `\${client_url}/courses/${_courseId}/exercises/${_exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
+  document.getElementById("score").hidden = false;
+  return true;
+}
+
 async function displayProblemStatement() {
   let url = `\${client_url}/courses/${course.id}/exercises/${exercise.id}/problem-statement`;
 
   const participation = await fetchParticipation(course.id, exercise.id);
-  if (participation) {
+  if (displayScore(course.id, exercise.id, participation)) {
     url += `/${participation.id}`;
   } else {
     document.getElementById("score").hidden = true;
@@ -317,14 +332,16 @@ async function displayProblemStatement() {
   document.getElementById("problemStatementIframe").src = url;
 
   const button = document.getElementById("cloneSubmitButton");
-  if (course.shortName.toUpperCase() + exercise.shortName.toUpperCase() === repoKey) {
+  if (
+    course.shortName.toUpperCase() + exercise.shortName.toUpperCase() ===
+    repoKey
+  ) {
     button.textContent = "Submit";
     button.onclick = submit;
   } else {
     button.textContent = "Clone";
     button.onclick = cloneRepository;
   }
-  
 }
 
 function cloneRepository() {

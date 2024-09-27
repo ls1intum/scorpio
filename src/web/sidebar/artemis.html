@@ -38,21 +38,6 @@
         margin: 0;
         display: block;
       }
-      dialog {
-        width: 85%;
-        height: 85%;
-        border: none;
-        border-radius: 5px;
-        padding: 0;
-        margin: 5px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-      dialog::backdrop {
-        background-color: rgba(0, 0, 0, 0.5);
-      }
       #buttonRow {
         display: flex;
         justify-content: space-between;
@@ -72,6 +57,21 @@
         border: none;
         width: 30px;
         background: transparent;
+      }
+      dialog {
+        width: 85%;
+        height: 85%;
+        border: none;
+        border-radius: 5px;
+        padding: 0;
+        margin: 5px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
       }
     </style>
     <meta
@@ -112,7 +112,6 @@
     </div>
 
     <div id="problemStatement">
-      <!-- TODO add clone button -->
       <div id="buttonRow">
         <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
 
@@ -125,8 +124,8 @@
             <iframe
               id="scoreIframe"
               referrerpolicy="origin-when-cross-origin"
-              sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
-            ></iframe>
+              sandbox="allow-scripts allow-same-origin"
+              ></iframe>
           </dialog>
         </div>
       </div>
@@ -134,7 +133,7 @@
       <iframe
         id="problemStatementIframe"
         referrerpolicy="origin-when-cross-origin"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-modals"
+        sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
       ></iframe>
     </div>
 

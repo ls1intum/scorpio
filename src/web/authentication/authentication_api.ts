@@ -21,7 +21,7 @@ export async function authenticateToken(
     .then((response) => {
       if (!response.ok) {
         throw new Error(
-          `HTTP error with status: ${response.status} ${response.body}`
+          `HTTP error with status: ${response.status} ${response.statusText}`
         );
       }
       return response.text();
