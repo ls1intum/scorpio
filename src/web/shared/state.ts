@@ -19,13 +19,14 @@ export var state: State = {
   repoExercise: undefined,
 };
 
-/// set the state - only changes the states value if it is not undefined
 export const set_state = (changes: State) => {
-  // if nothing is displayed at the moment, display the repo course and exercise
+  // nothing is displayed, but repo was detected
   if (
     !state.displayedCourse &&
+    !changes.displayedCourse &&
     changes.repoCourse &&
     !state.displayedExercise &&
+    !changes.displayedExercise &&
     changes.repoExercise
   ) {
     changes.displayedCourse = changes.repoCourse;
