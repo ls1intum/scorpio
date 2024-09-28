@@ -382,3 +382,92 @@ window.addEventListener("message", (event) => {
       break;
   }
 });
+
+(async () => {
+  const normal_speed = 3; // (pixels per frame)
+  let speed = normal_speed;
+  let posX = 0;
+  let posY = 0;
+  let clockwise = 1;
+  let edge = "bottom";
+
+  const leftMax = 0;
+  const rightMax = window.innerWidth - pet.width;
+  const topMax = window.innerHeight - pet.width;
+  const bottomMax = 0;
+
+  function move() {
+    if(speed === 0) {
+      return;
+    }
+    switch (edge) {
+      case "bottom":
+        posX += speed * clockwise;
+        if (posX > rightMax) {
+          edge = "right";
+          posX = rightMax;
+          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+        } else if (posX < leftMax) {
+          edge = "left";
+          posX = leftMax;
+          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "right":
+        posY += speed * clockwise;
+        if (posY > topMax) {
+          edge = "top";
+          posY = topMax;
+          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+        } else if (posY < bottomMax) {
+          edge = "bottom";
+          posY = bottomMax;
+          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "top":
+        posX -= speed * clockwise;
+        if (posX < leftMax) {
+          edge = "left";
+          posX = leftMax;
+          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+        } else if (posX > rightMax) {
+          edge = "right";
+          posX = rightMax;
+          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "left":
+        posY -= speed * clockwise;
+        if (posY < bottomMax) {
+          edge = "bottom";
+          posY = bottomMax;
+          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+        } else if (posY > topMax) {
+          edge = "top";
+          posY = topMax;
+          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+        }
+        break;
+    }
+
+    pet.style.left = `${posX}px`;
+    pet.style.bottom = `${posY}px`;
+  }
+
+  function randomDirectionChange() {
+    const random = Math.random();
+    if (random < 0.33) {
+      clockwise *= -1;
+      speed = normal_speed;
+      pet.style.transform = `${pet.style.transform} scaleX(${-1})`;
+    } else if (random < 0.66) {
+      speed = 0;
+    } else {
+      speed = normal_speed;
+    }
+  }
+
+  setInterval(move, 20);
+  setInterval(randomDirectionChange, Math.random() * (3000 - 1000) + 1000);
+})();
