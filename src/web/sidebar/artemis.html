@@ -73,6 +73,21 @@
       dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
       }
+      #pet{
+        position: absolute;
+        width: 30px;
+        bottom: 0;
+        left: 0;
+        z-index: 10;
+        animation: move 16s linear infinite;
+      }
+      @keyframes move {
+        0% { left: 0; transform: scaleX(1); }
+        47% { left: calc(100% - 35px); transform: scaleX(1); }
+        50% { left: calc(100% - 35px); transform: scaleX(-1); }
+        97% { left: 0; transform: scaleX(-1); }
+        100% { left: 0; transform: scaleX(1); }
+      }
     </style>
     <meta
       http-equiv="Content-Security-Policy"
@@ -80,7 +95,9 @@
       script-src 'unsafe-inline';
       style-src-elem 'self' vscode-resource:; 
       connect-src ${base_url}; 
-      frame-src ${client_url};"
+      frame-src ${client_url};
+      img-src 'self' vscode-resource:; 
+      "
     />
   </head>
   <body>
@@ -137,6 +154,7 @@
       ></iframe>
     </div>
 
+    <img id="pet" src="${petUri}"></img>
     <script>
       ${script}
     </script>

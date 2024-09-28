@@ -1,9 +1,6 @@
 import * as vscode from "vscode";
 import { onStateChange, set_state, state } from "../shared/state";
-import {
-  ArtemisAuthenticationProvider,
-  AUTH_ID,
-} from "../authentication/authentication_provider";
+import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
 import { settings } from "../shared/config";
@@ -23,6 +20,7 @@ enum OutgoingCommands {
   SEND_ACCESS_TOKEN = "sendAccessToken",
   LOGOUT = "logout",
   SET_EXERCISE = "setExercise",
+  EASTER_EGG = "easterEgg",
 }
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -36,8 +34,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     onStateChange.event((e) => {
       const repoKey =
         e.repoCourse && e.repoExercise
-          ? e.repoCourse.shortName.toUpperCase() +
-            e.repoExercise.shortName.toUpperCase()
+          ? e.repoCourse.shortName.toUpperCase() + e.repoExercise.shortName.toUpperCase()
           : undefined;
       this.displayExercise(e.displayedCourse, e.displayedExercise, repoKey);
     });
@@ -50,6 +47,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       if (removed && removed.length > 0) {
         this.logout();
         return;
+      }
+    });
+
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("scorpio.easteregg")) {
+        this.easterEgg();
       }
     });
   }
@@ -126,22 +129,22 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const styleVSCodeUri = this._view.webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
+    const petArray = [
+      this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "penguin.png")),
+      this._view.webview.asWebviewUri(
+        vscode.Uri.joinPath(this._extensionUri, "media", "penguin-walking.gif")
+      ),
+      this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "penguin-hat.gif")),
+    ];
 
     // import JS File
     const script = artemisJS;
     this.htmlContent = this.htmlContent!.replace("${script}", script);
-    this.htmlContent = this.htmlContent!.replace(
-      /\$\{base_url\}/g,
-      settings.base_url!
-    );
-    this.htmlContent = this.htmlContent!.replace(
-      /\$\{client_url\}/g,
-      settings.client_url!
-    );
-    this.htmlContent = this.htmlContent!.replace(
-      "${styleVSCodeUri}",
-      styleVSCodeUri.toString()
-    );
+    this.htmlContent = this.htmlContent!.replace(/\$\{base_url\}/g, settings.base_url!);
+    this.htmlContent = this.htmlContent!.replace(/\$\{client_url\}/g, settings.client_url!);
+    this.htmlContent = this.htmlContent!.replace("${styleVSCodeUri}", styleVSCodeUri.toString());
+    this.htmlContent = this.htmlContent!.replace("${petUri}", petArray[0].toString());
+    //this.htmlContent = this.htmlContent!.replace("${petUri}", petArray[Math.floor(Math.random() * petArray.length)].toString());
 
     this._view.webview.html = this.htmlContent;
   }
@@ -156,30 +159,27 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     const repoKey =
       state.repoCourse && state.repoExercise
-        ? state.repoCourse.shortName.toUpperCase() +
-          state.repoExercise.shortName.toUpperCase()
+        ? state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase()
         : undefined;
-    this.displayExercise(
-      state.displayedCourse,
-      state.displayedExercise,
-      repoKey
-    );
+    this.displayExercise(state.displayedCourse, state.displayedExercise, repoKey);
+
+    this.easterEgg();
   }
 
-  private async login(session: vscode.AuthenticationSession) {
+  private login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
       command: OutgoingCommands.SEND_ACCESS_TOKEN,
       text: `${session.accessToken}`,
     });
   }
 
-  private async logout() {
+  private logout() {
     this._view?.webview.postMessage({
       command: OutgoingCommands.LOGOUT,
     });
   }
 
-  private async displayExercise(
+  private displayExercise(
     course: Course | undefined,
     exercise: Exercise | undefined,
     repoKey: string | undefined
@@ -191,6 +191,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         exercise: exercise,
         repoKey: repoKey,
       }),
+    });
+  }
+
+  private easterEgg() {
+    this._view?.webview.postMessage({
+      command: OutgoingCommands.EASTER_EGG,
+      text: `${!settings.easter_egg}`,
     });
   }
 
