@@ -2,6 +2,7 @@ const IncomingCommand = {
   sendAccessToken: "sendAccessToken",
   logout: "logout",
   setExercise: "setExercise",
+  easterEgg: "easterEgg",
 };
 
 const OutgoingCommand = {
@@ -24,6 +25,8 @@ let course = undefined;
 let exercise = undefined;
 let repoKey = undefined;
 let token = undefined;
+
+const pet = document.getElementById("pet");
 
 // Store the original fetch function
 const originalFetch = window.fetch;
@@ -96,30 +99,30 @@ async function setCookie(_token) {
   console.log("before set", token);
   console.log("Setting cookie");
   try {
-  await fetch(`\${base_url}/api/public/re-key`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${_token}`,
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      token = _token;
-      postInfo("Login successful!");
-      changeState();
+    await fetch(`\${base_url}/api/public/re-key`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${_token}`,
+      },
     })
-    .catch((error) => {
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        token = _token;
+        postInfo("Login successful!");
+        changeState();
+      })
+      .catch((error) => {
         if (error instanceof TypeError) {
           throw new Error(`Could not reach the server: ${error.message}`);
         }
 
-      throw error;
-    });
+        throw error;
+      });
   } catch (error) {
     postError(`Login failed: ${error}`);
     return;
@@ -176,9 +179,7 @@ async function fetch_all_courses() {
     .then(async (response) => {
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
-          `HTTP error! status: ${response.status} message: ${errorText}`
-        );
+        throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
       }
 
       const data = await response.json();
@@ -192,17 +193,14 @@ async function fetch_all_courses() {
             courseWithScore.course.exercises = courseWithScore.course.exercises
               ?.filter((exercise) => exercise.type == "programming")
               .map((exercise) => {
-                exercise.dueDate = exercise.dueDate
-                  ? new Date(exercise.dueDate)
-                  : undefined;
+                exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
                 return exercise;
               });
             return courseWithScore;
           })
           .filter(
             (courseWithScore) =>
-              courseWithScore.course.exercises &&
-              courseWithScore.course.exercises.length > 0
+              courseWithScore.course.exercises && courseWithScore.course.exercises.length > 0
           ) ?? []
       );
     })
@@ -269,16 +267,13 @@ function displayExerciseOptions() {
 
 async function fetchParticipation(_courseId, _exerciseId) {
   try {
-    const response = await fetch(
-      `\${base_url}/api/exercises/${_exerciseId}/participation`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`\${base_url}/api/exercises/${_exerciseId}/participation`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -306,9 +301,7 @@ function displayScore(_courseId, _exerciseId, participation) {
     return false;
   }
 
-  document.getElementById(
-    "scoreButton"
-  ).textContent = `${latestResult.score} %`;
+  document.getElementById("scoreButton").textContent = `${latestResult.score} %`;
   document.getElementById(
     "scoreIframe"
   ).src = `\${client_url}/courses/${_courseId}/exercises/${_exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
@@ -329,10 +322,7 @@ async function displayProblemStatement() {
   document.getElementById("problemStatementIframe").src = url;
 
   const button = document.getElementById("cloneSubmitButton");
-  if (
-    course.shortName.toUpperCase() + exercise.shortName.toUpperCase() ===
-    repoKey
-  ) {
+  if (course.shortName.toUpperCase() + exercise.shortName.toUpperCase() === repoKey) {
     button.textContent = "Submit";
     button.onclick = submit;
   } else {
@@ -387,5 +377,97 @@ window.addEventListener("message", (event) => {
         });
       }
       break;
+    case IncomingCommand.easterEgg:
+      pet.hidden = message.text === "true";
+      break;
   }
 });
+
+(async () => {
+  const normal_speed = 3; // (pixels per frame)
+  let speed = normal_speed;
+  let posX = 0;
+  let posY = 0;
+  let clockwise = 1;
+  let edge = "bottom";
+
+  const leftMax = 0;
+  const rightMax = window.innerWidth - pet.width;
+  const topMax = window.innerHeight - pet.width;
+  const bottomMax = 0;
+
+  function move() {
+    if(speed === 0) {
+      return;
+    }
+    switch (edge) {
+      case "bottom":
+        posX += speed * clockwise;
+        if (posX > rightMax) {
+          edge = "right";
+          posX = rightMax;
+          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+        } else if (posX < leftMax) {
+          edge = "left";
+          posX = leftMax;
+          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "right":
+        posY += speed * clockwise;
+        if (posY > topMax) {
+          edge = "top";
+          posY = topMax;
+          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+        } else if (posY < bottomMax) {
+          edge = "bottom";
+          posY = bottomMax;
+          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "top":
+        posX -= speed * clockwise;
+        if (posX < leftMax) {
+          edge = "left";
+          posX = leftMax;
+          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+        } else if (posX > rightMax) {
+          edge = "right";
+          posX = rightMax;
+          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+        }
+        break;
+      case "left":
+        posY -= speed * clockwise;
+        if (posY < bottomMax) {
+          edge = "bottom";
+          posY = bottomMax;
+          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+        } else if (posY > topMax) {
+          edge = "top";
+          posY = topMax;
+          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+        }
+        break;
+    }
+
+    pet.style.left = `${posX}px`;
+    pet.style.bottom = `${posY}px`;
+  }
+
+  function randomDirectionChange() {
+    const random = Math.random();
+    if (random < 0.33) {
+      clockwise *= -1;
+      speed = normal_speed;
+      pet.style.transform = `${pet.style.transform} scaleX(${-1})`;
+    } else if (random < 0.66) {
+      speed = 0;
+    } else {
+      speed = normal_speed;
+    }
+  }
+
+  setInterval(move, 20);
+  setInterval(randomDirectionChange, Math.random() * (3000 - 1000) + 1000);
+})();

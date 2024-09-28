@@ -73,6 +73,13 @@
       dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
       }
+      #pet{
+        position: absolute;
+        width: 30px;
+        bottom: 0;
+        left: 0;
+        z-index: 10;
+      }
     </style>
     <meta
       http-equiv="Content-Security-Policy"
@@ -80,7 +87,9 @@
       script-src 'unsafe-inline';
       style-src-elem 'self' vscode-resource:; 
       connect-src ${base_url}; 
-      frame-src ${client_url};"
+      frame-src ${client_url};
+      img-src 'self' vscode-resource:; 
+      "
     />
   </head>
   <body>
@@ -137,6 +146,7 @@
       ></iframe>
     </div>
 
+    <img id="pet" src="${petUri}"></img>
     <script>
       ${script}
     </script>
