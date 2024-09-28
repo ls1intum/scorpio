@@ -19,6 +19,7 @@ import {
 } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
+import { initTheia, theiaEnv } from "./theia/theia";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -27,19 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "scorpio" is now active!');
 
   const authenticationProvider = initAuthentication(context);
-  (async () => {
-    if (
-      await vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: false,
-      })
-    ) {
-      vscode.commands.executeCommand(
-        "setContext",
-        "scorpio.authenticated",
-        true
-      );
-    }
-  })();
+
+  initTheia();
 
   const sidebar = initSidebar(context, authenticationProvider);
 
@@ -62,6 +52,20 @@ function initAuthentication(
   );
 
   context.subscriptions.push(authenticationProvider);
+
+  (async () => {
+    if (
+      await vscode.authentication.getSession(AUTH_ID, [], {
+        createIfNone: theiaEnv,
+      })
+    ) {
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.authenticated",
+        true
+      );
+    }
+  })();
 
   authenticationProvider.onAuthSessionsChange.event(
     ({ added, removed, changed }) => {
