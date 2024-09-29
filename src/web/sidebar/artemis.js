@@ -397,13 +397,40 @@ window.addEventListener("message", (event) => {
   let clockwise = 1;
   let edge = "bottom";
 
-  const leftMax = 0;
-  const rightMax = window.innerWidth - pet.width;
-  const topMax = window.innerHeight - pet.width;
-  const bottomMax = 0;
+  let leftMax = 0;
+  let rightMax = window.innerWidth - pet.width;
+  let topMax = window.innerHeight - pet.width + 8;
+  let bottomMax = 0;
+
+  function updateBoundaries() {
+    leftMax = 0;
+    rightMax = window.innerWidth - pet.width;
+    topMax = window.innerHeight - pet.width + 8;
+    bottomMax = 0;
+
+    // making window smaller
+    if (posX > rightMax) {
+      posX = rightMax;
+    }
+    if (posY > topMax) {
+      posY = topMax;
+    }
+
+    // making window bigger
+    if (edge === "right") {
+      pet.style.left = `${rightMax}px`;
+      posX = rightMax;
+    }
+    if (edge === "top") {
+      pet.style.bottom = `${topMax}px`;
+      posY = topMax;
+    }
+  }
+
+  window.addEventListener("resize", updateBoundaries);
 
   function move() {
-    if (speed === 0) {
+    if (pet.hidden || speed === 0) {
       return;
     }
     switch (edge) {
@@ -462,6 +489,9 @@ window.addEventListener("message", (event) => {
   }
 
   function randomDirectionChange() {
+    if (pet.hidden) {
+      return;
+    }
     if (Math.random() < 0.5) {
       const turn = Math.random() < 0.5 ? -1 : 1;
       clockwise *= turn;
@@ -469,7 +499,7 @@ window.addEventListener("message", (event) => {
       pet.style.transform = `${pet.style.transform} scaleX(${turn})`;
     } else {
       speed = 0;
-    } 
+    }
   }
 
   setInterval(move, 20);
