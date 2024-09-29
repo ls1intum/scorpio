@@ -197,7 +197,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private easterEgg() {
     this._view?.webview.postMessage({
       command: OutgoingCommands.EASTER_EGG,
-      text: `${!settings.easter_egg}`,
+      text: `${settings.easter_egg}`,
     });
   }
 

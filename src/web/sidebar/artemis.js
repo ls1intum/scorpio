@@ -382,124 +382,132 @@ window.addEventListener("message", (event) => {
       }
       break;
     case IncomingCommand.easterEgg:
-      pet.hidden = message.text === "true";
+      showPet(message.text === "true");
       break;
   }
 });
 
-(async () => {
-  const normal_speed = 3; // (pixels per frame)
-  let speed = normal_speed;
-  let posX = 0;
-  let posY = 0;
-  let clockwise = 1;
-  let edge = "bottom";
+let moveIntervalId;
+let changeDirectionIntervalId;
 
-  let leftMax = 0;
-  let rightMax = window.innerWidth - pet.width;
-  let topMax = window.innerHeight - pet.width + 8;
-  let bottomMax = 0;
+function showPet(show) {
+  if (show) {
+    pet.hidden = false;
+    moveIntervalId = setInterval(move, 20);
+    changeDirectionIntervalId = setInterval(changeDirection, Math.random() * (3000 - 1000) + 1000);
+    updateBoundaries();
+    window.addEventListener("resize", updateBoundaries);
+  } else {
+    pet.hidden = true;
+    clearInterval(moveIntervalId);
+    clearInterval(changeDirectionIntervalId);
+    window.removeEventListener("resize", updateBoundaries);
+  }
+}
 
-  function updateBoundaries() {
-    leftMax = 0;
-    rightMax = window.innerWidth - pet.width;
-    topMax = window.innerHeight - pet.width + 8;
-    bottomMax = 0;
+const normal_speed = 3; // (pixels per frame)
+let speed = normal_speed;
+let posX = 0;
+let posY = 0;
+let clockwise = 1;
+let edge = "bottom";
 
-    // making window smaller
-    if (posX > rightMax) {
-      posX = rightMax;
-    }
-    if (posY > topMax) {
-      posY = topMax;
-    }
+let leftMax = 0;
+let rightMax = window.innerWidth - pet.width;
+let topMax = window.innerHeight - pet.width + 8;
+let bottomMax = 0;
 
-    // making window bigger
-    if (edge === "right") {
-      pet.style.left = `${rightMax}px`;
-      posX = rightMax;
-    }
-    if (edge === "top") {
-      pet.style.bottom = `${topMax}px`;
-      posY = topMax;
-    }
+function updateBoundaries() {
+  leftMax = 0;
+  rightMax = window.innerWidth - pet.width;
+  topMax = window.innerHeight - pet.width + 8;
+  bottomMax = 0;
+
+  // making window smaller
+  if (posX > rightMax) {
+    posX = rightMax;
+  }
+  if (posY > topMax) {
+    posY = topMax;
   }
 
-  window.addEventListener("resize", updateBoundaries);
+  // making window bigger
+  if (edge === "right") {
+    pet.style.left = `${rightMax}px`;
+    posX = rightMax;
+  }
+  if (edge === "top") {
+    pet.style.bottom = `${topMax}px`;
+    posY = topMax;
+  }
+}
 
-  function move() {
-    if (pet.hidden || speed === 0) {
-      return;
-    }
-    switch (edge) {
-      case "bottom":
-        posX += speed * clockwise;
-        if (posX > rightMax) {
-          edge = "right";
-          posX = rightMax;
-          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
-        } else if (posX < leftMax) {
-          edge = "left";
-          posX = leftMax;
-          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
-        }
-        break;
-      case "right":
-        posY += speed * clockwise;
-        if (posY > topMax) {
-          edge = "top";
-          posY = topMax;
-          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
-        } else if (posY < bottomMax) {
-          edge = "bottom";
-          posY = bottomMax;
-          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
-        }
-        break;
-      case "top":
-        posX -= speed * clockwise;
-        if (posX < leftMax) {
-          edge = "left";
-          posX = leftMax;
-          pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
-        } else if (posX > rightMax) {
-          edge = "right";
-          posX = rightMax;
-          pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
-        }
-        break;
-      case "left":
-        posY -= speed * clockwise;
-        if (posY < bottomMax) {
-          edge = "bottom";
-          posY = bottomMax;
-          pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
-        } else if (posY > topMax) {
-          edge = "top";
-          posY = topMax;
-          pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
-        }
-        break;
-    }
-
-    pet.style.left = `${posX}px`;
-    pet.style.bottom = `${posY}px`;
+function move() {
+  if (speed === 0) {
+    return;
+  }
+  switch (edge) {
+    case "bottom":
+      posX += speed * clockwise;
+      if (posX > rightMax) {
+        edge = "right";
+        posX = rightMax;
+        pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+      } else if (posX < leftMax) {
+        edge = "left";
+        posX = leftMax;
+        pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "right":
+      posY += speed * clockwise;
+      if (posY > topMax) {
+        edge = "top";
+        posY = topMax;
+        pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+      } else if (posY < bottomMax) {
+        edge = "bottom";
+        posY = bottomMax;
+        pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "top":
+      posX -= speed * clockwise;
+      if (posX < leftMax) {
+        edge = "left";
+        posX = leftMax;
+        pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+      } else if (posX > rightMax) {
+        edge = "right";
+        posX = rightMax;
+        pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "left":
+      posY -= speed * clockwise;
+      if (posY < bottomMax) {
+        edge = "bottom";
+        posY = bottomMax;
+        pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+      } else if (posY > topMax) {
+        edge = "top";
+        posY = topMax;
+        pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+      }
+      break;
   }
 
-  function randomDirectionChange() {
-    if (pet.hidden) {
-      return;
-    }
-    if (Math.random() < 0.5) {
-      const turn = Math.random() < 0.5 ? -1 : 1;
-      clockwise *= turn;
-      speed = normal_speed;
-      pet.style.transform = `${pet.style.transform} scaleX(${turn})`;
-    } else {
-      speed = 0;
-    }
-  }
+  pet.style.left = `${posX}px`;
+  pet.style.bottom = `${posY}px`;
+}
 
-  setInterval(move, 20);
-  setInterval(randomDirectionChange, Math.random() * (3000 - 1000) + 1000);
-})();
+function changeDirection() {
+  if (Math.random() < 0.5) {
+    const turn = Math.random() < 0.5 ? -1 : 1;
+    clockwise *= turn;
+    speed = normal_speed;
+    pet.style.transform = `${pet.style.transform} scaleX(${turn})`;
+  } else {
+    speed = 0;
+  }
+}
