@@ -96,8 +96,6 @@ function loginOut() {
 }
 
 async function setCookie(_token) {
-  console.log("before set", token);
-  console.log("Setting cookie");
   try {
     await fetch(`\${base_url}/api/public/re-key`, {
       method: "POST",
