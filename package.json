@@ -47,7 +47,7 @@
           "editPresentation": "singlelineText",
           "type": "string"
         },
-        "scorpio.easteregg":{
+        "scorpio.?":{
             "description": "Wait and see",
             "type": "boolean"
         }

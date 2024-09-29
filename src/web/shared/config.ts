@@ -23,7 +23,7 @@ export const settings: Settings = (() => {
   }
   const default_repo_path = vscode.workspace.getConfiguration("scorpio").get<string>("defaults.repoPath");
 
-  const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("easteregg") ?? false;
+  const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("?") ?? false;
 
   return {
     base_url: base_url,
@@ -62,8 +62,8 @@ vscode.workspace.onDidChangeConfiguration((e) => {
     return;
   }
 
-  if (e.affectsConfiguration("scorpio.easteregg")) {
-    const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("easteregg") ?? false;
+  if (e.affectsConfiguration("scorpio.?")) {
+    const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("?") ?? false;
     settings.easter_egg = easter_egg;
     return;
   }

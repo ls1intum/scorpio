@@ -365,10 +365,16 @@ window.addEventListener("message", (event) => {
       const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
+        const updateUi =
+          deserializedObject.course !== course ||
+          deserializedObject.exercise !== exercise ||
+          deserializedObject.repoKey !== repoKey;
         course = deserializedObject.course;
         exercise = deserializedObject.exercise;
         repoKey = deserializedObject.repoKey;
-        changeState();
+        if (updateUi) {
+          changeState();
+        }
       } catch (error) {
         console.error("Failed to deserialize message text:", error);
         vscode.postMessage({
@@ -397,7 +403,7 @@ window.addEventListener("message", (event) => {
   const bottomMax = 0;
 
   function move() {
-    if(speed === 0) {
+    if (speed === 0) {
       return;
     }
     switch (edge) {
@@ -456,16 +462,14 @@ window.addEventListener("message", (event) => {
   }
 
   function randomDirectionChange() {
-    const random = Math.random();
-    if (random < 0.33) {
-      clockwise *= -1;
+    if (Math.random() < 0.5) {
+      const turn = Math.random() < 0.5 ? -1 : 1;
+      clockwise *= turn;
       speed = normal_speed;
-      pet.style.transform = `${pet.style.transform} scaleX(${-1})`;
-    } else if (random < 0.66) {
-      speed = 0;
+      pet.style.transform = `${pet.style.transform} scaleX(${turn})`;
     } else {
-      speed = normal_speed;
-    }
+      speed = 0;
+    } 
   }
 
   setInterval(move, 20);

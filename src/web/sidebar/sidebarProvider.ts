@@ -51,7 +51,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     });
 
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("scorpio.easteregg")) {
+      if (e.affectsConfiguration("scorpio.?")) {
         this.easterEgg();
       }
     });
