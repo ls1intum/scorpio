@@ -75,13 +75,13 @@ function changeState() {
     return;
   }
   if (!course) {
-    displayCourseOptions();
     showSection(SectionsToDisplay.courseSelection);
+    displayCourseOptions();
     return;
   }
   if (!exercise) {
-    displayExerciseOptions();
     showSection(SectionsToDisplay.exerciseSelection);
+    displayExerciseOptions();
     return;
   }
 
@@ -213,8 +213,23 @@ async function fetch_all_courses() {
 
 function buildCourseItem(_courseWithScore, itemTemplate) {
   const item = itemTemplate.cloneNode(true);
+  item.style.display = "flex";
+  item.querySelector("#courseTitle").textContent = _courseWithScore.course.title;
+  item.querySelector(
+    "#courseScore"
+  ).textContent = `${_courseWithScore.totalScores.studentScores.absoluteScore}/${_courseWithScore.totalScores.reachablePoints} Points`;
+  item.querySelector("#nextExercise").textContent = (() => {
+    const nextExercise = _courseWithScore.course?.exercises
+      ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
+      .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+      .at(0);
+    return nextExercise
+      ? `Next exercise: ${nextExercise.title} due on ${nextExercise.dueDate.toLocaleString()}`
+      : "No upcoming exercise";
+  })();
+
   item.hidden = false;
-  item.textContent = _courseWithScore.course.title;
+
   item.onclick = () => {
     course = _courseWithScore.course;
     changeState();
@@ -226,17 +241,32 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
 async function displayCourseOptions() {
   const coursesWithScores = await fetch_all_courses();
   const courseGrid = document.getElementById("courseGrid");
-  courseGrid.innerHTML = "";
+  courseGrid.replaceChildren();
   const courseItemTemplate = document.getElementById("courseItem");
+  courseItemTemplate.style.display = "none";
+
   coursesWithScores.forEach((courseWithScore) => {
     const item = buildCourseItem(courseWithScore, courseItemTemplate);
     courseGrid.appendChild(item);
   });
+
 }
 
 function buildExerciseItem(_exercise, itemTemplate) {
   const item = itemTemplate.cloneNode(true);
-  item.textContent = _exercise.title;
+  item.style.display = "flex";
+
+  item.querySelector("#exerciseTitle").textContent = _exercise.title;
+  item.querySelector("#exerciseScore").textContent = (() => {
+    const score = _exercise.studentParticipations
+      ?.at(0)
+      ?.results?.filter((result) => result.rated)
+      .sort((a, b) => b.completionDate > a.completionDate)
+      .at(0)?.score;
+    return score ? `${score} %` : "No graded result";
+  })();
+  item.querySelector("#exerciseDue").textContent = _exercise.dueDate;
+
   item.hidden = false;
   item.onclick = () => {
     // dont set exercise here, because postMessage will trigger a setExercise from plugin side
@@ -254,13 +284,30 @@ function buildExerciseItem(_exercise, itemTemplate) {
 }
 
 function displayExerciseOptions() {
-  const exerciseGrid = document.getElementById("exerciseGrid");
-  exerciseGrid.innerHTML = "";
+  const upcomingDue = document.getElementById("upcomingDue");
+  upcomingDue.replaceChildren();
+  const pastDue = document.getElementById("pastDue");
+  pastDue.replaceChildren();
+  const noDue = document.getElementById("noDue");
+  noDue.replaceChildren();
+
   const exerciseItemTemplate = document.getElementById("exerciseItem");
-  course.exercises.forEach((exercise) => {
-    const item = buildExerciseItem(exercise, exerciseItemTemplate);
-    exerciseGrid.appendChild(item);
-  });
+  exerciseItemTemplate.style.display = "none";
+
+  course.exercises
+    .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+    .forEach((exercise) => {
+      const item = buildExerciseItem(exercise, exerciseItemTemplate);
+      if (exercise.dueDate) {
+        if (exercise.dueDate < new Date()) {
+          pastDue.appendChild(item);
+        } else {
+          upcomingDue.appendChild(item);
+        }
+      } else {
+        noDue.appendChild(item);
+      }
+    });
 }
 
 async function fetchParticipation(_courseId, _exerciseId) {
@@ -363,16 +410,15 @@ window.addEventListener("message", (event) => {
       const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
-        const updateUi =
-          deserializedObject.course !== course ||
-          deserializedObject.exercise !== exercise ||
-          deserializedObject.repoKey !== repoKey;
+        if(deserializedObject.course === course &&
+          deserializedObject.exercise === exercise &&
+          deserializedObject.repoKey === repoKey){
+            return;
+          }
         course = deserializedObject.course;
         exercise = deserializedObject.exercise;
         repoKey = deserializedObject.repoKey;
-        if (updateUi) {
-          changeState();
-        }
+        changeState();
       } catch (error) {
         console.error("Failed to deserialize message text:", error);
         vscode.postMessage({
