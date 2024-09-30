@@ -21,12 +21,28 @@
         margin-top: 10px;
       }
       #courseItem{
-        margin: 5px;
-        max-width: 100px;
+        max-width: 300px;
+        display: flex;
+        flex-wrap: wrap;
       }
       #exerciseItem{
-        margin: 5px;
-        max-width: 100px;
+        max-width: 300px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .row {
+        width: 100%;
+        display: flex; 
+        flex-wrap: wrap; 
+        align-items: baseline; 
+        justify-content: space-between;
+      }
+      .grid{
+        display: grid;
+        grid-gap: 20px;
+        grid-auto-flow: row;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 300px));
+        justify-content: center;
       }
       #problemStatement {
         height: 100%;
@@ -37,11 +53,6 @@
         border: none;
         margin: 0;
         display: block;
-      }
-      #buttonRow {
-        display: flex;
-        justify-content: space-between;
-        margin: 5px;
       }
       #cloneSubmitButton {
         width: 80px;
@@ -86,6 +97,7 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; 
       script-src 'unsafe-inline';
+      style-src 'self' 'unsafe-inline';
       style-src-elem 'self' vscode-resource:; 
       connect-src ${base_url}; 
       frame-src ${client_url};
@@ -102,27 +114,46 @@
       <button id="loginButton" onclick="loginOut()">Login</button>
     </div>
 
-    <div id="courseSelection">
-      <p>Please select a course</p>
+    <div id="courseSelection" style="padding-left: 10px; padding-right: 10px;">
+      <h2>Courses</h2>
       <button id="courseItem" hidden="true">
-
+        <div class="row">
+          <h2 id="courseTitle"></h2>
+          <p id="courseScore"></p>
+        </div>
+        <p id="nextExercise"></p>
       </button>
-      <div id="courseGrid">
 
+      <div id="courseGrid" class="grid">
       </div>
     </div>
-    <div id="exerciseSelection">
-      <p>Please select an exercise</p>
+
+    <div id="exerciseSelection" style="padding-left: 10px; padding-right: 10px;">
+      <h2>Exercises</h2>
       <button id="exerciseItem" hidden="true">
-
+        <div class="row">
+          <h2 id="exerciseTitle"></h2>
+          <p id="exerciseScore"></p>
+        </div>
+        <p id="exerciseDue"></p>
       </button>
-      <div id="exerciseGrid"></div>
 
+      <h3>Due coming up</h3>
+      <div id="upcomingDue" class="grid">
+
+      </div>
+
+      <h3>Past due date</h3>
+      <div id="pastDue" class="grid">
+      </div>
+
+      <h3>No due date</h3>
+      <div id="noDue" class="grid">
       </div>
     </div>
 
     <div id="problemStatement">
-      <div id="buttonRow">
+      <div class="row">
         <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
 
         <div id="score">
