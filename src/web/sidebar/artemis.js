@@ -2,6 +2,7 @@ const IncomingCommand = {
   sendAccessToken: "sendAccessToken",
   logout: "logout",
   setExercise: "setExercise",
+  easterEgg: "easterEgg",
 };
 
 const OutgoingCommand = {
@@ -24,6 +25,8 @@ let course = undefined;
 let exercise = undefined;
 let repoKey = undefined;
 let token = undefined;
+
+const pet = document.getElementById("pet");
 
 // Store the original fetch function
 const originalFetch = window.fetch;
@@ -72,13 +75,13 @@ function changeState() {
     return;
   }
   if (!course) {
-    displayCourseOptions();
     showSection(SectionsToDisplay.courseSelection);
+    displayCourseOptions();
     return;
   }
   if (!exercise) {
-    displayExerciseOptions();
     showSection(SectionsToDisplay.exerciseSelection);
+    displayExerciseOptions();
     return;
   }
 
@@ -93,33 +96,31 @@ function loginOut() {
 }
 
 async function setCookie(_token) {
-  console.log("before set", token);
-  console.log("Setting cookie");
   try {
-  await fetch(`\${base_url}/api/public/re-key`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${_token}`,
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      token = _token;
-      postInfo("Login successful!");
-      changeState();
+    await fetch(`\${base_url}/api/public/re-key`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${_token}`,
+      },
     })
-    .catch((error) => {
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        token = _token;
+        postInfo("Login successful!");
+        changeState();
+      })
+      .catch((error) => {
         if (error instanceof TypeError) {
           throw new Error(`Could not reach the server: ${error.message}`);
         }
 
-      throw error;
-    });
+        throw error;
+      });
   } catch (error) {
     postError(`Login failed: ${error}`);
     return;
@@ -176,9 +177,7 @@ async function fetch_all_courses() {
     .then(async (response) => {
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
-          `HTTP error! status: ${response.status} message: ${errorText}`
-        );
+        throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
       }
 
       const data = await response.json();
@@ -192,17 +191,14 @@ async function fetch_all_courses() {
             courseWithScore.course.exercises = courseWithScore.course.exercises
               ?.filter((exercise) => exercise.type == "programming")
               .map((exercise) => {
-                exercise.dueDate = exercise.dueDate
-                  ? new Date(exercise.dueDate)
-                  : undefined;
+                exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
                 return exercise;
               });
             return courseWithScore;
           })
           .filter(
             (courseWithScore) =>
-              courseWithScore.course.exercises &&
-              courseWithScore.course.exercises.length > 0
+              courseWithScore.course.exercises && courseWithScore.course.exercises.length > 0
           ) ?? []
       );
     })
@@ -217,8 +213,23 @@ async function fetch_all_courses() {
 
 function buildCourseItem(_courseWithScore, itemTemplate) {
   const item = itemTemplate.cloneNode(true);
+  item.style.display = "flex";
+  item.querySelector("#courseTitle").textContent = _courseWithScore.course.title;
+  item.querySelector(
+    "#courseScore"
+  ).textContent = `${_courseWithScore.totalScores.studentScores.absoluteScore}/${_courseWithScore.totalScores.reachablePoints} Points`;
+  item.querySelector("#nextExercise").textContent = (() => {
+    const nextExercise = _courseWithScore.course?.exercises
+      ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
+      .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+      .at(0);
+    return nextExercise
+      ? `Next exercise: ${nextExercise.title} due on ${nextExercise.dueDate.toLocaleString()}`
+      : "No upcoming exercise";
+  })();
+
   item.hidden = false;
-  item.textContent = _courseWithScore.course.title;
+
   item.onclick = () => {
     course = _courseWithScore.course;
     changeState();
@@ -230,17 +241,32 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
 async function displayCourseOptions() {
   const coursesWithScores = await fetch_all_courses();
   const courseGrid = document.getElementById("courseGrid");
-  courseGrid.innerHTML = "";
+  courseGrid.replaceChildren();
   const courseItemTemplate = document.getElementById("courseItem");
+  courseItemTemplate.style.display = "none";
+
   coursesWithScores.forEach((courseWithScore) => {
     const item = buildCourseItem(courseWithScore, courseItemTemplate);
     courseGrid.appendChild(item);
   });
+
 }
 
 function buildExerciseItem(_exercise, itemTemplate) {
   const item = itemTemplate.cloneNode(true);
-  item.textContent = _exercise.title;
+  item.style.display = "flex";
+
+  item.querySelector("#exerciseTitle").textContent = _exercise.title;
+  item.querySelector("#exerciseScore").textContent = (() => {
+    const score = _exercise.studentParticipations
+      ?.at(0)
+      ?.results?.filter((result) => result.rated)
+      .sort((a, b) => b.completionDate > a.completionDate)
+      .at(0)?.score;
+    return score ? `${score} %` : "No graded result";
+  })();
+  item.querySelector("#exerciseDue").textContent = _exercise.dueDate;
+
   item.hidden = false;
   item.onclick = () => {
     // dont set exercise here, because postMessage will trigger a setExercise from plugin side
@@ -258,27 +284,41 @@ function buildExerciseItem(_exercise, itemTemplate) {
 }
 
 function displayExerciseOptions() {
-  const exerciseGrid = document.getElementById("exerciseGrid");
-  exerciseGrid.innerHTML = "";
+  const upcomingDue = document.getElementById("upcomingDue");
+  upcomingDue.replaceChildren();
+  const pastDue = document.getElementById("pastDue");
+  pastDue.replaceChildren();
+  const noDue = document.getElementById("noDue");
+  noDue.replaceChildren();
+
   const exerciseItemTemplate = document.getElementById("exerciseItem");
-  course.exercises.forEach((exercise) => {
-    const item = buildExerciseItem(exercise, exerciseItemTemplate);
-    exerciseGrid.appendChild(item);
-  });
+  exerciseItemTemplate.style.display = "none";
+
+  course.exercises
+    .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+    .forEach((exercise) => {
+      const item = buildExerciseItem(exercise, exerciseItemTemplate);
+      if (exercise.dueDate) {
+        if (exercise.dueDate < new Date()) {
+          pastDue.appendChild(item);
+        } else {
+          upcomingDue.appendChild(item);
+        }
+      } else {
+        noDue.appendChild(item);
+      }
+    });
 }
 
 async function fetchParticipation(_courseId, _exerciseId) {
   try {
-    const response = await fetch(
-      `\${base_url}/api/exercises/${_exerciseId}/participation`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`\${base_url}/api/exercises/${_exerciseId}/participation`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -306,9 +346,7 @@ function displayScore(_courseId, _exerciseId, participation) {
     return false;
   }
 
-  document.getElementById(
-    "scoreButton"
-  ).textContent = `${latestResult.score} %`;
+  document.getElementById("scoreButton").textContent = `${latestResult.score} %`;
   document.getElementById(
     "scoreIframe"
   ).src = `\${client_url}/courses/${_courseId}/exercises/${_exerciseId}/participations/${participation.id}/results/${latestResult.id}/feedback`;
@@ -329,10 +367,7 @@ async function displayProblemStatement() {
   document.getElementById("problemStatementIframe").src = url;
 
   const button = document.getElementById("cloneSubmitButton");
-  if (
-    course.shortName.toUpperCase() + exercise.shortName.toUpperCase() ===
-    repoKey
-  ) {
+  if (course.shortName.toUpperCase() + exercise.shortName.toUpperCase() === repoKey) {
     button.textContent = "Submit";
     button.onclick = submit;
   } else {
@@ -375,6 +410,11 @@ window.addEventListener("message", (event) => {
       const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
+        if(deserializedObject.course === course &&
+          deserializedObject.exercise === exercise &&
+          deserializedObject.repoKey === repoKey){
+            return;
+          }
         course = deserializedObject.course;
         exercise = deserializedObject.exercise;
         repoKey = deserializedObject.repoKey;
@@ -387,5 +427,133 @@ window.addEventListener("message", (event) => {
         });
       }
       break;
+    case IncomingCommand.easterEgg:
+      showPet(message.text === "true");
+      break;
   }
 });
+
+let moveIntervalId;
+let changeDirectionIntervalId;
+
+function showPet(show) {
+  if (show) {
+    pet.hidden = false;
+    moveIntervalId = setInterval(move, 20);
+    changeDirectionIntervalId = setInterval(changeDirection, Math.random() * (3000 - 1000) + 1000);
+    updateBoundaries();
+    window.addEventListener("resize", updateBoundaries);
+  } else {
+    pet.hidden = true;
+    clearInterval(moveIntervalId);
+    clearInterval(changeDirectionIntervalId);
+    window.removeEventListener("resize", updateBoundaries);
+  }
+}
+
+const normal_speed = 3; // (pixels per frame)
+let speed = normal_speed;
+let posX = 0;
+let posY = 0;
+let clockwise = 1;
+let edge = "bottom";
+
+let leftMax = 0;
+let rightMax = window.innerWidth - pet.width;
+let topMax = window.innerHeight - pet.width + 8;
+let bottomMax = 0;
+
+function updateBoundaries() {
+  leftMax = 0;
+  rightMax = window.innerWidth - pet.width;
+  topMax = window.innerHeight - pet.width + 8;
+  bottomMax = 0;
+
+  // making window smaller
+  if (posX > rightMax) {
+    posX = rightMax;
+  }
+  if (posY > topMax) {
+    posY = topMax;
+  }
+
+  // making window bigger
+  if (edge === "right") {
+    pet.style.left = `${rightMax}px`;
+    posX = rightMax;
+  }
+  if (edge === "top") {
+    pet.style.bottom = `${topMax}px`;
+    posY = topMax;
+  }
+}
+
+function move() {
+  if (speed === 0) {
+    return;
+  }
+  switch (edge) {
+    case "bottom":
+      posX += speed * clockwise;
+      if (posX > rightMax) {
+        edge = "right";
+        posX = rightMax;
+        pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+      } else if (posX < leftMax) {
+        edge = "left";
+        posX = leftMax;
+        pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "right":
+      posY += speed * clockwise;
+      if (posY > topMax) {
+        edge = "top";
+        posY = topMax;
+        pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+      } else if (posY < bottomMax) {
+        edge = "bottom";
+        posY = bottomMax;
+        pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "top":
+      posX -= speed * clockwise;
+      if (posX < leftMax) {
+        edge = "left";
+        posX = leftMax;
+        pet.style.transform = `rotate(90deg) scaleX(${clockwise})`;
+      } else if (posX > rightMax) {
+        edge = "right";
+        posX = rightMax;
+        pet.style.transform = `rotate(-90deg) scaleX(${clockwise})`;
+      }
+      break;
+    case "left":
+      posY -= speed * clockwise;
+      if (posY < bottomMax) {
+        edge = "bottom";
+        posY = bottomMax;
+        pet.style.transform = `rotate(0deg) scaleX(${clockwise})`;
+      } else if (posY > topMax) {
+        edge = "top";
+        posY = topMax;
+        pet.style.transform = `rotate(180deg) scaleX(${clockwise})`;
+      }
+      break;
+  }
+
+  pet.style.left = `${posX}px`;
+  pet.style.bottom = `${posY}px`;
+}
+
+function changeDirection() {
+  if (Math.random() < 0.5) {
+    const turn = Math.random() < 0.5 ? -1 : 1;
+    clockwise *= turn;
+    speed = normal_speed;
+    pet.style.transform = `${pet.style.transform} scaleX(${turn})`;
+  } else {
+    speed = 0;
+  }
+}

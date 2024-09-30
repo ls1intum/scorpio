@@ -28,7 +28,7 @@
       }
     ],
     "configuration": {
-      "title": "Scorpio",
+      "title": "Scorpio - Artemis",
       "properties": {
         "scorpio.artemis.apiBaseUrl": {
           "description": "The base URL of the Artemis Server",
@@ -37,7 +37,7 @@
           "default": "http://localhost:8080"
         },
         "scorpio.artemis.clientBaseUrl": {
-          "description": "The URL of the Artemis Client - probably the same as #scorpio.artemis.apiBaseUrl",
+          "markdownDescription": "The URL of the Artemis Client - probably the same as `#scorpio.artemis.apiBaseUrl#`",
           "type": "string",
           "editPresentation": "singlelineText",
           "default": "http://localhost:9000"
@@ -46,6 +46,10 @@
           "description": "The default to search for and clone repositories into - has to be an absolute path",
           "editPresentation": "singlelineText",
           "type": "string"
+        },
+        "scorpio.?":{
+            "description": "Wait and see",
+            "type": "boolean"
         }
       }
     },
