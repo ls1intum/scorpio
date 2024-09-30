@@ -123,6 +123,13 @@ function registerCommands(
   authenticationProvider: ArtemisAuthenticationProvider,
   sidebar: SidebarProvider
 ) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.restart", () => {
+      deactivate();
+      activate(context);
+    })
+  )
+
   // command to login
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.login", async () => {

@@ -75,6 +75,11 @@
     },
     "commands": [
       {
+        "command": "scorpio.restart",
+        "category": "Artemis",
+        "title": "Restart Extension"
+      },
+      {
         "command": "scorpio.login",
         "category": "Artemis",
         "title": "Login"
