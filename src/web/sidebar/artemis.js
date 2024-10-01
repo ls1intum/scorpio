@@ -218,15 +218,18 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
   item.querySelector(
     "#courseScore"
   ).textContent = `${_courseWithScore.totalScores.studentScores.absoluteScore}/${_courseWithScore.totalScores.reachablePoints} Points`;
-  item.querySelector("#nextExercise").textContent = (() => {
-    const nextExercise = _courseWithScore.course?.exercises
-      ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
-      .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
-      .at(0);
-    return nextExercise
-      ? `Next exercise: ${nextExercise.title} due on ${nextExercise.dueDate.toLocaleString()}`
-      : "No upcoming exercise";
-  })();
+
+  const nextExercise = _courseWithScore.course?.exercises
+    ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
+    .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+    .at(0);
+
+  item.querySelector("#nextExercise").textContent = nextExercise
+    ? `Next exercise: ${nextExercise.title}`
+    : "No upcoming exercise";
+  item.querySelector("#nextExerciseDue").textContent = nextExercise
+    ? `due on ${nextExercise.dueDate.toDateString()}`
+    : "";
 
   item.hidden = false;
 
@@ -249,7 +252,6 @@ async function displayCourseOptions() {
     const item = buildCourseItem(courseWithScore, courseItemTemplate);
     courseGrid.appendChild(item);
   });
-
 }
 
 function buildExerciseItem(_exercise, itemTemplate) {
@@ -265,7 +267,7 @@ function buildExerciseItem(_exercise, itemTemplate) {
       .at(0)?.score;
     return score ? `${score} %` : "No graded result";
   })();
-  item.querySelector("#exerciseDue").textContent = _exercise.dueDate;
+  item.querySelector("#exerciseDue").textContent = _exercise.dueDate ? _exercise.dueDate.toLocaleString() : "";
 
   item.hidden = false;
   item.onclick = () => {
@@ -410,11 +412,13 @@ window.addEventListener("message", (event) => {
       const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
-        if(deserializedObject.course === course &&
+        if (
+          deserializedObject.course === course &&
           deserializedObject.exercise === exercise &&
-          deserializedObject.repoKey === repoKey){
-            return;
-          }
+          deserializedObject.repoKey === repoKey
+        ) {
+          return;
+        }
         course = deserializedObject.course;
         exercise = deserializedObject.exercise;
         repoKey = deserializedObject.repoKey;

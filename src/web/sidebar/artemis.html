@@ -37,6 +37,11 @@
         align-items: baseline; 
         justify-content: space-between;
       }
+      .column {
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start;     
+      }
       .grid{
         display: grid;
         grid-gap: 20px;
@@ -117,11 +122,14 @@
     <div id="courseSelection" style="padding-left: 10px; padding-right: 10px;">
       <h2>Courses</h2>
       <button id="courseItem" hidden="true">
+        <h2 id="courseTitle"></h2>
         <div class="row">
-          <h2 id="courseTitle"></h2>
           <span id="courseScore"></span>
+          <div class="column">
+            <span id="nextExercise"></span>
+            <span id="nextExerciseDue"></span>
+          </div>
         </div>
-        <span id="nextExercise"></span>
       </button>
 
       <div id="courseGrid" class="grid">
@@ -131,11 +139,11 @@
     <div id="exerciseSelection" style="padding-left: 10px; padding-right: 10px;">
       <h2>Exercises</h2>
       <button id="exerciseItem" hidden="true">
+        <h2 id="exerciseTitle"></h2>
         <div class="row">
-          <h2 id="exerciseTitle"></h2>
           <span id="exerciseScore"></span>
+          <span id="exerciseDue"></span>
         </div>
-        <span id="exerciseDue"></span>
       </button>
 
       <h3>Due coming up</h3>
@@ -153,23 +161,23 @@
     </div>
 
     <div id="problemStatement">
-      <div class="row">
-        <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
+        <div class="row">
+          <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
 
-        <div id="score">
-          <button id="scoreButton" onclick="scorePopup.showModal()">
-            Score
-          </button>
-          <dialog id="scorePopup">
-            <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
-            <iframe
-              id="scoreIframe"
-              referrerpolicy="origin-when-cross-origin"
-              sandbox="allow-scripts allow-same-origin"
-              ></iframe>
-          </dialog>
+          <div id="score">
+            <button id="scoreButton" onclick="scorePopup.showModal()">
+              Score
+            </button>
+            <dialog id="scorePopup">
+              <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
+              <iframe
+                id="scoreIframe"
+                referrerpolicy="origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin"
+                ></iframe>
+            </dialog>
+          </div>
         </div>
-      </div>
 
       <iframe
         id="problemStatementIframe"
