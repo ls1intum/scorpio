@@ -49,6 +49,10 @@
         grid-template-columns: repeat(auto-fill, minmax(100px, 300px));
         justify-content: center;
       }
+      .scrollableContainer {
+        overflow-y: auto;
+        height: 100%;
+      }
       #problemStatement {
         height: 100%;
       }
@@ -88,6 +92,11 @@
       }
       dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
+      }
+      table {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-spacing: 10px 5px;
       }
       #pet{
         position: absolute;
@@ -161,34 +170,50 @@
     </div>
 
     <div id="problemStatement">
-      <div class="column">
-        <div class="row">
-          <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
+      <div class="row">
+        <button id="cloneSubmitButton" onclick="cloneRepository()">Clone</button>
 
-          <div id="score">
-            <button id="scoreButton" onclick="scorePopup.showModal()">
-              Score
-            </button>
-            <dialog id="scorePopup">
-              <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
-              <iframe
-                id="scoreIframe"
-                referrerpolicy="origin-when-cross-origin"
-                sandbox="allow-scripts allow-same-origin"
-                ></iframe>
-            </dialog>
-          </div>
+        <div id="score">
+          <button id="scoreButton" onclick="scorePopup.showModal()">
+            Score
+          </button>
+          <dialog id="scorePopup">
+            <button id="closeScorePopup" onclick="scorePopup.close()">X</button>
+            <iframe
+              id="scoreIframe"
+              referrerpolicy="origin-when-cross-origin"
+              sandbox="allow-scripts allow-same-origin"
+              ></iframe>
+          </dialog>
         </div>
-
-        <table id="exerciseDetails">
-        </table>
       </div>
 
-      <iframe
-        id="problemStatementIframe"
-        referrerpolicy="origin-when-cross-origin"
-        sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
-      ></iframe>
+      <div class="scrollableContainer">
+        <table id="exerciseDetails">
+          <tr>
+            <td style="font-weight: bold;">Points:</td>
+            <td id="pointsCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Submission due:</td>
+            <td id="submissionCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Complaint possible:</td>
+            <td id="complaintCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Difficulty:</td>
+            <td id="difficultyCell"></td>
+          </tr>
+        </table>
+
+        <iframe
+          id="problemStatementIframe"
+          referrerpolicy="origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
+        ></iframe>
+      </div>
     </div>
 
     <img id="pet" src="${petUri}"></img>

@@ -360,35 +360,25 @@ function displayScore(_courseId, _exerciseId, participation) {
 
 function displayExerciseDetails(participation) {
   const exerciseDetailsTable = document.getElementById("exerciseDetails");
-  exerciseDetailsTable.replaceChildren();
 
-  const pointRow = exerciseDetailsTable.insertRow();
-  pointRow.insertCell().textContent = "Points";
-  pointRow.insertCell().textContent = participation
+  exerciseDetailsTable.querySelector("#pointsCell").textContent = participation?.results
     ? `${(
-        ((participation?.results
-          ?.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
+        ((participation.results
+          .sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
           .at(0)?.score ?? 0) *
           exercise.maxPoints) /
         100
       ).toFixed(1)} / ${exercise.maxPoints}`
     : "No score";
 
-  const submissionDueRow = exerciseDetailsTable.insertRow();
-  submissionDueRow.insertCell().textContent = "Submission due";
-  submissionDueRow.insertCell().textContent = exercise.dueDate
-    ? exercise.dueDate.toLocaleString()
+  exerciseDetailsTable.querySelector("#submissionCell").textContent = exercise.dueDate
+    ? new Date(exercise.dueDate).toLocaleString()
     : "No due date";
 
-  const allowComplaintsRow = exerciseDetailsTable.insertRow();
-  allowComplaintsRow.insertCell().textContent = "Complaint possible";
-  allowComplaintsRow.insertCell().textContent = exercise.allowComplaintsForAutomaticAssessments
-    ? "Yes"
-    : "No";
+  exerciseDetailsTable.querySelector("#complaintCell").textContent =
+    exercise.allowComplaintsForAutomaticAssessments ? "Yes" : "No";
 
-  const difficultyRow = exerciseDetailsTable.insertRow();
-  difficultyRow.insertCell().textContent = "Difficulty";
-  difficultyRow.insertCell().textContent = exercise.difficulty;
+  exerciseDetailsTable.querySelector("#difficultyCell").textContent = exercise.difficulty ?? "n/d";
 }
 
 async function displayProblemStatement() {
