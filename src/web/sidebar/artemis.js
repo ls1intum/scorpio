@@ -267,7 +267,9 @@ function buildExerciseItem(_exercise, itemTemplate) {
       .at(0)?.score;
     return score ? `${score} %` : "No graded result";
   })();
-  item.querySelector("#exerciseDue").textContent = _exercise.dueDate ? _exercise.dueDate.toLocaleString() : "";
+  item.querySelector("#exerciseDue").textContent = _exercise.dueDate
+    ? _exercise.dueDate.toLocaleString()
+    : "";
 
   item.hidden = false;
   item.onclick = () => {
@@ -356,15 +358,50 @@ function displayScore(_courseId, _exerciseId, participation) {
   return true;
 }
 
+function displayExerciseDetails(participation) {
+  const exerciseDetailsTable = document.getElementById("exerciseDetails");
+  exerciseDetailsTable.replaceChildren();
+
+  const pointRow = exerciseDetailsTable.insertRow();
+  pointRow.insertCell().textContent = "Points";
+  pointRow.insertCell().textContent = participation
+    ? `${(
+        ((participation?.results
+          ?.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
+          .at(0)?.score ?? 0) *
+          exercise.maxPoints) /
+        100
+      ).toFixed(1)} / ${exercise.maxPoints}`
+    : "No score";
+
+  const submissionDueRow = exerciseDetailsTable.insertRow();
+  submissionDueRow.insertCell().textContent = "Submission due";
+  submissionDueRow.insertCell().textContent = exercise.dueDate
+    ? exercise.dueDate.toLocaleString()
+    : "No due date";
+
+  const allowComplaintsRow = exerciseDetailsTable.insertRow();
+  allowComplaintsRow.insertCell().textContent = "Complaint possible";
+  allowComplaintsRow.insertCell().textContent = exercise.allowComplaintsForAutomaticAssessments
+    ? "Yes"
+    : "No";
+
+  const difficultyRow = exerciseDetailsTable.insertRow();
+  difficultyRow.insertCell().textContent = "Difficulty";
+  difficultyRow.insertCell().textContent = exercise.difficulty;
+}
+
 async function displayProblemStatement() {
   let url = `\${client_url}/courses/${course.id}/exercises/${exercise.id}/problem-statement`;
 
   const participation = await fetchParticipation(course.id, exercise.id);
-  if (displayScore(course.id, exercise.id, participation)) {
+  if (participation) {
     url += `/${participation.id}`;
-  } else {
-    document.getElementById("score").hidden = true;
   }
+
+  document.getElementById("score").hidden = !displayScore(course.id, exercise.id, participation);
+
+  displayExerciseDetails(participation);
 
   document.getElementById("problemStatementIframe").src = url;
 
