@@ -218,15 +218,18 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
   item.querySelector(
     "#courseScore"
   ).textContent = `${_courseWithScore.totalScores.studentScores.absoluteScore}/${_courseWithScore.totalScores.reachablePoints} Points`;
-  item.querySelector("#nextExercise").textContent = (() => {
-    const nextExercise = _courseWithScore.course?.exercises
-      ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
-      .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
-      .at(0);
-    return nextExercise
-      ? `Next exercise: ${nextExercise.title} due on ${nextExercise.dueDate.toLocaleString()}`
-      : "No upcoming exercise";
-  })();
+
+  const nextExercise = _courseWithScore.course?.exercises
+    ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
+    .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
+    .at(0);
+
+  item.querySelector("#nextExercise").textContent = nextExercise
+    ? `Next exercise: ${nextExercise.title}`
+    : "No upcoming exercise";
+  item.querySelector("#nextExerciseDue").textContent = nextExercise
+    ? `due on ${nextExercise.dueDate.toDateString()}`
+    : "";
 
   item.hidden = false;
 
@@ -249,7 +252,6 @@ async function displayCourseOptions() {
     const item = buildCourseItem(courseWithScore, courseItemTemplate);
     courseGrid.appendChild(item);
   });
-
 }
 
 function buildExerciseItem(_exercise, itemTemplate) {
@@ -265,7 +267,9 @@ function buildExerciseItem(_exercise, itemTemplate) {
       .at(0)?.score;
     return score ? `${score} %` : "No graded result";
   })();
-  item.querySelector("#exerciseDue").textContent = _exercise.dueDate;
+  item.querySelector("#exerciseDue").textContent = _exercise.dueDate
+    ? _exercise.dueDate.toLocaleString()
+    : "";
 
   item.hidden = false;
   item.onclick = () => {
@@ -354,15 +358,40 @@ function displayScore(_courseId, _exerciseId, participation) {
   return true;
 }
 
+function displayExerciseDetails(participation) {
+  const exerciseDetailsTable = document.getElementById("exerciseDetails");
+
+  exerciseDetailsTable.querySelector("#pointsCell").textContent = participation?.results
+    ? `${(
+        ((participation.results
+          .sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
+          .at(0)?.score ?? 0) *
+          exercise.maxPoints) /
+        100
+      ).toFixed(1)} / ${exercise.maxPoints}`
+    : "No score";
+
+  exerciseDetailsTable.querySelector("#submissionCell").textContent = exercise.dueDate
+    ? new Date(exercise.dueDate).toLocaleString()
+    : "No due date";
+
+  exerciseDetailsTable.querySelector("#complaintCell").textContent =
+    exercise.allowComplaintsForAutomaticAssessments ? "Yes" : "No";
+
+  exerciseDetailsTable.querySelector("#difficultyCell").textContent = exercise.difficulty ?? "n/d";
+}
+
 async function displayProblemStatement() {
   let url = `\${client_url}/courses/${course.id}/exercises/${exercise.id}/problem-statement`;
 
   const participation = await fetchParticipation(course.id, exercise.id);
-  if (displayScore(course.id, exercise.id, participation)) {
+  if (participation) {
     url += `/${participation.id}`;
-  } else {
-    document.getElementById("score").hidden = true;
   }
+
+  document.getElementById("score").hidden = !displayScore(course.id, exercise.id, participation);
+
+  displayExerciseDetails(participation);
 
   document.getElementById("problemStatementIframe").src = url;
 
@@ -410,11 +439,13 @@ window.addEventListener("message", (event) => {
       const messageText = message.text;
       try {
         const deserializedObject = JSON.parse(messageText);
-        if(deserializedObject.course === course &&
+        if (
+          deserializedObject.course === course &&
           deserializedObject.exercise === exercise &&
-          deserializedObject.repoKey === repoKey){
-            return;
-          }
+          deserializedObject.repoKey === repoKey
+        ) {
+          return;
+        }
         course = deserializedObject.course;
         exercise = deserializedObject.exercise;
         repoKey = deserializedObject.repoKey;

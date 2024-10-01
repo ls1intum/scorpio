@@ -37,12 +37,21 @@
         align-items: baseline; 
         justify-content: space-between;
       }
+      .column {
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start;     
+      }
       .grid{
         display: grid;
         grid-gap: 20px;
         grid-auto-flow: row;
         grid-template-columns: repeat(auto-fill, minmax(100px, 300px));
         justify-content: center;
+      }
+      .scrollableContainer {
+        overflow-y: auto;
+        height: 100%;
       }
       #problemStatement {
         height: 100%;
@@ -84,6 +93,11 @@
       dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.5);
       }
+      table {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-spacing: 10px 5px;
+      }
       #pet{
         position: absolute;
         margin-bottom: 0;
@@ -117,11 +131,14 @@
     <div id="courseSelection" style="padding-left: 10px; padding-right: 10px;">
       <h2>Courses</h2>
       <button id="courseItem" hidden="true">
+        <h2 id="courseTitle"></h2>
         <div class="row">
-          <h2 id="courseTitle"></h2>
-          <p id="courseScore"></p>
+          <span id="courseScore"></span>
+          <div class="column">
+            <span id="nextExercise"></span>
+            <span id="nextExerciseDue"></span>
+          </div>
         </div>
-        <p id="nextExercise"></p>
       </button>
 
       <div id="courseGrid" class="grid">
@@ -131,11 +148,11 @@
     <div id="exerciseSelection" style="padding-left: 10px; padding-right: 10px;">
       <h2>Exercises</h2>
       <button id="exerciseItem" hidden="true">
+        <h2 id="exerciseTitle"></h2>
         <div class="row">
-          <h2 id="exerciseTitle"></h2>
-          <p id="exerciseScore"></p>
+          <span id="exerciseScore"></span>
+          <span id="exerciseDue"></span>
         </div>
-        <p id="exerciseDue"></p>
       </button>
 
       <h3>Due coming up</h3>
@@ -171,11 +188,32 @@
         </div>
       </div>
 
-      <iframe
-        id="problemStatementIframe"
-        referrerpolicy="origin-when-cross-origin"
-        sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
-      ></iframe>
+      <div class="scrollableContainer">
+        <table id="exerciseDetails">
+          <tr>
+            <td style="font-weight: bold;">Points:</td>
+            <td id="pointsCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Submission due:</td>
+            <td id="submissionCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Complaint possible:</td>
+            <td id="complaintCell"></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold;">Difficulty:</td>
+            <td id="difficultyCell"></td>
+          </tr>
+        </table>
+
+        <iframe
+          id="problemStatementIframe"
+          referrerpolicy="origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
+        ></iframe>
+      </div>
     </div>
 
     <img id="pet" src="${petUri}"></img>
