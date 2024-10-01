@@ -8,7 +8,7 @@ import { Exercise } from "../exercise/exercise.model";
 import { fetch_course_exercise_projectKey } from "../exercise/exercise.api";
 import { set_state, state } from "./state";
 
-let gitAPI: GitAPI;
+export let gitAPI: GitAPI;
 
 let currentRepo: Repository | undefined;
 

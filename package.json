@@ -12,14 +12,14 @@
     "Other"
   ],
   "extensionKind": [
-    "ui",
-    "workspace"
+    "workspace",
+    "ui"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
-  "browser": "./dist/extension.js",
   "main": "./dist/extension.js",
+  "browser": "./dist/extension.js",
   "contributes": {
     "authentication": [
       {
@@ -75,6 +75,11 @@
     },
     "commands": [
       {
+        "command": "scorpio.restart",
+        "category": "Artemis",
+        "title": "Restart Extension"
+      },
+      {
         "command": "scorpio.login",
         "category": "Artemis",
         "title": "Login"
@@ -129,15 +134,15 @@
       "commandPalette": [
         {
           "command": "scorpio.login",
-          "when": "!scorpio.authenticated"
+          "when": "!scorpio.theia && !scorpio.authenticated"
         },
         {
           "command": "scorpio.logout",
-          "when": "scorpio.authenticated"
+          "when": "!scorpio.theia && scorpio.authenticated"
         },
         {
           "command": "scorpio.displayExercise",
-          "when": "scorpio.authenticated"
+          "when": "!scorpio.theia && scorpio.authenticated"
         },
         {
           "command": "scorpio.displayedExercise.remove",
@@ -145,7 +150,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "scorpio.authenticated && scorpio.displayedKey"
+          "when": "!scorpio.theia && scorpio.authenticated && scorpio.displayedKey"
         },
         {
           "command": "scorpio.workspace.submit",
@@ -180,7 +185,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
           "group": "navigation@3"
         },
         {
@@ -190,7 +195,7 @@
         },
         {
           "command": "scorpio.displayedExercise.remove",
-          "when": "(view == artemis-sidebar) && scorpio.displayedKey",
+          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.displayedKey",
           "group": "navigation@1"
         }
       ]

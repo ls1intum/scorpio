@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { authenticateToken } from "./authentication_api";
+import { cloneUrlEnv, theiaEnv, tokenEnv } from "../theia/theia";
 
 export const AUTH_ID = "artemis";
 const AUTH_NAME = `Credentials`; // what is displayed on the profile button
@@ -31,7 +32,11 @@ export class ArtemisAuthenticationProvider
     this.sessionPromise = this.getSessionFromStorage();
 
     this._disposable = vscode.Disposable.from(
-      vscode.authentication.registerAuthenticationProvider(AUTH_ID, AUTH_NAME, this),
+      vscode.authentication.registerAuthenticationProvider(
+        AUTH_ID,
+        AUTH_NAME,
+        this
+      ),
       secretStorage.onDidChange(() => this.checkForUpdates())
     );
   }
@@ -62,12 +67,7 @@ export class ArtemisAuthenticationProvider
       );
   }
 
-  /**
-   * Create a new auth session
-   * @param scopes
-   * @returns
-   */
-  public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
+  private async loginDialog(): Promise<{ token: string; username: string }> {
     const username = await vscode.window.showInputBox({
       ignoreFocusOut: true,
       prompt: "Enter your Artemis username",
@@ -90,6 +90,28 @@ export class ArtemisAuthenticationProvider
       throw new Error(`login failure`);
     }
 
+    return { token, username };
+  }
+
+  /**
+   * Create a new auth session
+   * @param scopes
+   * @returns
+   */
+  public async createSession(
+    scopes: string[]
+  ): Promise<vscode.AuthenticationSession> {
+    var token = "";
+    var username = "";
+    if (theiaEnv) {
+      token = tokenEnv!;
+      username = cloneUrlEnv!.username;
+    } else {
+      const { token: _token, username: _username } = await this.loginDialog();
+      token = _token;
+      username = _username;
+    }
+
     const session = new ArtemisSession(token, username, scopes);
 
     await this.secretStorage.store(
@@ -108,6 +130,10 @@ export class ArtemisAuthenticationProvider
 
   // This function is called when the end user signs out of the account.
   async removeSession(_sessionId: string = ""): Promise<void> {
+    if (theiaEnv) {
+      throw Error("Cannot sign out in theia environment");
+    }
+
     const session = await this.sessionPromise;
     if (!session) {
       return;
