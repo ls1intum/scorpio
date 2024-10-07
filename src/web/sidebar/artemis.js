@@ -234,8 +234,14 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
   item.hidden = false;
 
   item.onclick = () => {
-    course = _courseWithScore.course;
-    changeState();
+
+    vscode.postMessage({
+      command: OutgoingCommand.setExercise,
+      text: JSON.stringify({
+        course: _courseWithScore.course,
+        exercise: undefined,
+      }),
+    });
   };
 
   return item;
@@ -294,6 +300,8 @@ function displayExerciseOptions() {
   pastDue.replaceChildren();
   const noDue = document.getElementById("noDue");
   noDue.replaceChildren();
+
+  document.getElementById("courseTitleExerciseSelection").textContent = `Exercises in ${course.title}`;
 
   const exerciseItemTemplate = document.getElementById("exerciseItem");
   exerciseItemTemplate.style.display = "none";
@@ -363,9 +371,8 @@ function displayExerciseDetails(participation) {
 
   exerciseDetailsTable.querySelector("#pointsCell").textContent = participation?.results
     ? `${(
-        ((participation.results
-          .sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
-          .at(0)?.score ?? 0) *
+        ((participation.results.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate)).at(0)
+          ?.score ?? 0) *
           exercise.maxPoints) /
         100
       ).toFixed(1)} / ${exercise.maxPoints}`
@@ -391,6 +398,7 @@ async function displayProblemStatement() {
 
   document.getElementById("score").hidden = !displayScore(course.id, exercise.id, participation);
 
+  document.getElementById("exerciseTitleProblemStatement").textContent = exercise.title;
   displayExerciseDetails(participation);
 
   document.getElementById("problemStatementIframe").src = url;

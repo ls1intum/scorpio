@@ -190,7 +190,7 @@
         },
         {
           "command": "scorpio.displayedExercise.remove",
-          "when": "(view == artemis-sidebar) && scorpio.displayedKey",
+          "when": "(view == artemis-sidebar) && scorpio.displayBackButton",
           "group": "navigation@1"
         }
       ]

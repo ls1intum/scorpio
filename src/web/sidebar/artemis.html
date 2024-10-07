@@ -12,23 +12,32 @@
         padding: 0;
         overflow: hidden;
       }
-      #login {
-        margin: 20px;
-        max-width: 500px;
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        margin: 0;
+        display: block;
       }
-      #loginButton {
-        max-width: 400px;
-        margin-top: 10px;
+      dialog {
+        width: 85%;
+        height: 85%;
+        border: none;
+        border-radius: 5px;
+        padding: 0;
+        margin: 5px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
-      #courseItem{
-        max-width: 300px;
-        display: flex;
-        flex-wrap: wrap;
+      dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
       }
-      #exerciseItem{
-        max-width: 300px;
-        display: flex;
-        flex-wrap: wrap;
+      table {
+        border-spacing: 10px 5px;
+        padding-left: 10px;
+        padding-right: 10px;
       }
       .row {
         width: 100%;
@@ -53,15 +62,27 @@
         overflow-y: auto;
         height: 100%;
       }
-      #problemStatement {
-        height: 100%;
+      .padHorizontal{
+        padding-left: 10px;
+        padding-right: 10px;
       }
-      iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-        margin: 0;
-        display: block;
+      #login {
+        margin: 20px;
+        max-width: 500px;
+      }
+      #loginButton {
+        max-width: 400px;
+        margin-top: 10px;
+      }
+      #courseItem{
+        max-width: 300px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      #exerciseItem{
+        max-width: 300px;
+        display: flex;
+        flex-wrap: wrap;
       }
       #cloneSubmitButton {
         width: 80px;
@@ -78,25 +99,8 @@
         width: 30px;
         background: transparent;
       }
-      dialog {
-        width: 85%;
-        height: 85%;
-        border: none;
-        border-radius: 5px;
-        padding: 0;
-        margin: 5px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-      dialog::backdrop {
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-      table {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        border-spacing: 10px 5px;
+      #problemStatement {
+        height: 100%;
       }
       #pet{
         position: absolute;
@@ -128,7 +132,7 @@
       <button id="loginButton" onclick="loginOut()">Login</button>
     </div>
 
-    <div id="courseSelection" style="padding-left: 10px; padding-right: 10px;">
+    <div id="courseSelection" class="padHorizontal">
       <h2>Courses</h2>
       <button id="courseItem" hidden="true">
         <h2 id="courseTitle"></h2>
@@ -145,8 +149,8 @@
       </div>
     </div>
 
-    <div id="exerciseSelection" style="padding-left: 10px; padding-right: 10px;">
-      <h2>Exercises</h2>
+    <div id="exerciseSelection" class="padHorizontal">
+      <h2 id="courseTitleExerciseSelection">Exercises</h2>
       <button id="exerciseItem" hidden="true">
         <h2 id="exerciseTitle"></h2>
         <div class="row">
@@ -189,6 +193,7 @@
       </div>
 
       <div class="scrollableContainer">
+        <h2 id="exerciseTitleProblemStatement" class="padHorizontal">Exercises</h2>
         <table id="exerciseDetails">
           <tr>
             <td style="font-weight: bold;">Points:</td>

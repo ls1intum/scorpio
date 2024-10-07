@@ -9,8 +9,7 @@ export interface State {
   repoExercise: Exercise | undefined;
 }
 
-export const onStateChange: vscode.EventEmitter<State> =
-  new vscode.EventEmitter<State>();
+export const onStateChange: vscode.EventEmitter<State> = new vscode.EventEmitter<State>();
 
 export var state: State = {
   displayedCourse: undefined,
@@ -40,35 +39,27 @@ export const set_state = (changes: State) => {
   state.displayedExercise = changes.displayedExercise;
 
   if (state.repoCourse && state.repoExercise) {
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.repoKey",
-      [
-      state.repoCourse.shortName.toUpperCase() +
-        state.repoExercise.shortName.toUpperCase()
-      ]
-    );
+    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
+      state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase(),
+    ]);
   } else {
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.repoKey",
-      null
-    );
+    vscode.commands.executeCommand("setContext", "scorpio.repoKey", null);
   }
 
-  if (state.displayedCourse && state.displayedExercise) {
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.displayedKey",
-    state.displayedCourse.shortName.toUpperCase() +
-        state.displayedExercise.shortName.toUpperCase()
-    );
+  if (state.displayedCourse) {
+    if (state.displayedExercise) {
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.displayedKey",
+        state.displayedCourse.shortName.toUpperCase() + state.displayedExercise.shortName.toUpperCase()
+      );
+    }
+
+    vscode.commands.executeCommand("setContext", "scorpio.displayBackButton", true);
   } else {
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.displayedKey",
-      null
-    );
+    vscode.commands.executeCommand("setContext", "scorpio.displayedKey", null);
+
+    vscode.commands.executeCommand("setContext", "scorpio.displayBackButton", false);
   }
 
   onStateChange.fire(changes);
