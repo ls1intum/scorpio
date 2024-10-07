@@ -306,6 +306,10 @@ function displayExerciseOptions() {
   exerciseItemTemplate.style.display = "none";
 
   course.exercises
+    .map((exercise) => {
+      exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
+      return exercise;
+    })
     .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
     .forEach((exercise) => {
       const item = buildExerciseItem(exercise, exerciseItemTemplate);
