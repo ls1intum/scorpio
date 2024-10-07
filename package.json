@@ -90,7 +90,7 @@
         "title": "Display Exercise"
       },
       {
-        "command": "scorpio.displayedExercise.remove",
+        "command": "scorpio.displayedExercise.back",
         "category": "Artemis",
         "title": "Show Course Selection",
         "icon": "$(arrow-left)"
@@ -140,7 +140,7 @@
           "when": "scorpio.authenticated"
         },
         {
-          "command": "scorpio.displayedExercise.remove",
+          "command": "scorpio.displayedExercise.back",
           "when": "false"
         },
         {
@@ -189,7 +189,7 @@
           "group": "navigation@2"
         },
         {
-          "command": "scorpio.displayedExercise.remove",
+          "command": "scorpio.displayedExercise.back",
           "when": "(view == artemis-sidebar) && scorpio.displayBackButton",
           "group": "navigation@1"
         }

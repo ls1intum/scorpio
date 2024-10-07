@@ -234,7 +234,6 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
   item.hidden = false;
 
   item.onclick = () => {
-
     vscode.postMessage({
       command: OutgoingCommand.setExercise,
       text: JSON.stringify({
@@ -332,7 +331,8 @@ async function fetchParticipation(_courseId, _exerciseId) {
       },
     });
     if (!response.ok) {
-      throw new Error(response.statusText);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
     }
 
     participation = await response.json();
