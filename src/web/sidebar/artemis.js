@@ -234,8 +234,13 @@ function buildCourseItem(_courseWithScore, itemTemplate) {
   item.hidden = false;
 
   item.onclick = () => {
-    course = _courseWithScore.course;
-    changeState();
+    vscode.postMessage({
+      command: OutgoingCommand.setExercise,
+      text: JSON.stringify({
+        course: _courseWithScore.course,
+        exercise: undefined,
+      }),
+    });
   };
 
   return item;
@@ -295,10 +300,16 @@ function displayExerciseOptions() {
   const noDue = document.getElementById("noDue");
   noDue.replaceChildren();
 
+  document.getElementById("courseTitleExerciseSelection").textContent = `Exercises in ${course.title}`;
+
   const exerciseItemTemplate = document.getElementById("exerciseItem");
   exerciseItemTemplate.style.display = "none";
 
   course.exercises
+    .map((exercise) => {
+      exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
+      return exercise;
+    })
     .sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1))
     .forEach((exercise) => {
       const item = buildExerciseItem(exercise, exerciseItemTemplate);
@@ -324,7 +335,8 @@ async function fetchParticipation(_courseId, _exerciseId) {
       },
     });
     if (!response.ok) {
-      throw new Error(response.statusText);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status} message: ${errorText}`);
     }
 
     participation = await response.json();
@@ -363,9 +375,8 @@ function displayExerciseDetails(participation) {
 
   exerciseDetailsTable.querySelector("#pointsCell").textContent = participation?.results
     ? `${(
-        ((participation.results
-          .sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate))
-          .at(0)?.score ?? 0) *
+        ((participation.results.sort((a, b) => new Date(b.completionDate) - new Date(a.completionDate)).at(0)
+          ?.score ?? 0) *
           exercise.maxPoints) /
         100
       ).toFixed(1)} / ${exercise.maxPoints}`
@@ -391,6 +402,7 @@ async function displayProblemStatement() {
 
   document.getElementById("score").hidden = !displayScore(course.id, exercise.id, participation);
 
+  document.getElementById("exerciseTitleProblemStatement").textContent = exercise.title;
   displayExerciseDetails(participation);
 
   document.getElementById("problemStatementIframe").src = url;
