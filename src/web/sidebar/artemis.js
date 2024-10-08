@@ -97,7 +97,7 @@ function loginOut() {
 
 async function setCookie(_token) {
   try {
-    await fetch(`\${base_url}/api/public/re-key`, {
+    await fetch(`\${base_url}/api/public/theia-token?as-cookie=true`, {
       method: "POST",
       credentials: "include",
       headers: {

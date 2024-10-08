@@ -21,9 +21,7 @@ class ArtemisSession implements vscode.AuthenticationSession {
   }
 }
 
-export class ArtemisAuthenticationProvider
-  implements vscode.AuthenticationProvider, vscode.Disposable
-{
+export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvider, vscode.Disposable {
   private readonly _disposable: vscode.Disposable | undefined;
   private sessionPromise: Promise<ArtemisSession | undefined>;
 
@@ -47,9 +45,7 @@ export class ArtemisAuthenticationProvider
    * @param scopes
    * @returns
    */
-  public async getSessions(
-    scopes: string[] = []
-  ): Promise<vscode.AuthenticationSession[]> {
+  public async getSessions(scopes: string[] = []): Promise<vscode.AuthenticationSession[]> {
     const session = await this.getSessionFromStorage();
     return session ? [session] : [];
   }
@@ -57,9 +53,7 @@ export class ArtemisAuthenticationProvider
   private async getSessionFromStorage() {
     return this.secretStorage
       .get(SESSIONS_SECRET_KEY)
-      .then((sessionString) =>
-        sessionString ? JSON.parse(sessionString) : undefined
-      );
+      .then((sessionString) => (sessionString ? JSON.parse(sessionString) : undefined));
   }
 
   /**
@@ -85,17 +79,14 @@ export class ArtemisAuthenticationProvider
       throw new Error("No password provided");
     }
 
-    const token = await authenticateToken(username, password);
+    const token = (await authenticateToken(username, password)).access_token;
     if (!token) {
       throw new Error(`login failure`);
     }
 
     const session = new ArtemisSession(token, username, scopes);
 
-    await this.secretStorage.store(
-      SESSIONS_SECRET_KEY,
-      JSON.stringify(session)
-    );
+    await this.secretStorage.store(SESSIONS_SECRET_KEY, JSON.stringify(session));
 
     this.onAuthSessionsChange.fire({
       added: [session],
