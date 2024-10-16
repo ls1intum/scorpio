@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
 import { onStateChange, set_state, state } from "../shared/state";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
-import artemisHTML from "./artemis.html";
-import artemisJS from "!raw-loader!./artemis.js";
 import { settings } from "../shared/config";
 import { Exercise } from "../exercise/exercise.model";
 import { Course } from "../course/course.model";
+import { getUri } from "./getUri";
+import { getNonce } from "./getNonce";
 
 enum IncomingCommands {
   INFO = "info",
@@ -63,7 +64,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
-      localResourceRoots: [this._extensionUri],
+      localResourceRoots: [vscode.Uri.joinPath(this._extensionUri, "dist"), vscode.Uri.joinPath(this._extensionUri, "webview/build")],
     };
 
     this.initHTML();
@@ -125,28 +126,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       return;
     }
 
-    this.htmlContent = artemisHTML;
-    const styleVSCodeUri = this._view.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const petArray = [
-      this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "penguin.png")),
-      this._view.webview.asWebviewUri(
-        vscode.Uri.joinPath(this._extensionUri, "media", "penguin-walking.gif")
-      ),
-      this._view.webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "penguin-hat.gif")),
-    ];
+    // The CSS file from the Angular build output
+    const stylesUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "styles.css"]);
+    // The JS files from the Angular build output
+    const runtimeUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "runtime.js"]);
+    const polyfillsUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "polyfills.js"]);
+    const scriptUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "main.js"]);
 
-    // import JS File
-    const script = artemisJS;
-    this.htmlContent = this.htmlContent!.replace("${script}", script);
-    this.htmlContent = this.htmlContent!.replace(/\$\{base_url\}/g, settings.base_url!);
-    this.htmlContent = this.htmlContent!.replace(/\$\{client_url\}/g, settings.client_url!);
-    this.htmlContent = this.htmlContent!.replace("${styleVSCodeUri}", styleVSCodeUri.toString());
-    this.htmlContent = this.htmlContent!.replace("${petUri}", petArray[0].toString());
-    //this.htmlContent = this.htmlContent!.replace("${petUri}", petArray[Math.floor(Math.random() * petArray.length)].toString());
+    const nonce = getNonce();
 
-    this._view.webview.html = this.htmlContent;
+    this._view.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource}; script-src 'nonce-${nonce}';">
+          <link rel="stylesheet" type="text/css" href="${stylesUri}">
+          <title>Hello World</title>
+        </head>
+        <body>
+          <app-root></app-root>
+          <script type="module" nonce="${nonce}" src="${runtimeUri}"></script>
+          <script type="module" nonce="${nonce}" src="${polyfillsUri}"></script>
+          <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+        </body>
+      </html>
+    `;
   }
 
   private async initState() {
