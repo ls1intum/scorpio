@@ -4,7 +4,7 @@
 
 * This folder contains all of the files necessary for your web extension.
 * `package.json` * this is the manifest file in which you declare your extension and command.
-* `src/web/extension.ts` * this is the main file for the browser
+* `src/extension.ts` * this is the main file for the browser
 * `webpack.config.js` * the webpack config file for the web main
 
 ## Setup
@@ -14,13 +14,13 @@
 ## Get up and running the Web Extension
 
 * Run `npm install`.
-* Place breakpoints in `src/web/extension.ts`.
+* Place breakpoints in `src/extension.ts`.
 * Debug via F5 (Run Web Extension).
 * Execute extension code via `F1 > Hello world`.
 
 ## Make changes
 
-* You can relaunch the extension from the debug toolbar after changing code in `src/web/extension.ts`.
+* You can relaunch the extension from the debug toolbar after changing code in `src/extension.ts`.
 * You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes.
 
 ## Explore the API
@@ -32,7 +32,7 @@
 * Open the debug viewlet (`Ctrl+Shift+D` or `Cmd+Shift+D` on Mac) and from the launch configuration dropdown pick `Extension Tests`.
 * Press `F5` to run the tests in a new window with your extension loaded.
 * See the output of the test result in the debug console.
-* Make changes to `src/web/test/suite/extension.test.ts` or create new test files inside the `test/suite` folder.
+* Make changes to `src/test/suite/extension.test.ts` or create new test files inside the `test/suite` folder.
   * The provided test runner will only consider files matching the name pattern `**.test.ts`.
   * You can create folders inside the `test` folder to structure your tests any way you want.
 

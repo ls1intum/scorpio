@@ -1,0 +1,10 @@
+<h2>Exercises in {{ course()?.title }}</h2>
+@for (exercise of exercises(); track exercise) {
+<vscode-button (click)="clickExercise(exercise)">
+  <h2>{{ exercise?.title }}</h2>
+  <div class="row">
+    <span> 0 / 0 </span>
+    <span> due date</span>
+  </div>
+</vscode-button>
+}
