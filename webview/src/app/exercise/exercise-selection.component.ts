@@ -45,15 +45,9 @@ export class ExerciseSelectionComponent implements OnInit {
   clickExercise(exercise: any) {
     vscode.postMessage({
       command: OutgoingCommands.SET_COURSE_AND_EXERCISE,
-      text: JSON.stringify({ course: this.course, exercise: exercise }),
+      text: JSON.stringify({ course: this.course(), exercise: exercise }),
     });
 
-    // course and exercise are set by the changed state in the editor
-    this.stateService.changeState({
-      viewState: ViewState.PROBLEM_STATEMENT,
-      course: this.course(),
-      exercise: exercise,
-      repoKey: undefined,
-    });
+    // view change is triggered by editor
   }
 }

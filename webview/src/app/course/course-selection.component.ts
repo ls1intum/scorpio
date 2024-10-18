@@ -41,12 +41,6 @@ export class CourseSelectionComponent implements OnInit {
       text: JSON.stringify({ course: course, exercise: undefined }),
     });
 
-    // course is set by the changed state in the editor
-    this.stateService.changeState({
-      viewState: ViewState.EXERCISE_SELECTION,
-      course: course,
-      exercise: undefined,
-      repoKey: undefined,
-    });
+    // view change is triggered by editor
   }
 }
