@@ -1,5 +1,10 @@
 import type { WebviewApi } from "vscode-webview";
 
+export enum OutgoingCommands {
+  INFO =  "info",
+  ERROR = "error",
+};
+
 /**
  * A utility wrapper around the acquireVsCodeApi() function, which enables
  * message passing and state management between the webview and extension

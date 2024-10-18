@@ -1,26 +1,34 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { onStateChange, set_state, state } from "../shared/state";
+import { onStateChange, set_state, State, state } from "../shared/state";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/config";
 import { Exercise } from "../exercise/exercise.model";
-import { Course } from "../course/course.model";
+import { Course, TotalScores } from "../course/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
+import { fetch_all_courses } from "../course/course.api";
+import { fetch_programming_exercises_by_courseId } from "../exercise/exercise.api";
 
 enum IncomingCommands {
   INFO = "info",
   ERROR = "error",
   LOGIN = "login",
+  GET_COURSE_OPTIONS = "getCourseOptions",
+  GET_EXERCISE_OPTIONS = "getExerciseOptions",
   CLONE_REPOSITORY = "cloneRepository",
   SUBMIT = "submit",
-  SET_EXERCISE = "setExercise",
+  SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
 }
 
 enum OutgoingCommands {
-  SEND_ACCESS_TOKEN = "sendAccessToken",
-  LOGOUT = "logout",
-  SET_EXERCISE = "setExercise",
+  SHOW_LOGIN = "showLogin",
+  SHOW_COURSE_SELECTION = "showCourseSelection",
+  SHOW_EXERCISE_SELECTION = "showExerciseSelection",
+  SHOW_PROBLEM_STATEMENT = "showProblemStatement",
+  SEND_COURSE_OPTIONS = "sendCourseOptions",
+  SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
+  SEND_COURSE_AND_EXERCISE = "sendCourseAndExercise",
   EASTER_EGG = "easterEgg",
 }
 
@@ -32,12 +40,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _extensionUri: vscode.Uri,
     private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
   ) {
-    onStateChange.event((e) => {
-      const repoKey =
-        e.repoCourse && e.repoExercise
-          ? e.repoCourse.shortName.toUpperCase() + e.repoExercise.shortName.toUpperCase()
-          : undefined;
-      this.displayExercise(e.displayedCourse, e.displayedExercise, repoKey);
+    onStateChange.event((e: State) => {
+      this.displayExercise();
     });
 
     onAuthSessionsChange.event(async ({ added, removed, changed }) => {
@@ -64,7 +68,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this._extensionUri, "dist"), vscode.Uri.joinPath(this._extensionUri, "webview/build")],
+      localResourceRoots: [
+        vscode.Uri.joinPath(this._extensionUri, "dist"),
+        vscode.Uri.joinPath(this._extensionUri, "webview/build"),
+      ],
     };
 
     this.initHTML();
@@ -93,7 +100,41 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case IncomingCommands.LOGIN: {
+          console.log("got login from webview");
           vscode.commands.executeCommand("scorpio.login");
+          break;
+        }
+        case IncomingCommands.GET_COURSE_OPTIONS: {
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+          const coursesWithScore: { course: Course; totalScores: TotalScores }[] = await fetch_all_courses(
+            session.accessToken
+          );
+          this._view?.webview.postMessage({
+            command: OutgoingCommands.SEND_COURSE_OPTIONS,
+            text: JSON.stringify(coursesWithScore),
+          });
+          break;
+        }
+        case IncomingCommands.GET_EXERCISE_OPTIONS: {
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+          const exercises = await fetch_programming_exercises_by_courseId(
+            session.accessToken,
+            state.displayedCourse!.id
+          );
+          this._view?.webview.postMessage({
+            command: OutgoingCommands.SEND_EXERCISE_OPTIONS,
+            text: JSON.stringify(exercises),
+          });
           break;
         }
         case IncomingCommands.CLONE_REPOSITORY: {
@@ -104,7 +145,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           vscode.commands.executeCommand("scorpio.workspace.submit");
           break;
         }
-        case IncomingCommands.SET_EXERCISE: {
+        case IncomingCommands.SET_COURSE_AND_EXERCISE: {
           if (!data.text) {
             return;
           }
@@ -161,43 +202,60 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     });
     if (session) {
       this.login(session);
+      this.displayExercise();
     }
-
-    const repoKey =
-      state.repoCourse && state.repoExercise
-        ? state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase()
-        : undefined;
-    this.displayExercise(state.displayedCourse, state.displayedExercise, repoKey);
 
     this.easterEgg();
   }
 
   private login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
-      command: OutgoingCommands.SEND_ACCESS_TOKEN,
-      text: `${session.accessToken}`,
+      command: OutgoingCommands.SHOW_COURSE_SELECTION,
     });
   }
 
   private logout() {
     this._view?.webview.postMessage({
-      command: OutgoingCommands.LOGOUT,
+      command: OutgoingCommands.SHOW_LOGIN,
     });
   }
 
-  private displayExercise(
-    course: Course | undefined,
-    exercise: Exercise | undefined,
-    repoKey: string | undefined
-  ) {
-    this._view?.webview.postMessage({
-      command: OutgoingCommands.SET_EXERCISE,
-      text: JSON.stringify({
-        course: course,
-        exercise: exercise,
-        repoKey: repoKey,
-      }),
-    });
+  private displayExercise() {
+    const repoKey =
+      state.repoCourse && state.repoExercise
+        ? state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase()
+        : undefined;
+    const course = state.displayedCourse;
+    const exercise = state.displayedExercise;
+
+    if (!course && !exercise) {
+      this._view?.webview.postMessage({
+        command: OutgoingCommands.SHOW_COURSE_SELECTION,
+      });
+      return;
+    }
+
+    if (course && !exercise) {
+      this._view?.webview.postMessage({
+        command: OutgoingCommands.SHOW_EXERCISE_SELECTION,
+        text: JSON.stringify({
+          course: course,
+        }),
+      });
+      return;
+    }
+
+    if (course && exercise) {
+      this._view?.webview.postMessage({
+        command: OutgoingCommands.SHOW_PROBLEM_STATEMENT,
+        text: JSON.stringify({
+          course: course,
+          exercise: exercise,
+          repoKey: repoKey,
+        }),
+      });
+      return;
+    }
   }
 
   private easterEgg() {
