@@ -7,6 +7,7 @@ export async function cloneTheia(cloneUrl: URL) {
     initGitExtension();
   }
 
+  // Check if a workspace is available in which the exercise can be cloned
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     vscode.window.showErrorMessage("No workspace folder available");
@@ -22,6 +23,7 @@ export async function cloneTheia(cloneUrl: URL) {
     destinationPath
   );
 
+  // Update the workspace folder to include the cloned repository
   vscode.workspace.updateWorkspaceFolders(
     0,
     null,

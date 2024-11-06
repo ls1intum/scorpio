@@ -22,9 +22,7 @@ class ArtemisSession implements vscode.AuthenticationSession {
   }
 }
 
-export class ArtemisAuthenticationProvider
-  implements vscode.AuthenticationProvider, vscode.Disposable
-{
+export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvider, vscode.Disposable {
   private readonly _disposable: vscode.Disposable | undefined;
   private sessionPromise: Promise<ArtemisSession | undefined>;
 
@@ -32,11 +30,7 @@ export class ArtemisAuthenticationProvider
     this.sessionPromise = this.getSessionFromStorage();
 
     this._disposable = vscode.Disposable.from(
-      vscode.authentication.registerAuthenticationProvider(
-        AUTH_ID,
-        AUTH_NAME,
-        this
-      ),
+      vscode.authentication.registerAuthenticationProvider(AUTH_ID, AUTH_NAME, this),
       secretStorage.onDidChange(() => this.checkForUpdates())
     );
   }
@@ -52,9 +46,7 @@ export class ArtemisAuthenticationProvider
    * @param scopes
    * @returns
    */
-  public async getSessions(
-    scopes: string[] = []
-  ): Promise<vscode.AuthenticationSession[]> {
+  public async getSessions(scopes: string[] = []): Promise<vscode.AuthenticationSession[]> {
     const session = await this.getSessionFromStorage();
     return session ? [session] : [];
   }
@@ -62,12 +54,10 @@ export class ArtemisAuthenticationProvider
   private async getSessionFromStorage() {
     return this.secretStorage
       .get(SESSIONS_SECRET_KEY)
-      .then((sessionString) =>
-        sessionString ? JSON.parse(sessionString) : undefined
-      );
+      .then((sessionString) => (sessionString ? JSON.parse(sessionString) : undefined));
   }
 
-  private async loginDialog(): Promise<{ token: string; username: string }> {
+  private async loginDialog(): Promise<{ username: string; password: string }> {
     const username = await vscode.window.showInputBox({
       ignoreFocusOut: true,
       prompt: "Enter your Artemis username",
@@ -85,12 +75,7 @@ export class ArtemisAuthenticationProvider
       throw new Error("No password provided");
     }
 
-    const token = await authenticateToken(username, password);
-    if (!token) {
-      throw new Error(`login failure`);
-    }
-
-    return { token, username };
+    return { username, password };
   }
 
   /**
@@ -98,26 +83,25 @@ export class ArtemisAuthenticationProvider
    * @param scopes
    * @returns
    */
-  public async createSession(
-    scopes: string[]
-  ): Promise<vscode.AuthenticationSession> {
+  public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
     var token = "";
     var username = "";
     if (theiaEnv) {
       token = tokenEnv!;
       username = cloneUrlEnv!.username;
     } else {
-      const { token: _token, username: _username } = await this.loginDialog();
-      token = _token;
+      const { username: _username, password: _password } = await this.loginDialog();
+      token = await authenticateToken(_username, _password);
+      if (!token) {
+        throw new Error(`login failure`);
+      }
+      
       username = _username;
     }
 
     const session = new ArtemisSession(token, username, scopes);
 
-    await this.secretStorage.store(
-      SESSIONS_SECRET_KEY,
-      JSON.stringify(session)
-    );
+    await this.secretStorage.store(SESSIONS_SECRET_KEY, JSON.stringify(session));
 
     this.onAuthSessionsChange.fire({
       added: [session],

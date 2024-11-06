@@ -53,10 +53,12 @@ function initAuthentication(
 
   context.subscriptions.push(authenticationProvider);
 
+  // check if user is already authenticated
+  // is needed for the login button to be displayed on the profile button
   (async () => {
     if (
       await vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: theiaEnv,
+        createIfNone: false,
       })
     ) {
       vscode.commands.executeCommand(
