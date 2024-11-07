@@ -19,7 +19,9 @@ import {
 } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
-import { initTheia, theiaEnv } from "./theia/theia";
+import { initTheia } from "./theia/theia";
+
+export var authenticationProvider: ArtemisAuthenticationProvider;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -27,13 +29,13 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "scorpio" is now active!');
 
-  const authenticationProvider = initAuthentication(context);
+  initAuthentication(context);
 
   initTheia();
 
-  const sidebar = initSidebar(context, authenticationProvider);
+  const sidebar = initSidebar(context);
 
-  registerCommands(context, authenticationProvider, sidebar);
+  registerCommands(context, sidebar);
 
   listenToEvents();
 
@@ -46,8 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 function initAuthentication(
   context: vscode.ExtensionContext
-): ArtemisAuthenticationProvider {
-  var authenticationProvider = new ArtemisAuthenticationProvider(
+) {
+  authenticationProvider = new ArtemisAuthenticationProvider(
     context.secrets
   );
 
@@ -97,13 +99,10 @@ function initAuthentication(
       }
     }
   );
-
-  return authenticationProvider;
 }
 
 function initSidebar(
   context: vscode.ExtensionContext,
-  authenticationProvider: ArtemisAuthenticationProvider
 ): SidebarProvider {
   // register sidebar for problem statement
   const sidebarProvider = new SidebarProvider(
@@ -122,7 +121,6 @@ function initSidebar(
 
 function registerCommands(
   context: vscode.ExtensionContext,
-  authenticationProvider: ArtemisAuthenticationProvider,
   sidebar: SidebarProvider
 ) {
   context.subscriptions.push(

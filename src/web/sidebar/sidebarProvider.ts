@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { onStateChange, set_state, state } from "../shared/state";
-import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
+import { AUTH_ID } from "../authentication/authentication_provider";
 import artemisHTML from "./artemis.html";
 import artemisJS from "!raw-loader!./artemis.js";
 import { settings } from "../shared/config";

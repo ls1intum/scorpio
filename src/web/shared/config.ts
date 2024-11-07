@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { authenticationProvider } from "../extension";
 
 type Settings = {
   base_url: string | undefined;
@@ -42,7 +43,7 @@ vscode.workspace.onDidChangeConfiguration(async (e) => {
     }
     settings.base_url = base_url;
 
-    await vscode.commands.executeCommand("scorpio.logout");
+    await authenticationProvider.removeSession();
     vscode.commands.executeCommand("scorpio.restart");
   }
 
