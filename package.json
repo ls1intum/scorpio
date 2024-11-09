@@ -6,7 +6,7 @@
   "icon": "media/artemis_logo.png",
   "version": "0.0.0",
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.95.0"
   },
   "categories": [
     "Other"
