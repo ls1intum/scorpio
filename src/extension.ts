@@ -188,13 +188,25 @@ function registerCommands(
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.displayedExercise.remove",  () => {
-      set_state({
-        displayedCourse: undefined,
-        displayedExercise: undefined,
-        repoCourse: state.repoCourse,
-        repoExercise: state.repoExercise,
-      });
+    vscode.commands.registerCommand("scorpio.displayedExercise.back",  () => {
+      if(state.displayedExercise){
+        // only remove exercise to get into exercise selection
+        set_state({
+          displayedCourse: state.displayedCourse,
+          displayedExercise: undefined,
+          repoCourse: state.repoCourse,
+          repoExercise: state.repoExercise,
+        });
+      } else {
+        set_state({
+          displayedCourse: undefined,
+          displayedExercise: undefined,
+          repoCourse: state.repoCourse,
+          repoExercise: state.repoExercise,
+        });
+      }
+
+      
     })
   );
 

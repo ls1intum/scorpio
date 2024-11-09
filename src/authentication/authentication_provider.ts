@@ -91,7 +91,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
       username = cloneUrlEnv!.username;
     } else {
       const { username: _username, password: _password } = await this.loginDialog();
-      token = await authenticateToken(_username, _password);
+      token = (await authenticateToken(_username, _password)).access_token;
       if (!token) {
         throw new Error(`login failure`);
       }

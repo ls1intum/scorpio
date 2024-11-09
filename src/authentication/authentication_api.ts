@@ -3,7 +3,7 @@ import { settings } from "../shared/config";
 export async function authenticateToken(
   username: string,
   password: string
-): Promise<string> {
+): Promise<{access_token: string}> {
   var url = new URL(`${settings.base_url}/api/public/authenticate`);
   url.searchParams.append("as-bearer", "true");
 
@@ -24,7 +24,8 @@ export async function authenticateToken(
           `HTTP error with status: ${response.status} ${response.statusText}`
         );
       }
-      return response.text();
+
+      return response.json();
     })
     .catch((error) => {
       if (error instanceof TypeError) {
