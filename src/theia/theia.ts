@@ -31,7 +31,7 @@ export async function initTheia() {
 
   // make authentication
   if (
-    !await vscode.authentication.getSession(AUTH_ID, [], {
+    await vscode.authentication.getSession(AUTH_ID, [], {
       createIfNone: true,
     })
   ) {

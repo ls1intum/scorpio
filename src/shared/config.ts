@@ -44,6 +44,7 @@ vscode.workspace.onDidChangeConfiguration(async (e) => {
     settings.base_url = base_url;
 
     await authenticationProvider.removeSession();
+    console.log("Restarting extension");
     vscode.commands.executeCommand("scorpio.restart");
   }
 

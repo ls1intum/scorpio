@@ -1,12 +1,8 @@
 import * as vscode from "vscode";
-import { gitAPI, initGitExtension } from "../shared/repository";
+import simpleGit from "simple-git";
+import * as path from 'path';
 
 export async function cloneTheia(cloneUrl: URL) {
-  // Access the git extension
-  if (!gitAPI) {
-    initGitExtension();
-  }
-
   // Check if a workspace is available in which the exercise can be cloned
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
@@ -16,17 +12,11 @@ export async function cloneTheia(cloneUrl: URL) {
 
   const destinationPath = workspaceFolders[0].uri.fsPath;
 
-  // Clone the repository
-  await vscode.commands.executeCommand(
-    "git.clone",
-    cloneUrl.toString(),
-    destinationPath
-  );
+  // Create a subdirectory for the cloned repository
+  const repoName = path.basename(cloneUrl.pathname, '.git'); // Use repository name as subdirectory name
+  const clonePath = path.join(destinationPath, repoName);
 
-  // Update the workspace folder to include the cloned repository
-  vscode.workspace.updateWorkspaceFolders(
-    0,
-    null,
-    { uri: vscode.Uri.file(destinationPath) }
-  );
+  // Clone the repository
+  const git = simpleGit(destinationPath);
+  await git.clone(cloneUrl.toString(), clonePath);
 }
