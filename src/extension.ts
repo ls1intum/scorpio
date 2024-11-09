@@ -19,6 +19,9 @@ import {
 } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
+import { initTheia } from "./theia/theia";
+
+export var authenticationProvider: ArtemisAuthenticationProvider;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -26,7 +29,34 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "scorpio" is now active!');
 
-  const authenticationProvider = initAuthentication(context);
+  initAuthentication(context);
+
+  initTheia();
+
+  const sidebar = initSidebar(context);
+
+  registerCommands(context, sidebar);
+
+  listenToEvents();
+
+  (async () => {
+    // TODO make wait until everything else is initialized
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+  })();
+}
+
+function initAuthentication(
+  context: vscode.ExtensionContext
+) {
+  authenticationProvider = new ArtemisAuthenticationProvider(
+    context.secrets
+  );
+
+  context.subscriptions.push(authenticationProvider);
+
+  // check if user is already authenticated
+  // is needed for the login button to be displayed on the profile button
   (async () => {
     if (
       await vscode.authentication.getSession(AUTH_ID, [], {
@@ -40,28 +70,6 @@ export function activate(context: vscode.ExtensionContext) {
       );
     }
   })();
-
-  const sidebar = initSidebar(context, authenticationProvider);
-
-  registerCommands(context, authenticationProvider, sidebar);
-
-  listenToEvents();
-
-  (async () => {
-    // TODO make wait until everything else is initialized
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
-  })();
-}
-
-function initAuthentication(
-  context: vscode.ExtensionContext
-): ArtemisAuthenticationProvider {
-  var authenticationProvider = new ArtemisAuthenticationProvider(
-    context.secrets
-  );
-
-  context.subscriptions.push(authenticationProvider);
 
   authenticationProvider.onAuthSessionsChange.event(
     ({ added, removed, changed }) => {
@@ -91,13 +99,10 @@ function initAuthentication(
       }
     }
   );
-
-  return authenticationProvider;
 }
 
 function initSidebar(
   context: vscode.ExtensionContext,
-  authenticationProvider: ArtemisAuthenticationProvider
 ): SidebarProvider {
   // register sidebar for problem statement
   const sidebarProvider = new SidebarProvider(
@@ -116,9 +121,15 @@ function initSidebar(
 
 function registerCommands(
   context: vscode.ExtensionContext,
-  authenticationProvider: ArtemisAuthenticationProvider,
   sidebar: SidebarProvider
 ) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("scorpio.restart", () => {
+      deactivate();
+      activate(context);
+    })
+  )
+
   // command to login
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.login", async () => {

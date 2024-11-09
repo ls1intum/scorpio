@@ -12,14 +12,14 @@
     "Other"
   ],
   "extensionKind": [
-    "ui",
-    "workspace"
+    "workspace",
+    "ui"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
-  "browser": "./dist/extension.js",
   "main": "./dist/extension.js",
+  "browser": "./dist/extension.js",
   "contributes": {
     "authentication": [
       {
@@ -47,9 +47,9 @@
           "editPresentation": "singlelineText",
           "type": "string"
         },
-        "scorpio.?":{
-            "description": "Wait and see",
-            "type": "boolean"
+        "scorpio.?": {
+          "description": "Wait and see",
+          "type": "boolean"
         }
       }
     },
@@ -74,6 +74,11 @@
       ]
     },
     "commands": [
+      {
+        "command": "scorpio.restart",
+        "category": "Artemis",
+        "title": "Restart Extension"
+      },
       {
         "command": "scorpio.login",
         "category": "Artemis",
@@ -129,15 +134,15 @@
       "commandPalette": [
         {
           "command": "scorpio.login",
-          "when": "!scorpio.authenticated"
+          "when": "!scorpio.theia && !scorpio.authenticated"
         },
         {
           "command": "scorpio.logout",
-          "when": "scorpio.authenticated"
+          "when": "!scorpio.theia && scorpio.authenticated"
         },
         {
           "command": "scorpio.displayExercise",
-          "when": "scorpio.authenticated"
+          "when": "!scorpio.theia && scorpio.authenticated"
         },
         {
           "command": "scorpio.displayedExercise.back",
@@ -145,7 +150,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "scorpio.authenticated && scorpio.displayedKey"
+          "when": "!scorpio.theia && scorpio.authenticated && scorpio.displayedKey"
         },
         {
           "command": "scorpio.workspace.submit",
@@ -180,7 +185,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "(view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
           "group": "navigation@3"
         },
         {
@@ -190,7 +195,7 @@
         },
         {
           "command": "scorpio.displayedExercise.back",
-          "when": "(view == artemis-sidebar) && scorpio.displayBackButton",
+          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.displayBackButton",
           "group": "navigation@1"
         }
       ]
@@ -236,6 +241,7 @@
     "fetch-cookie": "^3.0.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
+    "simple-git": "^3.27.0",
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0"
   },

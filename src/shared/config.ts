@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { authenticationProvider } from "../extension";
 
 type Settings = {
   base_url: string | undefined;
@@ -33,14 +34,18 @@ export const settings: Settings = (() => {
   };
 })();
 
-vscode.workspace.onDidChangeConfiguration((e) => {
+
+vscode.workspace.onDidChangeConfiguration(async (e) => {
   if (e.affectsConfiguration("scorpio.artemis.apiBaseUrl")) {
     const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
     if (!base_url) {
       vscode.window.showErrorMessage("Artemis API Base URL not set. Please set it in the settings.");
     }
     settings.base_url = base_url;
-    return;
+
+    await authenticationProvider.removeSession();
+    console.log("Restarting extension");
+    vscode.commands.executeCommand("scorpio.restart");
   }
 
   if (e.affectsConfiguration("scorpio.artemis.clientBaseUrl")) {
@@ -53,18 +58,16 @@ vscode.workspace.onDidChangeConfiguration((e) => {
       }
     }
     settings.client_url = client_url;
-    return;
   }
 
   if (e.affectsConfiguration("scorpio.defaults.repoPath")) {
     const default_repo_path = vscode.workspace.getConfiguration("scorpio").get<string>("defaults.repoPath");
     settings.default_repo_path = default_repo_path;
-    return;
   }
 
   if (e.affectsConfiguration("scorpio.?")) {
     const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("?") ?? false;
     settings.easter_egg = easter_egg;
-    return;
+
   }
 });

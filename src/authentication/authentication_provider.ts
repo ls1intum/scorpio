@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { authenticateToken } from "./authentication_api";
+import { cloneUrlEnv, theiaEnv, tokenEnv } from "../theia/theia";
 
 export const AUTH_ID = "artemis";
 const AUTH_NAME = `Credentials`; // what is displayed on the profile button
@@ -56,12 +57,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
       .then((sessionString) => (sessionString ? JSON.parse(sessionString) : undefined));
   }
 
-  /**
-   * Create a new auth session
-   * @param scopes
-   * @returns
-   */
-  public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
+  private async loginDialog(): Promise<{ username: string; password: string }> {
     const username = await vscode.window.showInputBox({
       ignoreFocusOut: true,
       prompt: "Enter your Artemis username",
@@ -79,9 +75,28 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
       throw new Error("No password provided");
     }
 
-    const token = (await authenticateToken(username, password)).access_token;
-    if (!token) {
-      throw new Error(`login failure`);
+    return { username, password };
+  }
+
+  /**
+   * Create a new auth session
+   * @param scopes
+   * @returns
+   */
+  public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
+    var token = "";
+    var username = "";
+    if (theiaEnv) {
+      token = tokenEnv!;
+      username = cloneUrlEnv!.username;
+    } else {
+      const { username: _username, password: _password } = await this.loginDialog();
+      token = (await authenticateToken(_username, _password)).access_token;
+      if (!token) {
+        throw new Error(`login failure`);
+      }
+      
+      username = _username;
     }
 
     const session = new ArtemisSession(token, username, scopes);
@@ -99,6 +114,10 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
 
   // This function is called when the end user signs out of the account.
   async removeSession(_sessionId: string = ""): Promise<void> {
+    if (theiaEnv) {
+      throw Error("Cannot sign out in theia environment");
+    }
+
     const session = await this.sessionPromise;
     if (!session) {
       return;
