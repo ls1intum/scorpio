@@ -1,16 +1,34 @@
+# Ignore extension configs
 .vscode/**
+
+# Ignore test files
 .vscode-test-web/**
+**/.vscode-test.*
+dist/test/**
+
 src/**
 out/**
 node_modules/**
-dist/test/**
 .gitignore
-vsc-extension-quickstart.md
 webpack.config.js
 esbuild.js
+
+#Ignore all webview files except build directory
+webview/src/**
+webview/public/**
+webview/scripts/**
+webview/index.html
+webview/README.md
+webview/package.json
+webview/package-lock.json
+webview/node_modules/**
+webview/.gitignore
+webview/.vscode/**
+
+# Ignore misc
 .yarnrc
+vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
-**/.vscode-test.*
