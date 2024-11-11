@@ -3,11 +3,11 @@
     "version": "0.0.1",
     "private": true,
     "scripts": {
-      "ng": "ng",
-      "start": "ng serve",
-      "build": "ng build --output-hashing=none",
-      "watch": "ng build --watch --configuration development",
-      "test": "ng test"
+        "ng": "ng",
+        "start": "ng serve",
+        "build": "ng build --output-hashing=none",
+        "watch": "ng build --watch --configuration development",
+        "test": "ng test"
     },
     "dependencies": {
         "@angular/animations": "^18.2.8",
@@ -18,21 +18,28 @@
         "@angular/platform-browser": "^18.2.8",
         "@angular/platform-browser-dynamic": "^18.2.8",
         "@angular/router": "^18.2.8",
+        "@vscode/markdown-it-katex": "^1.1.0",
         "@vscode/webview-ui-toolkit": "^1.4.0",
+        "dompurify": "^3.1.7",
+        "markdown-it": "^14.1.0",
+        "markdown-it-class": "^1.0.0",
+        "markdown-it-highlightjs": "^4.2.0",
         "rxjs": "~7.8.1",
+        "trusted-types": "^2.0.0",
         "tslib": "^2.8.0",
         "zone.js": "~0.14.10"
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "^18.2.8",
-        "@angular/cli": "^18.2.8",
-        "@angular/compiler-cli": "^18.2.8",
-        "@angular/language-service": "^18.2.8",
         "@angular-eslint/builder": "18.3.1",
         "@angular-eslint/eslint-plugin": "18.3.1",
         "@angular-eslint/eslint-plugin-template": "18.3.1",
         "@angular-eslint/schematics": "18.3.1",
         "@angular-eslint/template-parser": "18.3.1",
+        "@angular/cli": "^18.2.8",
+        "@angular/compiler-cli": "^18.2.8",
+        "@angular/language-service": "^18.2.8",
+        "@types/markdown-it": "^14.1.2",
         "@types/vscode-webview": "^1.57.0",
         "typescript": "^5.5.4"
     }

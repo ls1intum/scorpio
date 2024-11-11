@@ -212,11 +212,9 @@
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
-
     "start:webview": "cd webview && npm run start",
     "build:webview": "cd webview && npm run build",
     "install:webview": "cd webview && npm install",
-
     "install:all": "npm install && npm run install:webview",
     "build:all": "npm run build && npm run build:webview"
   },
@@ -243,6 +241,7 @@
     "@vscode/vsce": "^3.1.1",
     "dotenv": "^16.4.5",
     "fetch-cookie": "^3.0.1",
+    "markdown-it": "^14.1.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "simple-git": "^3.27.0",

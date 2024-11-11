@@ -14,7 +14,7 @@ export enum ViewState {
   LOGIN = "login",
   COURSE_SELECTION = "course-selection",
   EXERCISE_SELECTION = "exercise-selection",
-  PROBLEM_STATEMENT = "problem-statement",
+  PROBLEM_STATEMENT = "exercise-detail",
 }
 
 export interface State {

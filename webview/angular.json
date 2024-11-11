@@ -24,7 +24,8 @@
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/assets"],
             "styles": ["src/vscode.css"],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": ["@vscode/markdown-it-katex", "dompurify", "markdown-it-class"]
           },
           "configurations": {
             "production": {
@@ -32,7 +33,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
