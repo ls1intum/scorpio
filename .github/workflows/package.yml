@@ -37,9 +37,12 @@ jobs:
             - name: Change version
               run: npm version ${{ inputs.version }} --no-git-tag-version
 
+            - name: Install Dependencies
+              run: npm run install:all
+                
             - name: Build Project
               run: npm run build:all
-              
+
             - name: Package VSIX
               run: npm run package
 
