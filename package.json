@@ -212,9 +212,13 @@
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
-    "install:all": "npm install && cd webview && npm install",
+
     "start:webview": "cd webview && npm run start",
-    "build:webview": "cd webview && npm run build"
+    "build:webview": "cd webview && npm run build",
+    "install:webview": "cd webview && npm install",
+
+    "install:all": "npm install && npm run install:webview",
+    "build:all": "npm run build && npm run build:webview"
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",

@@ -21,4 +21,4 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Build Project
-              run: npm run build
+              run: npm run build:all
