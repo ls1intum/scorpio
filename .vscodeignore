@@ -12,6 +12,7 @@ node_modules/**
 .gitignore
 webpack.config.js
 esbuild.js
+.github/**
 
 #Ignore all webview files except build directory
 webview/src/**
