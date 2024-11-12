@@ -1,4 +1,4 @@
-import { settings } from "../shared/config";
+import { settings } from "../shared/settings";
 import { Course, TotalScores } from "./course.model";
 
 export async function fetch_course_by_courseId(

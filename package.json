@@ -31,23 +31,30 @@
       "title": "Scorpio - Artemis",
       "properties": {
         "scorpio.artemis.apiBaseUrl": {
+          "order": 1,
           "description": "The base URL of the Artemis Server",
           "type": "string",
+          "format": "uri",
           "editPresentation": "singlelineText",
           "default": "http://localhost:8080"
         },
         "scorpio.artemis.clientBaseUrl": {
+          "order": 2,
           "markdownDescription": "The URL of the Artemis Client - probably the same as `#scorpio.artemis.apiBaseUrl#`",
           "type": "string",
+          "format": "uri",
           "editPresentation": "singlelineText",
           "default": "http://localhost:9000"
         },
         "scorpio.defaults.repoPath": {
+          "order": 3,
           "description": "The default to search for and clone repositories into - has to be an absolute path",
           "editPresentation": "singlelineText",
-          "type": "string"
+          "type": "string",
+          "format": "path"
         },
         "scorpio.?": {
+          "order": 99,
           "description": "Wait and see",
           "type": "boolean"
         }

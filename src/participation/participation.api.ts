@@ -1,4 +1,4 @@
-import { settings } from "../shared/config";
+import { settings } from "../shared/settings";
 import { Participation } from "./participation.model";
 
 export async function start_exercise(

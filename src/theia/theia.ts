@@ -9,8 +9,9 @@ import { exit } from "process";
 const envFilePath = path.resolve(__dirname, '../.env');
 dotenv.config({path: envFilePath}); 
 export const theiaEnv: boolean = process.env.THEIA == "true";
-export const tokenEnv = process.env.ARTEMIS_TOKEN;
-export const cloneUrlEnv = process.env.ARTEMIS_CLONE_URL ? new URL(process.env.ARTEMIS_CLONE_URL) : undefined;
+export const theiaArtemisToken = process.env.ARTEMIS_TOKEN;
+export const theiaCloneUrl = process.env.ARTEMIS_CLONE_URL ? new URL(process.env.ARTEMIS_CLONE_URL) : undefined;
+export const theiaArtemisUrl = process.env.ARTEMIS_URL;
 
 export async function initTheia() {
   if (!theiaEnv) {
@@ -18,10 +19,10 @@ export async function initTheia() {
   }
 
   vscode.window.showInformationMessage("Theia environment detected");
-  if (!tokenEnv) {
+  if (!theiaArtemisToken) {
     vscode.window.showErrorMessage("No token in environment for theia usecase");
   }
-  if (!cloneUrlEnv) {
+  if (!theiaCloneUrl) {
     vscode.window.showErrorMessage(
       "No clone url in environment for theia usecase"
     );
@@ -45,7 +46,7 @@ export async function initTheia() {
   }
 
   // clone repository
-  cloneTheia(cloneUrlEnv!);
+  cloneTheia(theiaCloneUrl!);
 
   // login should trigger workspace detection
 }

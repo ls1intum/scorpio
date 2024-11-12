@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { API as GitAPI, GitExtension, Remote, Repository } from "../git"; // Path where you saved git.d.ts
-import { settings } from "../shared/config";
+import { settings } from "./settings";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "../course/course.model";

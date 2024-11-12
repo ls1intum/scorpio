@@ -1,14 +1,32 @@
 import * as vscode from "vscode";
 import { authenticationProvider } from "../extension";
+import { theiaEnv } from "../theia/theia";
+import { getSettingsForTheia, handleSettingsChangeForTheia } from "../theia/settings";
 
-type Settings = {
+export type Settings = {
   base_url: string | undefined;
   client_url: string | undefined;
   default_repo_path: string | undefined;
   easter_egg: boolean;
 };
 
-export const settings: Settings = (() => {
+export const settings: Settings = (() =>{
+  if (theiaEnv) {
+    return getSettingsForTheia();
+  } else{
+    return getSettingsForVscode();
+  }
+})();
+
+vscode.workspace.onDidChangeConfiguration((e) => {
+  if (theiaEnv) {
+    handleSettingsChangeForTheia(e);
+  } else {
+    handleSettingsChangeForVscode(e);
+  }
+});
+
+function getSettingsForVscode(): Settings {
   const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
   if (!base_url) {
     vscode.window.showErrorMessage("Artemis API Base URL not set. Please set it in the settings.");
@@ -32,10 +50,9 @@ export const settings: Settings = (() => {
     default_repo_path: default_repo_path,
     easter_egg: easter_egg,
   };
-})();
+}
 
-
-vscode.workspace.onDidChangeConfiguration(async (e) => {
+async function handleSettingsChangeForVscode(e: vscode.ConfigurationChangeEvent) {
   if (e.affectsConfiguration("scorpio.artemis.apiBaseUrl")) {
     const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
     if (!base_url) {
@@ -68,6 +85,7 @@ vscode.workspace.onDidChangeConfiguration(async (e) => {
   if (e.affectsConfiguration("scorpio.?")) {
     const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("?") ?? false;
     settings.easter_egg = easter_egg;
-
   }
-});
+}
+
+
