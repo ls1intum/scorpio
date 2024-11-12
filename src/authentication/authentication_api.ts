@@ -1,4 +1,4 @@
-import { settings } from "../shared/config";
+import { settings } from "../shared/settings";
 
 export async function authenticateToken(
   username: string,

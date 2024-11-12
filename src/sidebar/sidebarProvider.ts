@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import { onStateChange, set_state, State, state } from "../shared/state";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
-import { settings } from "../shared/config";
+import { settings } from "../shared/settings";
 import { Exercise } from "../exercise/exercise.model";
 import { Course, TotalScores } from "../course/course.model";
 import { getUri } from "./getUri";

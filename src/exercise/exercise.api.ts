@@ -1,4 +1,4 @@
-import { settings } from "../shared/config";
+import { settings } from "../shared/settings";
 import { Course } from "../course/course.model";
 import { Exercise } from "./exercise.model";
 
