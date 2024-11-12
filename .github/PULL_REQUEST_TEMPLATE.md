@@ -1,16 +1,11 @@
-### Motivation and Context
-<!-- Why is this change required? What problem does it solve? -->
-<!-- If it fixes an open issue, please link to the issue here. -->
-
 ### Description
 <!-- Describe your changes in detail -->
 
 ### Steps for Testing
 <!-- Please describe in detail how the reviewer can test your changes. -->
 
-1. Install the release as described in [the readme](https://github.com/ls1intum/Orion/blob/main/README.md#testing-of-pull-requests)
-2. Open an exercise in Orion
-3. ...
+1. Open an exercise in Scorpio
+2. ...
 
 ### Review Progress
 <!-- Each Pull Request should be reviewed by at least two other developers. The code as well as the functionality (= manual test) needs to be reviewed. -->

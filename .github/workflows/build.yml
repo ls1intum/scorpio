@@ -20,5 +20,8 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Install Dependencies
+              run: npm run install:all
+
             - name: Build Project
               run: npm run build:all
