@@ -1,15 +1,17 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, signal, WritableSignal } from "@angular/core";
-import { vscode } from "../vscode";
-import { ActivatedRoute } from "@angular/router";
 import { StateService } from "../state.service";
+import { CommonModule } from "@angular/common";
+import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
 
 @Component({
-  selector: "problem-statement",
-  templateUrl: "./problem-statement.component.html",
-  styleUrls: ["./problem-statement.component.css"],
+  selector: "exercise-detail",
+  templateUrl: "./exercise-detail.view.html",
+  styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, ProblemStatementComponent],
 })
-export class ProblemStatementComponent implements OnInit {
+export class ExerciseDetailView implements OnInit {
   course: WritableSignal<any> = signal(undefined);
 
   exercise: WritableSignal<any> = signal(undefined);

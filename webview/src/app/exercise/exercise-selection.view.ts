@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, signal, WritableSignal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, Input, OnInit, signal, WritableSignal } from "@angular/core";
 import { vscode } from "../vscode";
 import { StateService, ViewState } from "../state.service";
+import { CommonModule } from "@angular/common";
 
 enum OutgoingCommands {
   GET_EXERCISE_OPTIONS = "getExerciseOptions",
@@ -13,11 +14,14 @@ enum IncomingCommands {
 
 @Component({
   selector: "exercise-selection",
-  templateUrl: "./exercise-selection.component.html",
-  styleUrls: ["./exercise-selection.component.css"],
+  templateUrl: "./exercise-selection.view.html",
+  styleUrls: ["./exercise-selection.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class ExerciseSelectionComponent implements OnInit {
+export class ExerciseSelectionView implements OnInit {
   course: WritableSignal<any> = signal(undefined);
 
   exercises: WritableSignal<[any] | undefined> = signal(undefined);

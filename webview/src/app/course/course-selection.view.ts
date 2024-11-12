@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, signal, WritableSignal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, Input, OnInit, signal, WritableSignal } from "@angular/core";
 import { vscode } from "../vscode";
-import { Router } from "@angular/router";
 import { StateService, ViewState } from "../state.service";
+import { CommonModule } from "@angular/common";
 
 enum OutgoingCommands {
   GET_COURSE_OPTIONS = "getCourseOptions",
@@ -14,11 +14,14 @@ enum IncomingCommands {
 
 @Component({
   selector: "course-selection",
-  templateUrl: "./course-selection.component.html",
-  styleUrls: ["./course-selection.component.css"],
+  templateUrl: "./course-selection.view.html",
+  styleUrls: ["./course-selection.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class CourseSelectionComponent implements OnInit {
+export class CourseSelectionView implements OnInit {
   coursesWithScore: WritableSignal<[any] | undefined> = signal(undefined);
 
   constructor(private stateService: StateService) {}
