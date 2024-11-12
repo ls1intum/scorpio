@@ -6,6 +6,7 @@ export async function authenticateToken(
 ): Promise<{access_token: string}> {
   var url = new URL(`${settings.base_url}/api/public/authenticate`);
   url.searchParams.append("as-bearer", "true");
+  url.searchParams.append("tool", "SCORPIO");
 
   return fetch(url, {
     method: "POST",
