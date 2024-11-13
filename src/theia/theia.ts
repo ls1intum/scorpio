@@ -1,17 +1,19 @@
 import * as vscode from "vscode";
 import { cloneTheia } from "./cloning";
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import * as dotenv from "dotenv";
+import * as path from "path";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { exit } from "process";
 
-
-const envFilePath = path.resolve(__dirname, '../.env');
-dotenv.config({path: envFilePath}); 
+// const envFilePath = path.resolve(__dirname, "../.env");
+// dotenv.config({ path: envFilePath });
+dotenv.config();
 export const theiaEnv: boolean = process.env.THEIA == "true";
 export const theiaArtemisToken = process.env.ARTEMIS_TOKEN;
-export const theiaCloneUrl = process.env.ARTEMIS_CLONE_URL ? new URL(process.env.ARTEMIS_CLONE_URL) : undefined;
 export const theiaArtemisUrl = process.env.ARTEMIS_URL;
+export const theiaGitCloneUrl = process.env.GIT_URI ? new URL(process.env.GIT_URI) : undefined;
+export const theiaGitUserName = process.env.GIT_USER;
+export const theiaGitUserMail = process.env.GIT_MAIL;
 
 export async function initTheia() {
   if (!theiaEnv) {
@@ -19,13 +21,11 @@ export async function initTheia() {
   }
 
   vscode.window.showInformationMessage("Theia environment detected");
-  if (!theiaArtemisToken) {
-    vscode.window.showErrorMessage("No token in environment for theia usecase");
-  }
-  if (!theiaCloneUrl) {
+  if (!theiaArtemisToken || !theiaArtemisUrl || !theiaGitCloneUrl || !theiaGitUserName || !theiaGitUserMail) {
     vscode.window.showErrorMessage(
-      "No clone url in environment for theia usecase"
+      "The Theia environment variables are not configured correctly. Quitting extension."
     );
+    exit(1);
   }
 
   vscode.commands.executeCommand("setContext", "scorpio.theia", true);
@@ -36,17 +36,13 @@ export async function initTheia() {
       createIfNone: true,
     })
   ) {
-    vscode.commands.executeCommand(
-      "setContext",
-      "scorpio.authenticated",
-      true
-    );
-  }else {
+    vscode.commands.executeCommand("setContext", "scorpio.authenticated", true);
+  } else {
     vscode.window.showErrorMessage("User could not be authenticated with token in environment");
   }
 
   // clone repository
-  cloneTheia(theiaCloneUrl!);
+  cloneTheia(theiaGitCloneUrl!);
 
   // login should trigger workspace detection
 }
