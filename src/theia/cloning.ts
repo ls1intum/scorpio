@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import simpleGit from "simple-git";
 import * as path from "path";
+import { theiaGitUserMail, theiaGitUserName } from "./theia";
 
 export async function cloneTheia(cloneUrl: URL) {
   // Check if a workspace is available in which the exercise can be cloned
@@ -18,6 +19,9 @@ export async function cloneTheia(cloneUrl: URL) {
 
   // Clone the repository
   const git = simpleGit(destinationPath);
+  await git.addConfig("user.name", theiaGitUserName!);
+  await git.addConfig("user.email", theiaGitUserMail!);
+
   try {
     await git.clone(cloneUrl.toString(), clonePath);
   } catch (e: any) {
