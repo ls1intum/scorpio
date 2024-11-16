@@ -19,11 +19,12 @@ export async function cloneTheia(cloneUrl: URL) {
 
   // Clone the repository
   const git = simpleGit(destinationPath);
-  await git.addConfig("user.name", theiaGitUserName!);
-  await git.addConfig("user.email", theiaGitUserMail!);
 
   try {
     await git.clone(cloneUrl.toString(), clonePath);
+
+    await git.addConfig("user.name", theiaGitUserName!, true);
+    await git.addConfig("user.email", theiaGitUserMail!, true);
   } catch (e: any) {
     vscode.window.showErrorMessage(`Error cloning repository: ${e.message}`);
   }

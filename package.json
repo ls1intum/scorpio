@@ -238,6 +238,7 @@
     "html-loader": "^5.1.0",
     "mocha": "^10.7.3",
     "process": "^0.11.10",
+    "dotenv": "^16.4.5",
     "raw-loader": "^4.0.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
@@ -246,7 +247,6 @@
   },
   "dependencies": {
     "@vscode/vsce": "^3.1.1",
-    "dotenv": "^16.4.5",
     "fetch-cookie": "^3.0.1",
     "markdown-it": "^14.1.0",
     "os-browserify": "^0.3.0",

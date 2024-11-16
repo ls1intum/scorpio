@@ -7,7 +7,7 @@ import { exit } from "process";
 
 // const envFilePath = path.resolve(__dirname, "../.env");
 // dotenv.config({ path: envFilePath });
-dotenv.config();
+
 export const theiaEnv: boolean = process.env.THEIA == "true";
 export const theiaArtemisToken = process.env.ARTEMIS_TOKEN;
 export const theiaArtemisUrl = process.env.ARTEMIS_URL;
@@ -16,6 +16,11 @@ export const theiaGitUserName = process.env.GIT_USER;
 export const theiaGitUserMail = process.env.GIT_MAIL;
 
 export async function initTheia() {
+  vscode.window.showInformationMessage(`Env variables: \n ${
+    Object.entries(process.env)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(';\n')
+    }`)
   if (!theiaEnv) {
     return;
   }
