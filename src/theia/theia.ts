@@ -15,12 +15,13 @@ export const theiaGitCloneUrl = process.env.GIT_URI ? new URL(process.env.GIT_UR
 export const theiaGitUserName = process.env.GIT_USER;
 export const theiaGitUserMail = process.env.GIT_MAIL;
 
-export async function initTheia() {
-  vscode.window.showInformationMessage(`Env variables: \n ${
-    Object.entries(process.env)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(';\n')
-    }`)
+export async function initTheia(context: vscode.ExtensionContext) {
+  let envVariables = 'Env variables:\n';
+  context.environmentVariableCollection.forEach((variable, name) => {
+    envVariables += `${name}: ${variable}\n`;
+  });
+  vscode.window.showInformationMessage(envVariables);
+
   if (!theiaEnv) {
     return;
   }
