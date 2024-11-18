@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { theiaArtemisUrl } from "./theia";
 import { settings, Settings } from "../shared/settings";
+import { theiaEnv } from "./theia";
 
 export function getSettingsForTheia(): Settings {
-  const base_url = theiaArtemisUrl;
+  const base_url = theiaEnv!.ARTEMIS_URL?.toString();
   if (!base_url) {
     vscode.window.showWarningMessage("Artemis API URL not set in env. Falling back to default.");
     vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
