@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   initAuthentication(context);
 
-  initTheia(context);
+  initTheia();
 
   const sidebar = initSidebar(context);
 

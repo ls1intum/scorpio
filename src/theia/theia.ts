@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { cloneTheia } from "./cloning";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { exit } from "process";
+import { execSync } from "child_process";
 
 type theiaEnv = {
   ARTEMIS_TOKEN: string | undefined;
@@ -11,7 +12,7 @@ type theiaEnv = {
   GIT_MAIL: string | undefined;
 };
 
-export const theiaEnv: theiaEnv | undefined = (() => {
+function readTheiaEnv(): theiaEnv | undefined {
   if (!getEnvVariable("THEIA")) {
     return undefined;
   }
@@ -31,17 +32,26 @@ export const theiaEnv: theiaEnv | undefined = (() => {
     GIT_USER: theiaGitUserName,
     GIT_MAIL: theiaGitUserMail,
   };
-})();
+}
 
-export async function initTheia(context: vscode.ExtensionContext) {
+export const theiaEnv: theiaEnv | undefined = readTheiaEnv();
+
+export async function initTheia() {
   console.log(theiaEnv);
+  vscode.window.showInformationMessage(`${theiaEnv}`);
 
   if (!theiaEnv) {
     return;
   }
 
   vscode.window.showInformationMessage("Theia environment detected");
-  if (!theiaEnv.ARTEMIS_TOKEN || !theiaEnv.ARTEMIS_URL || !theiaEnv.GIT_URI || !theiaEnv.GIT_USER || !theiaEnv.GIT_MAIL) {
+  if (
+    !theiaEnv.ARTEMIS_TOKEN ||
+    !theiaEnv.ARTEMIS_URL ||
+    !theiaEnv.GIT_URI ||
+    !theiaEnv.GIT_USER ||
+    !theiaEnv.GIT_MAIL
+  ) {
     vscode.window.showErrorMessage(
       "The Theia environment variables are not configured correctly. Quitting extension."
     );
@@ -67,7 +77,6 @@ export async function initTheia(context: vscode.ExtensionContext) {
   // login should trigger workspace detection
 }
 
-import { execSync } from "child_process";
 
 function getEnvVariable(key: string): string | undefined {
   try {
