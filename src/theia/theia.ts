@@ -1,32 +1,47 @@
 import * as vscode from "vscode";
 import { cloneTheia } from "./cloning";
-import * as dotenv from "dotenv";
-import * as path from "path";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { exit } from "process";
 
-// const envFilePath = path.resolve(__dirname, "../.env");
-// dotenv.config({ path: envFilePath });
+type theiaEnv = {
+  ARTEMIS_TOKEN: string | undefined;
+  ARTEMIS_URL: URL | undefined;
+  GIT_URI: URL | undefined;
+  GIT_USER: string | undefined;
+  GIT_MAIL: string | undefined;
+};
 
-export const theiaEnv: boolean = process.env.THEIA == "true";
-export const theiaArtemisToken = process.env.ARTEMIS_TOKEN;
-export const theiaArtemisUrl = process.env.ARTEMIS_URL;
-export const theiaGitCloneUrl = process.env.GIT_URI ? new URL(process.env.GIT_URI) : undefined;
-export const theiaGitUserName = process.env.GIT_USER;
-export const theiaGitUserMail = process.env.GIT_MAIL;
+export const theiaEnv: theiaEnv | undefined = (() => {
+  if (!getEnvVariable("THEIA")) {
+    return undefined;
+  }
 
-export async function initTheia() {
-  vscode.window.showInformationMessage(`Env variables: \n ${
-    Object.entries(process.env)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(';\n')
-    }`)
+  const theiaArtemisToken = getEnvVariable("ARTEMIS_TOKEN");
+  const theiaArtemisUrlString = getEnvVariable("ARTEMIS_URL");
+  const theiaArtemisUrl = theiaArtemisUrlString ? new URL(theiaArtemisUrlString) : undefined;
+  const theiaGitCloneUrlString = getEnvVariable("GIT_URI");
+  const theiaGitCloneUrl = theiaGitCloneUrlString ? new URL(theiaGitCloneUrlString) : undefined;
+  const theiaGitUserName = getEnvVariable("GIT_USER");
+  const theiaGitUserMail = getEnvVariable("GIT_MAIL");
+
+  return {
+    ARTEMIS_TOKEN: theiaArtemisToken,
+    ARTEMIS_URL: theiaArtemisUrl,
+    GIT_URI: theiaGitCloneUrl,
+    GIT_USER: theiaGitUserName,
+    GIT_MAIL: theiaGitUserMail,
+  };
+})();
+
+export async function initTheia(context: vscode.ExtensionContext) {
+  console.log(theiaEnv);
+
   if (!theiaEnv) {
     return;
   }
 
   vscode.window.showInformationMessage("Theia environment detected");
-  if (!theiaArtemisToken || !theiaArtemisUrl || !theiaGitCloneUrl || !theiaGitUserName || !theiaGitUserMail) {
+  if (!theiaEnv.ARTEMIS_TOKEN || !theiaEnv.ARTEMIS_URL || !theiaEnv.GIT_URI || !theiaEnv.GIT_USER || !theiaEnv.GIT_MAIL) {
     vscode.window.showErrorMessage(
       "The Theia environment variables are not configured correctly. Quitting extension."
     );
@@ -47,7 +62,19 @@ export async function initTheia() {
   }
 
   // clone repository
-  cloneTheia(theiaGitCloneUrl!);
+  cloneTheia(theiaEnv.GIT_URI!);
 
   // login should trigger workspace detection
+}
+
+import { execSync } from "child_process";
+
+function getEnvVariable(key: string): string | undefined {
+  try {
+    const result = execSync(`echo $${key}`, { encoding: "utf8" });
+    return result.trim();
+  } catch (error) {
+    console.error(`Error fetching env variable ${key}: ${error}`);
+    return undefined;
+  }
 }
