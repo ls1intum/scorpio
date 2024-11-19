@@ -37,9 +37,6 @@ function readTheiaEnv(): theiaEnv | undefined {
 export const theiaEnv: theiaEnv | undefined = readTheiaEnv();
 
 export async function initTheia() {
-  console.log(theiaEnv);
-  vscode.window.showInformationMessage(`${theiaEnv}`);
-
   if (!theiaEnv) {
     return;
   }

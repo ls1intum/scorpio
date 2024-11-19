@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import simpleGit from "simple-git";
+import simpleGit, { GitConfigScope } from "simple-git";
 import * as path from "path";
 import { theiaEnv } from "./theia";
 
@@ -23,8 +23,8 @@ export async function cloneTheia(cloneUrl: URL) {
   try {
     await git.clone(cloneUrl.toString(), clonePath);
 
-    await git.addConfig("user.name", theiaEnv?.GIT_USER!, true);
-    await git.addConfig("user.email", theiaEnv?.GIT_MAIL!, true);
+    await git.addConfig("user.name", theiaEnv?.GIT_USER!, undefined, GitConfigScope.global);
+    await git.addConfig("user.email", theiaEnv?.GIT_MAIL!, undefined, GitConfigScope.global);
   } catch (e: any) {
     vscode.window.showErrorMessage(`Error cloning repository: ${e.message}`);
   }
