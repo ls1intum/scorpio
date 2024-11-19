@@ -22,10 +22,13 @@ export async function cloneTheia(cloneUrl: URL) {
 
   try {
     await git.clone(cloneUrl.toString(), clonePath);
-
+  } catch (e: any) {
+    vscode.window.showErrorMessage(`Error cloning repository: ${e.message}`);
+  }
+  try {
     await git.addConfig("user.name", theiaEnv?.GIT_USER!, undefined, GitConfigScope.global);
     await git.addConfig("user.email", theiaEnv?.GIT_MAIL!, undefined, GitConfigScope.global);
   } catch (e: any) {
-    vscode.window.showErrorMessage(`Error cloning repository: ${e.message}`);
+    vscode.window.showErrorMessage(`Error setting git config: ${e.message}`);
   }
 }

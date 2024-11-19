@@ -26,13 +26,13 @@ export async function handleSettingsChangeForTheia(e: vscode.ConfigurationChange
 
   if (e.affectsConfiguration("scorpio.artemis.apiBaseUrl")) {
     // url should not be changed in theia environement
-    vscode.window.showWarningMessage("Artemis API URL can not be changed in theia environment");
+    vscode.window.showWarningMessage("Artemis URL can not be changed in theia environment");
     config.update("artemis.apiBaseUrl", settings.base_url, vscode.ConfigurationTarget.Global);
   }
 
   if (e.affectsConfiguration("scorpio.artemis.clientBaseUrl")) {
     // url should not be changed in theia environement
-    vscode.window.showWarningMessage("Artemis Client URL can not be changed in theia environment");
+    vscode.window.showWarningMessage("Artemis URL can not be changed in theia environment");
     config.update("artemis.clientBaseUrl", settings.client_url, vscode.ConfigurationTarget.Global);
   }
 
