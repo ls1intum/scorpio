@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { cloneTheia } from "./cloning";
-import { AUTH_ID } from "../authentication/authentication_provider";
 import { exit } from "process";
 import { execSync } from "child_process";
 
@@ -34,11 +33,10 @@ function readTheiaEnv(): theiaEnv | undefined {
   };
 }
 
-export const theiaEnv: theiaEnv | undefined = readTheiaEnv();
+export var theiaEnv: theiaEnv | undefined;
 
 export async function initTheia() {
-  console.log(theiaEnv);
-  vscode.window.showInformationMessage(`${theiaEnv}`);
+  theiaEnv = readTheiaEnv();
 
   if (!theiaEnv) {
     return;
@@ -59,17 +57,6 @@ export async function initTheia() {
   }
 
   vscode.commands.executeCommand("setContext", "scorpio.theia", true);
-
-  // make authentication
-  if (
-    await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: true,
-    })
-  ) {
-    vscode.commands.executeCommand("setContext", "scorpio.authenticated", true);
-  } else {
-    vscode.window.showErrorMessage("User could not be authenticated with token in environment");
-  }
 
   // clone repository
   cloneTheia(theiaEnv.GIT_URI!);

@@ -10,21 +10,23 @@ export type Settings = {
   easter_egg: boolean;
 };
 
-export const settings: Settings = (() =>{
-  if (theiaEnv) {
-    return getSettingsForTheia();
-  } else{
-    return getSettingsForVscode();
-  }
-})();
+export var settings: Settings
 
-vscode.workspace.onDidChangeConfiguration((e) => {
+export function initSettings() {
   if (theiaEnv) {
-    handleSettingsChangeForTheia(e);
-  } else {
-    handleSettingsChangeForVscode(e);
+    settings = getSettingsForTheia();
+  } else{
+    settings = getSettingsForVscode();
   }
-});
+
+  vscode.workspace.onDidChangeConfiguration((e) => {
+    if (theiaEnv) {
+      handleSettingsChangeForTheia(e);
+    } else {
+      handleSettingsChangeForVscode(e);
+    }
+  });
+}
 
 function getSettingsForVscode(): Settings {
   const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
