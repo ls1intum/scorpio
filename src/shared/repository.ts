@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { API as GitAPI, GitExtension, Remote, Repository } from "../git"; // Path where you saved git.d.ts
 import { settings } from "./settings";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { AUTH_ID } from "../authentication/authentication_provider";
@@ -7,34 +6,13 @@ import { Course } from "../course/course.model";
 import { Exercise } from "../exercise/exercise.model";
 import { fetch_course_exercise_projectKey } from "../exercise/exercise.api";
 import { set_state, state } from "./state";
+import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
+import * as path from "path";
+import { retrieveVcsAccessToken } from "../authentication/authentication_api";
 
-export let gitAPI: GitAPI;
-
-let currentRepo: Repository | undefined;
-
-export function initGitExtension() {
-  if (
-    vscode.env.uiKind !== vscode.UIKind.Desktop ||
-    vscode.env.appHost !== "desktop"
-  ) {
-    throw new Error("Running in a web environment. Git features are disabled.");
-  }
-
-  const gitExtension =
-    vscode.extensions.getExtension<GitExtension>("vscode.git");
-  if (!gitExtension) {
-    throw new Error("Git extension not found");
-  }
-
-  gitAPI = gitExtension.exports.getAPI(1);
-}
+var gitRepo: SimpleGit | undefined;
 
 export async function cloneRepository(repoUrl: string, username: string) {
-  // Access the git extension
-  if (!gitAPI) {
-    initGitExtension();
-  }
-
   // Open a dialog to select the folder where the repo will be cloned
   const selectedFolder = await vscode.window.showOpenDialog({
     canSelectFolders: true,
@@ -46,18 +24,47 @@ export async function cloneRepository(repoUrl: string, username: string) {
     throw new Error("No folder selected");
   }
 
-  // Clone the repository
-  let cloneUrl = addCredentialsToHTTPUrl(repoUrl, username);
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
+  if (!session) {
+    throw new NotAuthenticatedError();
+  }
 
-  await vscode.commands.executeCommand(
-    "git.clone",
-    cloneUrl,
-    selectedFolder[0].fsPath.toString()
+  const vcsToken = await retrieveVcsAccessToken(
+    session.accessToken,
+    state.displayedExercise?.studentParticipations![0].id!
   );
+  // Clone the repository
+  const cloneUrlString = addVcsTokenToUrl(repoUrl, username, vcsToken);
+  const cloneUrl = new URL(cloneUrlString);
+
+  const destinationPath = selectedFolder[0].fsPath;
+  const repoName = path.basename(cloneUrl.pathname, ".git"); // Use repository name as subdirectory name
+  const clonePath = path.join(destinationPath, repoName);
+
+  const gitForClone = simpleGit(destinationPath);
+
+  await gitForClone.clone(cloneUrl.toString(), clonePath);
+
+  // Prompt the user to open the cloned folder in a new workspace
+  const openIn = await vscode.window.showInformationMessage(
+    `Would you like to open the cloned repository?`,
+    { modal: true },
+    "Open",
+    "Open in New Window",
+    "Cancel"
+  );
+
+  if (openIn === "Open") {
+    vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(clonePath));
+  } else if (openIn === "Open in New Window") {
+    vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(clonePath), true);
+  }
 }
 
-function addCredentialsToHTTPUrl(url: string, username: string) {
-  const credentials = `://${username}@`;
+function addVcsTokenToUrl(url: string, username: string, vsctoken: string): string {
+  const credentials = `://${username}:${vsctoken}@`;
   if (!url.includes("@")) {
     // the url has the format https://vcs-server.com
     return url.replace("://", credentials);
@@ -68,16 +75,11 @@ function addCredentialsToHTTPUrl(url: string, username: string) {
 }
 
 export async function submitCurrentWorkspace() {
-  // Access the git extension
-  if (!gitAPI) {
-    initGitExtension();
-  }
-
-  if (!currentRepo) {
+  if (!gitRepo) {
     throw new Error("No repository in workspace");
   }
 
-  const diff = await currentRepo.diffWithHEAD();
+  const diff = await gitRepo.diff();
   if (!diff || diff.length == 0) {
     throw new Error("No changes to commit");
   }
@@ -100,15 +102,13 @@ export async function submitCurrentWorkspace() {
   if (confirm !== "Confirm") {
     throw new Error("Commit process cancelled");
   }
-  await currentRepo.add([]);
-  await currentRepo.commit(commitMessage);
-  await currentRepo.push();
+  await gitRepo.add(".");
+  await gitRepo.commit(commitMessage);
+  await gitRepo.push();
 }
 
-export async function detectRepoCourseAndExercise(): Promise<
-  string | undefined
-> {
-  if (currentRepo) {
+export async function detectRepoCourseAndExercise(): Promise<string | undefined> {
+  if (gitRepo) {
     console.log("Repo already detected");
     return undefined;
   }
@@ -120,26 +120,28 @@ export async function detectRepoCourseAndExercise(): Promise<
     throw new NotAuthenticatedError();
   }
 
-  const repoAndRemote = getArtemisRepo(session.account.id);
-  if (!repoAndRemote) {
-    currentRepo = undefined;
+  const foundRepoAndRemote = await getArtemisRepo(session.account.id);
+  if (!foundRepoAndRemote) {
+    gitRepo = undefined;
     set_state({
       repoCourse: undefined,
       repoExercise: undefined,
       displayedCourse: state.displayedCourse,
       displayedExercise: state.displayedExercise,
     });
-    
+
     console.log("No Artemis repository found");
     return undefined;
   }
 
-  const projectKey = getProjectKeyFromRepoUrl(repoAndRemote.remote.fetchUrl!);
+  const projectKey = getProjectKeyFromRepoUrl(foundRepoAndRemote.remote.refs.fetch!);
 
-  const course_exercise: { course: Course; exercise: Exercise } =
-    await fetch_course_exercise_projectKey(session.accessToken, projectKey);
+  const course_exercise: { course: Course; exercise: Exercise } = await fetch_course_exercise_projectKey(
+    session.accessToken,
+    projectKey
+  );
 
-  currentRepo = repoAndRemote.repo;
+  gitRepo = foundRepoAndRemote.repo;
   set_state({
     repoCourse: course_exercise.course,
     repoExercise: course_exercise.exercise,
@@ -150,32 +152,32 @@ export async function detectRepoCourseAndExercise(): Promise<
   return projectKey;
 }
 
-function getArtemisRepo(
+async function getArtemisRepo(
   username: string
-): { repo: Repository; remote: Remote } | undefined {
-  if (!gitAPI) {
-    initGitExtension();
-  }
-
+): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
   if (!settings.base_url) {
     throw new Error("Base URL is not set");
   }
 
-  for (const repo of gitAPI.repositories) {
-    for (const remote of repo.state.remotes) {
-      if (remote.fetchUrl) {
-        // check that artemis is really the repo host
-        const remoteUrl = new URL(remote.fetchUrl);
-        const artemisUrl = new URL(settings.base_url);
-        if (
-          remoteUrl.host !== artemisUrl.host ||
-          remoteUrl.username !== username
-        ) {
-          continue;
-        }
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    console.log("No workspace folder available to detect repository");
+    return undefined;
+  }
 
-        return { repo: repo, remote: remote };
+  for (const folder of workspaceFolders) {
+    const folderPath = folder.uri.fsPath;
+    const git: SimpleGit = simpleGit(folderPath);
+    try {
+      const isRepo = await git.checkIsRepo();
+      if (isRepo) {
+        const remotes = await git.getRemotes(true);
+        if (remotes.length > 0) {
+          return { repo: git, remote: remotes[0] };
+        }
       }
+    } catch (error: any) {
+      console.error(`Error checking if folder is a repository: ${error.message}`);
     }
   }
 
@@ -188,9 +190,7 @@ function getProjectKeyFromRepoUrl(repoUrl: string): string {
     /^[a-zA-Z]+:\/\/[^@]+@[^:]+:[0-9]+\/git\/([^\/]+)\/[^\/]+-[^\/]+\.git$/
   );
   if (!projectKeyMatch) {
-    throw new Error(
-      "Invalid artemis repository URL does not contain project key"
-    );
+    throw new Error("Invalid artemis repository URL does not contain project key");
   }
 
   return projectKeyMatch[1];

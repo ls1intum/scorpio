@@ -42,11 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  (async () => {
-    // TODO make wait until everything else is initialized
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
-  })();
+  vscode.commands.executeCommand("scorpio.workspace.detectRepo");
 }
 
 function initAuthentication(
