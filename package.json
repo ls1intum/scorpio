@@ -3,7 +3,7 @@
   "displayName": "Artemis - Scorpio",
   "description": "",
   "publisher": "tum-aet",
-  "icon": "media/artemis_logo.png",
+  "icon": "media/icon.png",
   "version": "0.0.0",
   "engines": {
     "vscode": "^1.95.0"
@@ -38,14 +38,6 @@
           "editPresentation": "singlelineText",
           "default": "http://localhost:8080"
         },
-        "scorpio.artemis.clientBaseUrl": {
-          "order": 2,
-          "markdownDescription": "The URL of the Artemis Client - probably the same as `#scorpio.artemis.apiBaseUrl#`",
-          "type": "string",
-          "format": "uri",
-          "editPresentation": "singlelineText",
-          "default": "http://localhost:9000"
-        },
         "scorpio.defaults.repoPath": {
           "order": 3,
           "description": "The default to search for and clone repositories into - has to be an absolute path",
@@ -65,7 +57,7 @@
         {
           "id": "artemis-sidebar-view",
           "title": "Artemis",
-          "icon": "media/artemis_logo.svg"
+          "icon": "media/icon.svg"
         }
       ]
     },
@@ -75,7 +67,7 @@
           "type": "webview",
           "id": "artemis-sidebar",
           "name": "Scorpio",
-          "icon": "media/artemis_logo.svg",
+          "icon": "media/icon.svg",
           "contextualTitle": "Artemis"
         }
       ]

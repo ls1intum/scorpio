@@ -11,11 +11,9 @@ export function getSettingsForTheia(): Settings {
 
   const config = vscode.workspace.getConfiguration("scorpio");
   config.update("artemis.apiBaseUrl", base_url, vscode.ConfigurationTarget.Global);
-  config.update("artemis.clientBaseUrl", base_url, vscode.ConfigurationTarget.Global);
 
   return {
     base_url: base_url,
-    client_url: base_url,
     default_repo_path: undefined,
     easter_egg: false,
   };
@@ -28,12 +26,6 @@ export async function handleSettingsChangeForTheia(e: vscode.ConfigurationChange
     // url should not be changed in theia environement
     vscode.window.showWarningMessage("Artemis URL can not be changed in theia environment");
     config.update("artemis.apiBaseUrl", settings.base_url, vscode.ConfigurationTarget.Global);
-  }
-
-  if (e.affectsConfiguration("scorpio.artemis.clientBaseUrl")) {
-    // url should not be changed in theia environement
-    vscode.window.showWarningMessage("Artemis URL can not be changed in theia environment");
-    config.update("artemis.clientBaseUrl", settings.client_url, vscode.ConfigurationTarget.Global);
   }
 
   if (e.affectsConfiguration("scorpio.defaults.repoPath")) {
