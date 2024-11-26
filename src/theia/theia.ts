@@ -5,7 +5,7 @@ import { execSync } from "child_process";
 
 type theiaEnv = {
   ARTEMIS_TOKEN: string | undefined;
-  ARTEMIS_URL: URL | undefined;
+  ARTEMIS_URL: string | undefined;
   GIT_URI: URL | undefined;
   GIT_USER: string | undefined;
   GIT_MAIL: string | undefined;
@@ -18,7 +18,7 @@ function readTheiaEnv(): theiaEnv | undefined {
 
   const theiaArtemisToken = getEnvVariable("ARTEMIS_TOKEN");
   const theiaArtemisUrlString = getEnvVariable("ARTEMIS_URL");
-  const theiaArtemisUrl = theiaArtemisUrlString ? new URL(theiaArtemisUrlString) : undefined;
+  const theiaArtemisUrl = theiaArtemisUrlString ? theiaArtemisUrlString : undefined;
   const theiaGitCloneUrlString = getEnvVariable("GIT_URI");
   const theiaGitCloneUrl = theiaGitCloneUrlString ? new URL(theiaGitCloneUrlString) : undefined;
   const theiaGitUserName = getEnvVariable("GIT_USER");

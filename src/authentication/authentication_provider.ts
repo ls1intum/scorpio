@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import { authenticateToken } from "./authentication_api";
 import { theiaEnv } from "../theia/theia";
+import { settings } from "../shared/settings";
 
 export const AUTH_ID = "artemis";
 const AUTH_NAME = `Credentials`; // what is displayed on the profile button
-const SESSIONS_SECRET_KEY = `${AUTH_ID}.sessions`;
+var SESSIONS_SECRET_KEY = `${AUTH_ID}.sessions`;
 
 class ArtemisSession implements vscode.AuthenticationSession {
   id: string = AUTH_ID;
@@ -27,6 +28,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
   private sessionPromise: Promise<ArtemisSession | undefined>;
 
   constructor(private readonly secretStorage: vscode.SecretStorage) {
+    SESSIONS_SECRET_KEY = `${AUTH_ID}.${settings.base_url}.sessions`;
     this.sessionPromise = this.getSessionFromStorage();
 
     this._disposable = vscode.Disposable.from(

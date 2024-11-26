@@ -11,7 +11,15 @@
       "request": "launch",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "${defaultBuildTask}",
+      "env": {
+        // "THEIA":"true",
+        "ARTEMIS_TOKEN":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhcnRlbWlzX2FkbWluIiwiYXV0aCI6IlJPTEVfVVNFUixST0xFX0FETUlOIiwidG9vbHMiOiJTQ09SUElPIiwiZXhwIjoxNzM1MjMwNzM3fQ.ipSGyQ4E3iE_g5v1ZLAMxs5E3CJ_TgyUoM9-Ni3tdz63dhFcEWtqSmM-WQlzPmjp0Bf_6t6Uu6OOsT8fIyMGVw",
+        "ARTEMIS_URL":"https://artemis-test9.artemis.cit.tum.de",
+        "GIT_URI":"https://artemis_admin@artemis-test9.artemis.cit.tum.de/git/THEIATESTTESTEXERCISE/theiatesttestexercise-artemis_admin.git",
+        "GIT_USER":"artemis_admin",
+        "GIT_MAIL":"artemis.admin@tum.de"
+      }
     },
     {
       "name": "Extension Tests",
