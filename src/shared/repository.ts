@@ -9,6 +9,7 @@ import { set_state, state } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
+import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
 
 var gitRepo: SimpleGit | undefined;
 
@@ -165,15 +166,20 @@ async function getArtemisRepo(
     return undefined;
   }
 
-  for (const folder of workspaceFolders) {
-    const folderPath = folder.uri.fsPath;
-    const git: SimpleGit = simpleGit(folderPath);
+  // Get all level 1 subfolders of the workspace
+  const level1SubfoldersPath = await getLevel1SubfoldersOfWorkspace(workspaceFolders);
+
+  for (const folderPath of level1SubfoldersPath) {
+    const git: SimpleGit = simpleGit(folderPath.fsPath);
     try {
       const isRepo = await git.checkIsRepo();
       if (isRepo) {
         const remotes = await git.getRemotes(true);
-        if (remotes.length > 0) {
-          return { repo: git, remote: remotes[0] };
+        for(const remote of remotes) {
+          const url = new URL(remote.refs.fetch!);
+          if(url.hostname == new URL(settings.base_url).hostname && url.username == username) {
+            return { repo: git, remote: remote };
+          }
         }
       }
     } catch (error: any) {
@@ -186,12 +192,11 @@ async function getArtemisRepo(
 
 function getProjectKeyFromRepoUrl(repoUrl: string): string {
   // extract projectKey {protocol}://{username}@{host}:{port}/git/{PROJECT_KEY}/{project_key}-{username}.git
-  const projectKeyMatch = repoUrl.match(
-    /^[a-zA-Z]+:\/\/[^@]+@[^:]+:[0-9]+\/git\/([^\/]+)\/[^\/]+-[^\/]+\.git$/
-  );
-  if (!projectKeyMatch) {
+  const parts = repoUrl.split("/");
+  if(parts.length < 5) {
     throw new Error("Invalid artemis repository URL does not contain project key");
   }
 
-  return projectKeyMatch[1];
+  const projectKey = parts[4]
+  return projectKey;
 }
