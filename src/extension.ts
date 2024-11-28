@@ -3,20 +3,11 @@
 import * as vscode from "vscode";
 import "./utils/fetch.interceptor";
 import { build_course_options } from "./course/course";
-import {
-  build_exercise_options,
-  cloneCurrentExercise,
-} from "./exercise/exercise";
+import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
-import {
-  ArtemisAuthenticationProvider,
-  AUTH_ID,
-} from "./authentication/authentication_provider";
+import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
 import { set_state, state } from "./shared/state";
-import {
-  detectRepoCourseAndExercise,
-  submitCurrentWorkspace,
-} from "./shared/repository";
+import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
@@ -45,89 +36,72 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.executeCommand("scorpio.workspace.detectRepo");
 }
 
-function initAuthentication(
-  context: vscode.ExtensionContext
-) {
-  authenticationProvider = new ArtemisAuthenticationProvider(
-    context.secrets
-  );
+function initAuthentication(context: vscode.ExtensionContext) {
+  authenticationProvider = new ArtemisAuthenticationProvider(context.secrets);
 
   context.subscriptions.push(authenticationProvider);
 
   // check if user is already authenticated
   // is needed for the login button to be displayed on the profile button
   (async () => {
-    if (
-      await vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: theiaEnv != null,
-      })
-    ) {
-      vscode.commands.executeCommand(
-        "setContext",
-        "scorpio.authenticated",
-        true
-      );
+    let session: vscode.AuthenticationSession | undefined;
+    if (theiaEnv) {
+      do {
+        try {
+          session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: true,
+          });
+        } catch (e) {
+          session = undefined;
+        }
+      } while (!session);
+    } else {
+      session = await vscode.authentication.getSession(AUTH_ID, [], {
+        createIfNone: false,
+      });
     }
+
+    vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
   })();
 
-  authenticationProvider.onAuthSessionsChange.event(
-    ({ added, removed, changed }) => {
-      if (added && added.length > 0) {
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.authenticated",
-          true
-        );
-        vscode.commands.executeCommand("scorpio.workspace.detectRepo");
-        return;
-      }
-
-      if (removed && removed.length > 0) {
-        vscode.commands.executeCommand(
-          "setContext",
-          "scorpio.authenticated",
-          false
-        );
-        set_state({
-          displayedCourse: undefined,
-          displayedExercise: undefined,
-          repoCourse: undefined,
-          repoExercise: undefined,
-        });
-        return;
-      }
+  authenticationProvider.onAuthSessionsChange.event(({ added, removed, changed }) => {
+    if (added && added.length > 0) {
+      vscode.commands.executeCommand("setContext", "scorpio.authenticated", true);
+      vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+      return;
     }
-  );
+
+    if (removed && removed.length > 0) {
+      vscode.commands.executeCommand("setContext", "scorpio.authenticated", false);
+      set_state({
+        displayedCourse: undefined,
+        displayedExercise: undefined,
+        repoCourse: undefined,
+        repoExercise: undefined,
+      });
+      return;
+    }
+  });
 }
 
-function initSidebar(
-  context: vscode.ExtensionContext,
-): SidebarProvider {
+function initSidebar(context: vscode.ExtensionContext): SidebarProvider {
   // register sidebar for problem statement
   const sidebarProvider = new SidebarProvider(
     context.extensionUri,
     authenticationProvider.onAuthSessionsChange
   );
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      "artemis-sidebar",
-      sidebarProvider
-    )
-  );
+  context.subscriptions.push(vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider));
 
   return sidebarProvider;
 }
 
-function registerCommands(
-  context: vscode.ExtensionContext,
-  sidebar: SidebarProvider
-) {
+function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProvider) {
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.restart", () => {
       deactivate();
       activate(context);
     })
-  )
+  );
 
   // command to login
   context.subscriptions.push(
@@ -152,15 +126,15 @@ function registerCommands(
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.logout", async () => {
       vscode.window
-        .showWarningMessage(
-          "Sign out from Artemis - Scorpio",
-          { modal: true },
-          "Sign out"
-        )
+        .showWarningMessage("Sign out from Artemis - Scorpio", { modal: true }, "Sign out")
         .then((value) => {
           if (value === "Sign out") {
             authenticationProvider.removeSession();
             vscode.window.showInformationMessage("You have been logged out");
+
+            vscode.authentication.getSession(AUTH_ID, [], {
+              createIfNone: false,
+            });
           }
         });
     })
@@ -187,8 +161,8 @@ function registerCommands(
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("scorpio.displayedExercise.back",  () => {
-      if(state.displayedExercise){
+    vscode.commands.registerCommand("scorpio.displayedExercise.back", () => {
+      if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
         set_state({
           displayedCourse: state.displayedCourse,
@@ -204,27 +178,20 @@ function registerCommands(
           repoExercise: state.repoExercise,
         });
       }
-
-      
     })
   );
 
   // command to clone repository
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "scorpio.displayedExercise.clone",
-      async () => {
-        cloneCurrentExercise()
-          .then(() => {
-            vscode.window.showInformationMessage(
-              `Repository cloned successfully.`
-            );
-          })
-          .catch((e) => {
-            _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
-          });
-      }
-    )
+    vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
+      cloneCurrentExercise()
+        .then(() => {
+          vscode.window.showInformationMessage(`Repository cloned successfully.`);
+        })
+        .catch((e) => {
+          _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
+        });
+    })
   );
 
   // command to submit workspace
@@ -232,9 +199,7 @@ function registerCommands(
     vscode.commands.registerCommand("scorpio.workspace.submit", async () => {
       submitCurrentWorkspace()
         .then(() => {
-          vscode.window.showInformationMessage(
-            `Workspace submitted successfully.`
-          );
+          vscode.window.showInformationMessage(`Workspace submitted successfully.`);
         })
         .catch((e) => {
           _errorMessage(e, LogLevel.WARN, "Failed to submit workspace");
@@ -244,22 +209,19 @@ function registerCommands(
 
   // command to detect repo in workspace
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "scorpio.workspace.detectRepo",
-      async () => {
-        detectRepoCourseAndExercise()
-          .then((projectKey: string | undefined) => {
-            if (!projectKey) {
-              return;
-            }
+    vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
+      detectRepoCourseAndExercise()
+        .then((projectKey: string | undefined) => {
+          if (!projectKey) {
+            return;
+          }
 
-            vscode.window.showInformationMessage(`Repo detected successfully.`);
-          })
-          .catch((e) => {
-            _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
-          });
-      }
-    )
+          vscode.window.showInformationMessage(`Repo detected successfully.`);
+        })
+        .catch((e) => {
+          _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
+        });
+    })
   );
 
   // command to sync problem statement with workspace
@@ -267,9 +229,7 @@ function registerCommands(
     vscode.commands.registerCommand("scorpio.workspace.sync", async () => {
       sync_problem_statement_with_workspace()
         .then(() => {
-          vscode.window.showInformationMessage(
-            `Workspace synced successfully.`
-          );
+          vscode.window.showInformationMessage(`Workspace synced successfully.`);
         })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
@@ -298,22 +258,16 @@ enum LogLevel {
   ERROR = "error",
   WARN = "warn",
 }
-function _errorMessage(
-  e: any,
-  logLevel: LogLevel = LogLevel.ERROR,
-  messagePrefix: string = ""
-) {
+function _errorMessage(e: any, logLevel: LogLevel = LogLevel.ERROR, messagePrefix: string = "") {
   switch (logLevel) {
     case LogLevel.INFO:
       console.info(e);
       if (e instanceof NotAuthenticatedError) {
-        vscode.window
-          .showInformationMessage(`${messagePrefix}: ${e.message}`, "Login")
-          .then((value) => {
-            if (value === "Login") {
-              vscode.commands.executeCommand("scorpio.login");
-            }
-          });
+        vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if (value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }
+        });
         return;
       }
       if (e instanceof Error) {
@@ -326,13 +280,11 @@ function _errorMessage(
     case LogLevel.ERROR:
       console.error(e);
       if (e instanceof NotAuthenticatedError) {
-        vscode.window
-          .showErrorMessage(`${messagePrefix}: ${e.message}`, "Login")
-          .then((value) => {
-            if (value === "Login") {
-              vscode.commands.executeCommand("scorpio.login");
-            }
-          });
+        vscode.window.showErrorMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if (value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }
+        });
         return;
       }
       if (e instanceof Error) {
@@ -345,13 +297,11 @@ function _errorMessage(
     case LogLevel.WARN:
       console.warn(e);
       if (e instanceof NotAuthenticatedError) {
-        vscode.window
-          .showWarningMessage(`${messagePrefix}: ${e.message}`, "Login")
-          .then((value) => {
-            if (value === "Login") {
-              vscode.commands.executeCommand("scorpio.login");
-            }
-          });
+        vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
+          if (value === "Login") {
+            vscode.commands.executeCommand("scorpio.login");
+          }
+        });
         return;
       }
       if (e instanceof Error) {
