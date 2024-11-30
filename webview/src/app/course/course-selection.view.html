@@ -2,13 +2,20 @@
 @if (!coursesWithScore()) {
 <p>You are not enrolled into any courses that have a released programming exercise</p>
 } @for (courseWithScore of coursesWithScore(); track courseWithScore) {
-<vscode-button (click)="clickCourse(courseWithScore.course)">
-  <h2>{{ courseWithScore.course.title }}</h2>
-  <div class="row">
-    <span> 0 / 0 </span>
-    <div class="column">
-      <span> nextExercise </span>
-      <span> nextExerciseDueDate</span>
+<vscode-button class="course-item" (click)="clickCourse(courseWithScore.course)">
+  <div class="column">
+    <h3 class="title">{{ courseWithScore.course.title }}</h3>
+    <span>
+      {{courseWithScore.totalScores.studentScores.absoluteScore}} /
+      {{courseWithScore.totalScores.reachablePoints}}
+    </span>
+    <div class="row">
+      @if (courseWithScore.nextDueExercise) {
+      <div>Next exercise: {{courseWithScore.nextDueExercise.title}} </div>
+      <div>due on {{courseWithScore.nextDueExercise.dueDate!.toDateString()}}</div>
+      } @if (!courseWithScore.nextDueExercise) {
+      <div> No exercises due</div>
+      }
     </div>
   </div>
 </vscode-button>

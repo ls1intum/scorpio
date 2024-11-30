@@ -25,7 +25,8 @@
             "assets": ["src/assets"],
             "styles": ["src/vscode.css"],
             "scripts": [],
-            "allowedCommonJsDependencies": ["@vscode/markdown-it-katex", "dompurify", "markdown-it-class"]
+            "allowedCommonJsDependencies": ["@vscode/markdown-it-katex", "dompurify", "markdown-it-class"],
+            "inlineStyleLanguage": "css"
           },
           "configurations": {
             "production": {

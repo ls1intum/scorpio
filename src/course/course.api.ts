@@ -1,5 +1,5 @@
 import { settings } from "../shared/settings";
-import { Course, TotalScores } from "./course.model";
+import { Course, TotalScores } from "@shared/models/course.model";
 
 export async function fetch_course_by_courseId(
   token: string,

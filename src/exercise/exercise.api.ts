@@ -1,12 +1,12 @@
 import { settings } from "../shared/settings";
-import { Course } from "../course/course.model";
-import { Exercise } from "./exercise.model";
+import { Course } from "@shared/models/course.model";
+import { Exercise } from "@shared/models/exercise.model";
 
-export async function fetch_exercise_by_exerciseId(
+export async function fetch_exercise_details(
   token: string,
   exerciseId: number
 ): Promise<Exercise> {
-  const url = `${settings.base_url}/api/exercises/${exerciseId}`;
+  const url = `${settings.base_url}/api/exercises/${exerciseId}/details`;
 
   return fetch(url, {
     method: "GET",

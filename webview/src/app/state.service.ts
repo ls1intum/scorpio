@@ -1,14 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Location } from "@angular/common";
+import { CommandFromExtension } from "@shared/webview-commands";
 import { BehaviorSubject } from "rxjs";
-
-enum IncomingCommands {
-  SHOW_LOGIN = "showLogin",
-  SHOW_COURSE_SELECTION = "showCourseSelection",
-  SHOW_EXERCISE_SELECTION = "showExerciseSelection",
-  SHOW_PROBLEM_STATEMENT = "showProblemStatement",
-  EASTER_EGG = "easterEgg",
-}
 
 export enum ViewState {
   LOGIN = "login",
@@ -41,7 +33,7 @@ export class StateService {
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
       switch (message.command) {
-        case IncomingCommands.SHOW_LOGIN:
+        case CommandFromExtension.SHOW_LOGIN:
           this.changeState({
             viewState: ViewState.LOGIN,
             course: undefined,
@@ -49,7 +41,7 @@ export class StateService {
             repoKey: undefined,
           });
           break;
-        case IncomingCommands.SHOW_COURSE_SELECTION:
+        case CommandFromExtension.SHOW_COURSE_SELECTION:
           this.changeState({
             viewState: ViewState.COURSE_SELECTION,
             course: undefined,
@@ -57,7 +49,7 @@ export class StateService {
             repoKey: undefined,
           });
           break;
-        case IncomingCommands.SHOW_EXERCISE_SELECTION:
+        case CommandFromExtension.SHOW_EXERCISE_SELECTION:
           const {course: courseData} = JSON.parse(message.text);
           this.changeState({
             viewState: ViewState.EXERCISE_SELECTION,
@@ -66,7 +58,7 @@ export class StateService {
             repoKey: undefined,
           });
           break;
-        case IncomingCommands.SHOW_PROBLEM_STATEMENT:
+        case CommandFromExtension.SHOW_PROBLEM_STATEMENT:
           const { course: course, exercise: exercise, repoKey: repoKey } = JSON.parse(message.text);
           this.changeState({
             viewState: ViewState.PROBLEM_STATEMENT,
@@ -75,7 +67,7 @@ export class StateService {
             repoKey: repoKey,
           });
           break;
-        case IncomingCommands.EASTER_EGG:
+        case CommandFromExtension.EASTER_EGG:
           break;
       }
     });

@@ -1,0 +1,4 @@
+<dialog #myDialog>
+    <feedback-list [feedbackList]="feedbackList()" [OnClose]="myDialog.close"></feedback-list>
+</dialog>
+<button click="myDialog.show()">{{task().taskName}}</button>
