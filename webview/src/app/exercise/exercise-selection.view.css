@@ -1,7 +1,14 @@
+.exercise-list{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
 .exercise-item {
   margin: 0.25em;
   padding: 0.25em;
   max-width: 400px;
+  flex-grow: 1;
 }
 
 .exercise-item h3.title {

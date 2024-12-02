@@ -1,7 +1,14 @@
+.course-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
 .course-item {
   margin: 0.25em;
   padding: 0.25em;
   max-width: 400px;
+  flex-grow: 1;
 }
 
 .course-item h3.title {
