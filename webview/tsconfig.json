@@ -20,6 +20,10 @@
       "target": "es2022",
       "module": "es2022",
       "lib": ["es2022", "dom"],
+      "paths": {
+        "@shared/*": ["../shared/*"],
+        "@shared/models/*": ["../shared/models/*"],
+      }
     },
     "angularCompilerOptions": {
       "enableI18nLegacyMessageIdFormat": false,

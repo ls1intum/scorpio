@@ -1,4 +1,4 @@
-import { Exercise } from '../exercise/exercise.model';
+import { Exercise } from './exercise.model';
 
 export type Course = {
     id: number;

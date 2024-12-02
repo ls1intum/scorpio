@@ -1,0 +1,14 @@
+@for (failedFeedback of failedFeedbackList(); track failedFeedback) {
+<div [ngClass]="'container-fail'">
+  <b>Test Case</b>
+  <br />
+  <p>{{ failedFeedback.detailText }}</p>
+</div>
+} @for (passedFeedback of passedFeedbackList(); track passedFeedback) {
+<div [ngClass]="'container-success'">
+  <div class="row">
+    <b>Test Case</b>
+    <b>{{ passedFeedback.credits | number : "1.1-1" }} </b>
+  </div>
+</div>
+}

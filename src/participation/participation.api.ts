@@ -1,5 +1,6 @@
 import { settings } from "../shared/settings";
-import { Participation } from "./participation.model";
+import { Feedback } from "@shared/models/feedback.model";
+import { Participation } from "@shared/models/participation.model";
 
 export async function start_exercise(
   token: string,
@@ -65,4 +66,42 @@ export async function fetch_latest_participation(
 
       throw error;
     });
+
+    
+}
+
+export async function fetch_feedback(
+  token: string,
+  participationId: number,
+  resultId: number
+): Promise<Feedback[]> {
+  const url = `${settings.base_url}/api/participations/${participationId}/results/${resultId}/details`;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error! status: ${response.status} message: ${response.text}`
+        );
+      }
+
+      const data = await response.json();
+
+      return data as Feedback[];
+    })
+    .catch((error) => {
+      if (error instanceof TypeError) {
+        throw new Error(`Could not reach the server: ${error.message}`);
+      }
+
+      throw error;
+    });
+
+    
 }

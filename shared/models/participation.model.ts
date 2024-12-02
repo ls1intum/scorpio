@@ -1,3 +1,5 @@
+import { Result } from "./result.model"
+
 export type Participation = {
     type: string,
     id: number,
@@ -5,11 +7,4 @@ export type Participation = {
     userIndependentRepositoryUri: string,
     participantIdentifier: string,
     results: Result[] | undefined
-}
-
-export type Result = {
-    id: number,
-    completionDate: Date,
-    score: number,
-    rated: boolean,
 }

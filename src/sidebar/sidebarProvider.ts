@@ -1,36 +1,17 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
 import { onStateChange, set_state, State, state } from "../shared/state";
-import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
+import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
-import { Exercise } from "../exercise/exercise.model";
-import { Course, TotalScores } from "../course/course.model";
+import { Course, TotalScores } from "@shared/models/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
 import { fetch_all_courses } from "../course/course.api";
-import { fetch_programming_exercises_by_courseId } from "../exercise/exercise.api";
-
-enum IncomingCommands {
-  INFO = "info",
-  ERROR = "error",
-  LOGIN = "login",
-  GET_COURSE_OPTIONS = "getCourseOptions",
-  GET_EXERCISE_OPTIONS = "getExerciseOptions",
-  CLONE_REPOSITORY = "cloneRepository",
-  SUBMIT = "submit",
-  SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
-}
-
-enum OutgoingCommands {
-  SHOW_LOGIN = "showLogin",
-  SHOW_COURSE_SELECTION = "showCourseSelection",
-  SHOW_EXERCISE_SELECTION = "showExerciseSelection",
-  SHOW_PROBLEM_STATEMENT = "showProblemStatement",
-  SEND_COURSE_OPTIONS = "sendCourseOptions",
-  SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
-  SEND_COURSE_AND_EXERCISE = "sendCourseAndExercise",
-  EASTER_EGG = "easterEgg",
-}
+import {
+  fetch_course_exercise_projectKey,
+  fetch_programming_exercises_by_courseId,
+} from "../exercise/exercise.api";
+import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
+import { fetch_feedback } from "../participation/participation.api";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -85,14 +66,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
-        case IncomingCommands.INFO: {
+        case CommandFromWebview.INFO: {
           if (!data.text) {
             return;
           }
           vscode.window.showInformationMessage(`Sidebar: ${data.text}`);
           break;
         }
-        case IncomingCommands.ERROR: {
+        case CommandFromWebview.ERROR: {
           if (!data.text) {
             return;
           }
@@ -100,12 +81,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           vscode.window.showErrorMessage(`Sidebar: ${data.text}`);
           break;
         }
-        case IncomingCommands.LOGIN: {
-          console.log("got login from webview");
+        case CommandFromWebview.LOGIN: {
           vscode.commands.executeCommand("scorpio.login");
           break;
         }
-        case IncomingCommands.GET_COURSE_OPTIONS: {
+        case CommandFromWebview.GET_COURSE_OPTIONS: {
           const session = await vscode.authentication.getSession(AUTH_ID, [], {
             createIfNone: false,
           });
@@ -116,12 +96,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             session.accessToken
           );
           this._view?.webview.postMessage({
-            command: OutgoingCommands.SEND_COURSE_OPTIONS,
+            command: CommandFromExtension.SEND_COURSE_OPTIONS,
             text: JSON.stringify(coursesWithScore),
           });
           break;
         }
-        case IncomingCommands.GET_EXERCISE_OPTIONS: {
+        case CommandFromWebview.GET_EXERCISE_OPTIONS: {
           const session = await vscode.authentication.getSession(AUTH_ID, [], {
             createIfNone: false,
           });
@@ -133,20 +113,55 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             state.displayedCourse!.id
           );
           this._view?.webview.postMessage({
-            command: OutgoingCommands.SEND_EXERCISE_OPTIONS,
+            command: CommandFromExtension.SEND_EXERCISE_OPTIONS,
             text: JSON.stringify(exercises),
           });
           break;
         }
-        case IncomingCommands.CLONE_REPOSITORY: {
+        case CommandFromWebview.GET_EXERCISE_DETAILS: {
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+          const { course: course, exercise: exercise } = await fetch_course_exercise_projectKey(
+            session.accessToken,
+            state.displayedCourse!.shortName + state.displayedExercise!.shortName
+          );
+          set_state({
+            displayedCourse: course,
+            displayedExercise: exercise,
+            repoCourse: state.repoCourse,
+            repoExercise: state.repoExercise,
+          });
+          break;
+        }
+        case CommandFromWebview.GET_FEEDBACK: {
+          const { participationId: participationId, resultId: resultId } = JSON.parse(data.text);
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+
+          const feedback = await fetch_feedback(session.accessToken, participationId, resultId);
+          this._view?.webview.postMessage({
+            command: CommandFromExtension.SEND_FEEDBACK,
+            text: JSON.stringify(feedback),
+          });
+          break;
+        }
+        case CommandFromWebview.CLONE_REPOSITORY: {
           vscode.commands.executeCommand("scorpio.displayedExercise.clone");
           break;
         }
-        case IncomingCommands.SUBMIT: {
+        case CommandFromWebview.SUBMIT: {
           vscode.commands.executeCommand("scorpio.workspace.submit");
           break;
         }
-        case IncomingCommands.SET_COURSE_AND_EXERCISE: {
+        case CommandFromWebview.SET_COURSE_AND_EXERCISE: {
           if (!data.text) {
             return;
           }
@@ -183,7 +198,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource}; script-src 'nonce-${nonce}';">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${this._view.webview.cspSource};">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>Hello World</title>
         </head>
@@ -211,13 +226,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
-      command: OutgoingCommands.SHOW_COURSE_SELECTION,
+      command: CommandFromExtension.SHOW_COURSE_SELECTION,
     });
   }
 
   private logout() {
     this._view?.webview.postMessage({
-      command: OutgoingCommands.SHOW_LOGIN,
+      command: CommandFromExtension.SHOW_LOGIN,
     });
   }
 
@@ -231,14 +246,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     if (!course && !exercise) {
       this._view?.webview.postMessage({
-        command: OutgoingCommands.SHOW_COURSE_SELECTION,
+        command: CommandFromExtension.SHOW_COURSE_SELECTION,
       });
       return;
     }
 
     if (course && !exercise) {
       this._view?.webview.postMessage({
-        command: OutgoingCommands.SHOW_EXERCISE_SELECTION,
+        command: CommandFromExtension.SHOW_EXERCISE_SELECTION,
         text: JSON.stringify({
           course: course,
         }),
@@ -248,7 +263,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     if (course && exercise) {
       this._view?.webview.postMessage({
-        command: OutgoingCommands.SHOW_PROBLEM_STATEMENT,
+        command: CommandFromExtension.SHOW_PROBLEM_STATEMENT,
         text: JSON.stringify({
           course: course,
           exercise: exercise,
@@ -261,7 +276,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private easterEgg() {
     this._view?.webview.postMessage({
-      command: OutgoingCommands.EASTER_EGG,
+      command: CommandFromExtension.EASTER_EGG,
       text: `${settings.easter_egg}`,
     });
   }

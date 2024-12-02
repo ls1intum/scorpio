@@ -17,7 +17,6 @@ enum OutgoingCommands {
 })
 export class LoginView {
   requestLogin() {
-    console.log("Pressed login");
     vscode.postMessage({ command: OutgoingCommands.LOGIN, text: undefined });
   }
 }

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { Course } from "../course/course.model";
-import { Exercise } from "../exercise/exercise.model";
+import { Course } from "@shared/models//course.model";
+import { Exercise } from "@shared/models/exercise.model";
 
 export interface State {
   displayedCourse: Course | undefined;

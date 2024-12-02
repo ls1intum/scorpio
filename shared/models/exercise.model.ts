@@ -1,4 +1,4 @@
-import { Participation } from "../participation/participation.model"
+import { Participation } from "./participation.model"
 
 export type Exercise = {
     type: string,
