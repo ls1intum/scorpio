@@ -36,7 +36,7 @@
           "type": "string",
           "format": "uri",
           "editPresentation": "singlelineText",
-          "default": "http://localhost:8080"
+          "default": "https://artemis.cit.tum.de"
         },
         "scorpio.defaults.repoPath": {
           "order": 3,
