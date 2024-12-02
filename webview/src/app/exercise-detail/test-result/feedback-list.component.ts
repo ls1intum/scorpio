@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, Input, OnInit } from "@angular/core";
-import { FeedbackItem } from "./feedback-item.component";
+import { ChangeDetectionStrategy, Component, computed, input} from "@angular/core";
 import { Feedback } from "@shared/models/feedback.model";
 
 @Component({
@@ -9,17 +8,13 @@ import { Feedback } from "@shared/models/feedback.model";
   styleUrls: ["./feedback-list.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, FeedbackItem],
+  imports: [CommonModule],
 })
-export class FeedbackListComponent implements OnInit {
+export class FeedbackListComponent {
   feedbackList = input.required<Feedback[]>();
 
-  @Input()
-  OnClose: () => void = () => {};
+  protected failedFeedbackList = computed(() => this.feedbackList().filter((feedback) => !feedback.positive));
+  protected passedFeedbackList = computed(() => this.feedbackList().filter((feedback) => feedback.positive));
 
   constructor() {}
-
-  ngOnInit() {
-    
-  }
 }

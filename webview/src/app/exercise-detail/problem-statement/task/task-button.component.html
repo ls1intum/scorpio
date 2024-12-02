@@ -1,17 +1,26 @@
-<dialog #myDialog>
-  <feedback-list [feedbackList]="feedbackList()" [OnClose]="myDialog.close"></feedback-list>
+<dialog #feedbackDialog>
+  <button class="close-button" (click)="feedbackDialog.close()">X</button>
+  <br>
+  <br>
+  <feedback-list [feedbackList]="feedbackList()"></feedback-list>
 </dialog>
-@if (feedbackList().length == 0){
-  <i class="fa-regular fa-circle-question"></i>
-} @else if (getPassedTests() === feedbackList().length){
-  <i class="fa-regular fa-circle-check"></i>
-} @else {
-  <i class="fa-regular fa-circle-xmark"></i>
-}
+@switch (status()){ @case (TaskStatus.NO_RESULT){
+<i class="fa-regular fa-circle-question"></i>
+} @case (TaskStatus.SUCCESS){
+<i class="fa-regular fa-circle-check" [ngClass]="'text-success'"></i>
+} @case (TaskStatus.FAIL){
+<i class="fa-regular fa-circle-xmark" [ngClass]="'text-fail'"></i>
+} }
 <span>&nbsp;</span>
 <span class="task-name" [innerHTML]="task().taskName &nbsp;"></span>
-@if (feedbackList().length > 0){
-<a class="test-result" (click)="onClick()"> {{ getPassedTests() }} of {{ feedbackList().length }} passed </a>
-} @else {
+@switch (status()){ @case (TaskStatus.NO_RESULT){
 <small>No Test Results</small>
-}
+} @case (TaskStatus.SUCCESS){
+<span class="test-result" [ngClass]="'text-success'" (click)="feedbackDialog.show()">
+  {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
+</span>
+} @case (TaskStatus.FAIL){
+<span class="test-result" [ngClass]="'text-fail'" (click)="feedbackDialog.show()">
+  {{ positiveFeedback().length}} of {{ feedbackList().length }} passed
+</span>
+}}

@@ -1,0 +1,24 @@
+.container-success {
+  background-color: var(--vscode-editorInfo-foreground);
+  opacity: 0.8;
+  padding: 0.25rem;
+  margin: 0.25rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.container-fail {
+  background-color: var(--vscode-editorError-foreground);
+  opacity: 0.8;
+  padding: 0.25rem;
+  margin: 0.25rem;
+  min-height: 3rem;
+}
+
+.row{
+    width: 100%;
+    display: flex; 
+    align-items: baseline; 
+    justify-content: space-between;
+}

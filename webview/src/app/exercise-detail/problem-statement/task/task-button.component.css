@@ -6,3 +6,36 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.text-success {
+  color: var(--vscode-editorInfo-foreground);
+}
+
+.text-fail {
+  color: var(--vscode-editorError-foreground);
+}
+
+dialog {
+  width: 85%;
+  height: 85%;
+  border: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--vscode-editor-background);
+}
+
+dialog::backdrop {
+  background-color: var(--vscode-sideBar-background);
+  opacity: 0.5;
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+}
