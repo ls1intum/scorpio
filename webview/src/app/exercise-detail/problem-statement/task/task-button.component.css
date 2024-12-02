@@ -1,0 +1,8 @@
+.task-name {
+  font-weight: bold;
+}
+
+.test-result {
+  text-decoration: underline;
+  cursor: pointer;
+}

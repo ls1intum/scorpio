@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { fetch_exercise_details } from "./exercise.api";
 import { state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
@@ -9,17 +8,6 @@ import { Participation } from "@shared/models/participation.model";
 import { cloneRepository } from "../shared/repository";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { Result } from "@shared/models/result.model";
-
-export async function get_exercise_details(exerciseId: number): Promise<Exercise> {
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
-  if (!session) {
-    throw new NotAuthenticatedError();
-  }
-
-  return await fetch_exercise_details(session.accessToken, exerciseId);
-}
 
 function _getScoreString(exercise: Exercise): string {
   const score = exercise.studentParticipations

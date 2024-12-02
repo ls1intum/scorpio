@@ -1,14 +1,17 @@
 import * as vscode from "vscode";
 import { onStateChange, set_state, State, state } from "../shared/state";
-import { ArtemisAuthenticationProvider, AUTH_ID } from "../authentication/authentication_provider";
+import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
-import { Exercise } from "@shared/models/exercise.model";
 import { Course, TotalScores } from "@shared/models/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
 import { fetch_all_courses } from "../course/course.api";
-import { fetch_course_exercise_projectKey, fetch_exercise_details, fetch_programming_exercises_by_courseId } from "../exercise/exercise.api";
+import {
+  fetch_course_exercise_projectKey,
+  fetch_programming_exercises_by_courseId,
+} from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
+import { fetch_feedback } from "../participation/participation.api";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -122,7 +125,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const {course: course, exercise: exercise} = await fetch_course_exercise_projectKey(
+          const { course: course, exercise: exercise } = await fetch_course_exercise_projectKey(
             session.accessToken,
             state.displayedCourse!.shortName + state.displayedExercise!.shortName
           );
@@ -131,6 +134,22 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             displayedExercise: exercise,
             repoCourse: state.repoCourse,
             repoExercise: state.repoExercise,
+          });
+          break;
+        }
+        case CommandFromWebview.GET_FEEDBACK: {
+          const { participationId: participationId, resultId: resultId } = JSON.parse(data.text);
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+
+          const feedback = await fetch_feedback(session.accessToken, participationId, resultId);
+          this._view?.webview.postMessage({
+            command: CommandFromExtension.SEND_FEEDBACK,
+            text: JSON.stringify(feedback),
           });
           break;
         }
@@ -179,7 +198,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${this._view.webview.cspSource};">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>Hello World</title>
         </head>

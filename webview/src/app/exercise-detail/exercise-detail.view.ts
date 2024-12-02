@@ -41,7 +41,8 @@ export class ExerciseDetailView implements OnInit {
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
       if (message.command === CommandFromExtension.SEND_FEEDBACK) {
-        this.feedbackList.set(JSON.parse(message.text));
+        const feedback: Feedback[] = JSON.parse(message.text);
+        this.feedbackList.set(feedback);
       }
     });
 

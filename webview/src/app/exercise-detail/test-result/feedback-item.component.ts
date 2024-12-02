@@ -16,6 +16,6 @@ export class FeedbackItem implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    console.log("TestResult.ngOnInit");
+    
   }
 }

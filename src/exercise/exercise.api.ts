@@ -2,39 +2,6 @@ import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
 
-export async function fetch_exercise_details(
-  token: string,
-  exerciseId: number
-): Promise<Exercise> {
-  const url = `${settings.base_url}/api/exercises/${exerciseId}/details`;
-
-  return fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error! status: ${response.status} message: ${response.text}`
-        );
-      }
-
-      const data = await response.json();
-
-      return data as Exercise;
-    })
-    .catch((error) => {
-      if (error instanceof TypeError) {
-        throw new Error(`Could not reach the server: ${error.message}`);
-      }
-
-      throw error;
-    });
-}
-
 export async function fetch_programming_exercises_by_courseId(
   token: string,
   courseId: number

@@ -1,4 +1,17 @@
 <dialog #myDialog>
-    <feedback-list [feedbackList]="feedbackList()" [OnClose]="myDialog.close"></feedback-list>
+  <feedback-list [feedbackList]="feedbackList()" [OnClose]="myDialog.close"></feedback-list>
 </dialog>
-<button click="myDialog.show()">{{task().taskName}}</button>
+@if (feedbackList().length == 0){
+  <i class="fa-regular fa-circle-question"></i>
+} @else if (getPassedTests() === feedbackList().length){
+  <i class="fa-regular fa-circle-check"></i>
+} @else {
+  <i class="fa-regular fa-circle-xmark"></i>
+}
+<span>&nbsp;</span>
+<span class="task-name" [innerHTML]="task().taskName &nbsp;"></span>
+@if (feedbackList().length > 0){
+<a class="test-result" (click)="onClick()"> {{ getPassedTests() }} of {{ feedbackList().length }} passed </a>
+} @else {
+<small>No Test Results</small>
+}

@@ -1,17 +1,16 @@
 import {
-  ApplicationRef,
   ChangeDetectionStrategy,
   Component,
   computed,
-  createComponent,
   OnChanges,
-  signal,
   input,
-  WritableSignal,
-  Input,
-  EnvironmentInjector,
-  effect,
   Signal,
+  ViewChild,
+  ElementRef,
+  inject,
+  Renderer2,
+  ViewContainerRef,
+  SimpleChanges,
 } from "@angular/core";
 import { htmlForMarkdown } from "./markdown.converter";
 import { CommonModule } from "@angular/common";
@@ -37,7 +36,7 @@ const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}
   standalone: true,
   imports: [CommonModule, TaskButton],
 })
-export class ProblemStatementComponent {
+export class ProblemStatementComponent implements OnChanges {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
@@ -48,7 +47,19 @@ export class ProblemStatementComponent {
   public tasks: TaskArray = [];
   private taskIndex = 0;
 
-  constructor(private appRef: ApplicationRef, private injector: EnvironmentInjector) {}
+  @ViewChild("problemContainer", { static: false }) problemContainer!: ElementRef;
+  private renderer = inject(Renderer2);
+  private viewContainerRef = inject(ViewContainerRef);
+
+  constructor() {}
+
+  public ngOnChanges(changes: SimpleChanges) {
+    if (changes["feedbackList"]) {
+      this.tasks = [];
+      this.taskIndex = 0;
+      this.problemStatement = computed(() => this.renderMarkdown(this.exercise().problemStatement));
+    }
+  }
 
   renderMarkdown(problemStatement: string | undefined): string {
     if (!problemStatement) {
@@ -57,7 +68,9 @@ export class ProblemStatementComponent {
 
     let html = htmlForMarkdown(problemStatement);
     html = this.prepareTasks(html);
-    this.injectTasksIntoDocument();
+    setTimeout(() => {
+      this.injectTasksIntoDocument();
+    }, 1);
 
     return html;
   }
@@ -99,6 +112,8 @@ export class ProblemStatementComponent {
   }
 
   private injectTasksIntoDocument = () => {
+    this.renderer.setProperty(this.problemContainer.nativeElement, "innerHTML", this.problemStatement());
+
     this.tasks.forEach((task) => {
       const taskHtmlContainers = document.getElementsByClassName(taskDivElement(this.exercise().id, task.id));
 
@@ -110,18 +125,15 @@ export class ProblemStatementComponent {
   };
 
   private createTaskComponent(taskHtmlContainer: Element, task: Task) {
-    const componentRef = createComponent(TaskButton, {
-      hostElement: taskHtmlContainer,
-      environmentInjector: this.injector,
-    });
-    componentRef.setInput("task", task);
-    componentRef.setInput("feedbackList", this.feedbackList());
-    this.appRef.attachView(componentRef.hostView);
-    componentRef.changeDetectorRef.detectChanges();
+    const componentRef = this.viewContainerRef.createComponent(TaskButton);
 
-    // Clean up when the component is destroyed
-    componentRef.onDestroy(() => {
-      this.appRef.detachView(componentRef.hostView);
-    });
+    componentRef.setInput("task", task);
+    // TODO only insert feedback related to tasks tests
+    const matchedFeedback = this.feedbackList().filter((feedback: Feedback) =>
+      task.testIds.includes(feedback.testCase.id)
+    );
+    componentRef.setInput("feedbackList", matchedFeedback);
+
+    this.renderer.appendChild(taskHtmlContainer, componentRef.location.nativeElement);
   }
 }

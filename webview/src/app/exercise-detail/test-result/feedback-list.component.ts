@@ -20,6 +20,6 @@ export class FeedbackListComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    console.log("TestResult.ngOnInit");
+    
   }
 }

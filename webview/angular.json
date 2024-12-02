@@ -23,7 +23,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/assets"],
-            "styles": ["src/vscode.css"],
+            "styles": ["src/vscode.css", "node_modules/@fortawesome/fontawesome-free/css/all.css"],
             "scripts": [],
             "allowedCommonJsDependencies": ["@vscode/markdown-it-katex", "dompurify", "markdown-it-class"],
             "inlineStyleLanguage": "css"
