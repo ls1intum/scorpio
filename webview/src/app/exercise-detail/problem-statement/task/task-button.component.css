@@ -16,12 +16,12 @@
 }
 
 dialog {
-  width: 85%;
-  height: 85%;
+  width: 86%;
+  height: 86%;
   border: none;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: fixed;
+  top: 4%;
+  left: 2%;
   background-color: var(--vscode-editor-background);
 }
 

@@ -1,7 +1,7 @@
 <dialog #feedbackDialog>
   <button class="close-button" (click)="feedbackDialog.close()">X</button>
-  <br>
-  <br>
+  <br />
+  <br />
   <feedback-list [feedbackList]="feedbackList()"></feedback-list>
 </dialog>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
@@ -14,13 +14,13 @@
 <span>&nbsp;</span>
 <span class="task-name" [innerHTML]="task().taskName &nbsp;"></span>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
-<small>No Test Results</small>
+<span>No Test Results</span>
 } @case (TaskStatus.SUCCESS){
-<span class="test-result" [ngClass]="'text-success'" (click)="feedbackDialog.show()">
+<span class="test-result" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
   {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
 </span>
 } @case (TaskStatus.FAIL){
-<span class="test-result" [ngClass]="'text-fail'" (click)="feedbackDialog.show()">
-  {{ positiveFeedback().length}} of {{ feedbackList().length }} passed
+<span class="test-result" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()">
+  {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
 </span>
 }}
