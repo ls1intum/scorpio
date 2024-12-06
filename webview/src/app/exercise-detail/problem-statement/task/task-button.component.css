@@ -2,21 +2,9 @@
   font-weight: bold;
 }
 
-.no-result {
-  color: var(--vscode-editorWarning-foreground);
-}
-
 .test-result {
   text-decoration: underline;
   cursor: pointer;
-}
-
-.text-success {
-  color: var(--vscode-editorInfo-foreground);
-}
-
-.text-fail {
-  color: var(--vscode-editorError-foreground);
 }
 
 dialog {

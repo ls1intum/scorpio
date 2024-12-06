@@ -13,9 +13,8 @@ import { Result } from "@shared/models/result.model";
 import { vscode } from "src/app/vscode";
 import { Exercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
-import { ScoreButton } from "./score-button/score-button.component";
 import { StartButton } from "./start-button/start-button.component";
-import { HeaderTable } from "./header-table/header-table.component";
+import { ExerciseOverview } from "./header-table/overview.component";
 
 @Component({
   selector: "exercise-detail",
@@ -23,7 +22,7 @@ import { HeaderTable } from "./header-table/header-table.component";
   styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ScoreButton, StartButton, HeaderTable, ProblemStatementComponent],
+  imports: [CommonModule, StartButton, ExerciseOverview, ProblemStatementComponent],
 })
 export class ExerciseDetailView implements OnInit {
   course = input.required<Course>();

@@ -94,4 +94,17 @@ textarea::placeholder {
 dialog {
   background-color: var(--vscode-editor-background);
   border: var(--vscode-editorWidget-border);
+  color: var(--vscode-button-foreground);
+}
+
+.no-result {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.text-success {
+  color: var(--vscode-editorInfo-foreground);
+}
+
+.text-fail {
+  color: var(--vscode-editorError-foreground);
 }

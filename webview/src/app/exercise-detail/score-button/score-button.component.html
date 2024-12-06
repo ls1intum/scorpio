@@ -1,7 +1,0 @@
-<dialog #feedbackDialog>
-  <button class="close-button" (click)="feedbackDialog.close()">X</button>
-  <br />
-  <br />
-  <feedback-list [feedbackList]="result().feedbacks"></feedback-list>
-</dialog>
-<button (click)="feedbackDialog.showModal()">{{ result().score }} %</button>

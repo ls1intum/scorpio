@@ -2,16 +2,17 @@ import { CommonModule } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { Exercise } from "@shared/models/exercise.model";
 import { Result } from "@shared/models/result.model";
+import { ScoreButton } from "../overall-score/score-button.component";
 
 @Component({
-  selector: "header-table",
-  templateUrl: "./header-table.component.html",
-  styleUrls: ["./header-table.component.css"],
+  selector: "overview",
+  templateUrl: "./overview.component.html",
+  styleUrls: ["./overview.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScoreButton],
 })
-export class HeaderTable {
+export class ExerciseOverview {
   exercise = input.required<Exercise>();
 
   protected latestResult = computed(() => {
@@ -21,13 +22,5 @@ export class HeaderTable {
       ?.at(0);
   });
 
-  protected absoluteScore = computed(() => {
-    return ((this.latestResult()!.score * this.exercise().maxPoints) / 100).toFixed(1);
-  });
-
   constructor() {}
-
-  protected isComponent(content: any): boolean {
-    return typeof content === "function";
-  }
 }

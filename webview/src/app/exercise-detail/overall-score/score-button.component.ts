@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { Result } from "@shared/models/result.model";
 import { FeedbackListComponent } from "../test-result/feedback-list.component";
 
@@ -12,8 +12,13 @@ import { FeedbackListComponent } from "../test-result/feedback-list.component";
   imports: [CommonModule, FeedbackListComponent],
 })
 export class ScoreButton {
+  result = input<Result>();
 
-  result = input.required<Result>();
+  maxPoints = input.required<number>();
+
+  protected absoluteScore = computed(() => {
+    return ((this.result()!.score * this.maxPoints()) / 100).toFixed(1);
+  });
 
   constructor() {}
 }

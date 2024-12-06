@@ -14,13 +14,7 @@
   padding: 0.25rem;
   margin: 0.25rem;
   min-height: 3rem;
-}
-
-.container-fail p,
-.container-fail b,
-.container-success p,
-.container-success b {
-  color: var(--vscode-foreground);
+  text-align: left;
 }
 
 .row {

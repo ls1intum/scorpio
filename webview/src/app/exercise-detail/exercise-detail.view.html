@@ -1,8 +1,6 @@
 <h2>{{ exercise().title }}</h2>
-@if (latestResult()){
-<score-button [result]="latestResult()!"></score-button>
-} @else if( !exercise().dueDate || exercise().dueDate! > now()){
+@if( !exercise().dueDate || exercise().dueDate! > now()){
 <start-button [exercise]="exercise()"></start-button>
 }
-<header-table [exercise]="exercise()"></header-table>
+<overview [exercise]="exercise()"></overview>
 <problem-statement [exercise]="exercise()" [feedbackList]="feedbackList()"> </problem-statement>

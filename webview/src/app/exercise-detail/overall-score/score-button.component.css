@@ -11,6 +11,11 @@ dialog::backdrop {
   opacity: 0.5;
 }
 
+.test-result {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .close-button {
   position: absolute;
   top: 0.5rem;

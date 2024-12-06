@@ -2,9 +2,7 @@
   <tr>
     <th>Points</th>
     <td>
-      @if (latestResult()){
-      {{ absoluteScore() }} / {{ exercise().maxPoints }}
-      } @else { No score }
+      <score-button [result]="latestResult()" [maxPoints]="exercise().maxPoints"></score-button>
     </td>
   </tr>
 
