@@ -17,8 +17,10 @@ export async function start_exercise(
   })
     .then(async (response) => {
       if (!response.ok) {
+        const errorText = await response.text();
+        
         throw new Error(
-          `HTTP error! status: ${response.status} message: ${response.text}`
+          `HTTP error! status: ${response.status} message: ${errorText}`
         );
       }
 
@@ -50,8 +52,10 @@ export async function fetch_latest_participation(
   })
     .then(async (response) => {
       if (!response.ok) {
+        const errorText = await response.text();
+
         throw new Error(
-          `HTTP error! status: ${response.status} message: ${response.text}`
+          `HTTP error! status: ${response.status} message: ${errorText}`
         );
       }
 
@@ -86,8 +90,10 @@ export async function fetch_feedback(
   })
     .then(async (response) => {
       if (!response.ok) {
+        const errorText = await response.text();
+
         throw new Error(
-          `HTTP error! status: ${response.status} message: ${response.text}`
+          `HTTP error! status: ${response.status} message: ${errorText}`
         );
       }
 

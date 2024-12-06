@@ -4,21 +4,17 @@ import {
   computed,
   effect,
   input,
-  Input,
   OnInit,
-  signal,
-  WritableSignal,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
-import { Feedback } from "@shared/models/feedback.model";
-import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
-import { Participation } from "@shared/models/participation.model";
+import { CommandFromWebview } from "@shared/webview-commands";
 import { Result } from "@shared/models/result.model";
 import { vscode } from "src/app/vscode";
 import { Exercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
 import { ScoreButton } from "./score-button/score-button.component";
+import { StartButton } from "./start-button/start-button.component";
 
 @Component({
   selector: "exercise-detail",
@@ -26,7 +22,7 @@ import { ScoreButton } from "./score-button/score-button.component";
   styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ScoreButton, ProblemStatementComponent],
+  imports: [CommonModule, ScoreButton, StartButton, ProblemStatementComponent],
 })
 export class ExerciseDetailView implements OnInit {
   course = input.required<Course>();
@@ -45,6 +41,8 @@ export class ExerciseDetailView implements OnInit {
   feedbackList = computed(() => {
     return this.latestResult()?.feedbacks ?? [];
   });
+
+  now = computed(() => new Date());
 
   constructor() {
     effect(() => console.log(this.exercise()));

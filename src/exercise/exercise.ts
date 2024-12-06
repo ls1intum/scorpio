@@ -112,6 +112,9 @@ export async function cloneCurrentExercise() {
   try {
     participation = await fetch_latest_participation(session.accessToken, displayedExercise.id);
   } catch (e) {
+    if (displayedExercise.dueDate! < new Date()) {
+      throw new Error("Exercise is past due date and cannot be started");
+    }
     participation = await start_exercise(session.accessToken, displayedExercise.id);
   }
 
