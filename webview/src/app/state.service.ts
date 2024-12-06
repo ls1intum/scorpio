@@ -1,4 +1,6 @@
 import { Injectable } from "@angular/core";
+import { Course } from "@shared/models/course.model";
+import { Exercise } from "@shared/models/exercise.model";
 import { CommandFromExtension } from "@shared/webview-commands";
 import { BehaviorSubject } from "rxjs";
 
@@ -11,8 +13,8 @@ export enum ViewState {
 
 export interface State {
   viewState: ViewState;
-  course: any;
-  exercise: any;
+  course: Course | undefined;
+  exercise: Exercise | undefined;
   repoKey: string | undefined;
 }
 
@@ -60,6 +62,8 @@ export class StateService {
           break;
         case CommandFromExtension.SHOW_PROBLEM_STATEMENT:
           const { course: course, exercise: exercise, repoKey: repoKey } = JSON.parse(message.text);
+
+          exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : exercise.dueDate;
           this.changeState({
             viewState: ViewState.PROBLEM_STATEMENT,
             course: course,

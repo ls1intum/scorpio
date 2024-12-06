@@ -7,11 +7,10 @@ import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
 import { fetch_all_courses } from "../course/course.api";
 import {
-  fetch_course_exercise_projectKey,
   fetch_programming_exercises_by_courseId,
 } from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
-import { fetch_feedback } from "../participation/participation.api";
+import { get_course_exercise_by_projectKey } from "../exercise/exercise";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -119,14 +118,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
-          const session = await vscode.authentication.getSession(AUTH_ID, [], {
-            createIfNone: false,
-          });
-          if (!session) {
-            return;
-          }
-          const { course: course, exercise: exercise } = await fetch_course_exercise_projectKey(
-            session.accessToken,
+          const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
             state.displayedCourse!.shortName + state.displayedExercise!.shortName
           );
           set_state({
@@ -134,22 +126,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             displayedExercise: exercise,
             repoCourse: state.repoCourse,
             repoExercise: state.repoExercise,
-          });
-          break;
-        }
-        case CommandFromWebview.GET_FEEDBACK: {
-          const { participationId: participationId, resultId: resultId } = JSON.parse(data.text);
-          const session = await vscode.authentication.getSession(AUTH_ID, [], {
-            createIfNone: false,
-          });
-          if (!session) {
-            return;
-          }
-
-          const feedback = await fetch_feedback(session.accessToken, participationId, resultId);
-          this._view?.webview.postMessage({
-            command: CommandFromExtension.SEND_FEEDBACK,
-            text: JSON.stringify(feedback),
           });
           break;
         }

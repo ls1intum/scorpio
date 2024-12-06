@@ -8,5 +8,8 @@ export type Exercise = {
     problemStatement: string,
     // fix that jsons are not correctly deserialized
     dueDate: Date | undefined,
-    studentParticipations: Participation[] | undefined,
+    maxPoints: number,
+    bonusPoints: number,
+    difficulty: string | undefined,
+    studentParticipations: Participation[],
 }

@@ -17,8 +17,10 @@ export async function fetch_programming_exercises_by_courseId(
   })
     .then(async (response) => {
       if (!response.ok) {
+        const errorText = await response.text();
+
         throw new Error(
-          `HTTP error! status: ${response.status} message: ${response.text}`
+          `HTTP error! status: ${response.status} message: ${errorText}`
         );
       }
 
@@ -57,6 +59,7 @@ export async function fetch_course_exercise_projectKey(
     .then(async (response) => {
       if (!response.ok) {
         const errorText = await response.text();
+        
         throw new Error(
           `HTTP error! status: ${response.status} message: ${errorText}`
         );

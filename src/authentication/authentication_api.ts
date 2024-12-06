@@ -19,10 +19,12 @@ export async function authenticateToken(
       rememberMe: true,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
+        const errorText = await response.text();
+
         throw new Error(
-          `HTTP error with status: ${response.status} ${response.statusText}`
+          `HTTP error with status: ${response.status} ${errorText}`
         );
       }
 
@@ -54,11 +56,12 @@ function getVcsAccessToken(token: string, participationId: number, method: strin
       Authorization: `Bearer ${token}`,
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
-        console.error(response)
+        const errorText = await response.text();
+
         throw new Error(
-          `HTTP error with status: ${response.status} ${response.statusText}`
+          `HTTP error with status: ${response.status} ${errorText}`
         );
       }
 

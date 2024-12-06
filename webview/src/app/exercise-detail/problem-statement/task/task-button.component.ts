@@ -28,10 +28,6 @@ export class TaskButton {
   });
 
   constructor() {}
-
-  onClick() {
-    console.log("TaskButton.onClick");
-  }
 }
 
 enum TaskStatus {

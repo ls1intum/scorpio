@@ -35,8 +35,8 @@ enum IncomingCommands {
 })
 export class CourseSelectionView implements OnInit {
   coursesWithScore: WritableSignal<
-    { course: Course; totalScores: TotalScores; nextDueExercise: Exercise | undefined }[] | undefined
-  > = signal(undefined);
+    { course: Course; totalScores: TotalScores; nextDueExercise: Exercise | undefined }[]
+  > = signal([]);
 
   constructor() {}
 

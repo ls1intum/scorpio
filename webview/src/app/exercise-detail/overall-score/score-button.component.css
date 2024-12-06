@@ -1,12 +1,3 @@
-.task-name {
-  font-weight: bold;
-}
-
-.test-result {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 dialog {
   width: 86%;
   height: 86%;
@@ -18,6 +9,11 @@ dialog {
 dialog::backdrop {
   background-color: var(--vscode-sideBar-background);
   opacity: 0.5;
+}
+
+.test-result {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .close-button {

@@ -1,6 +1,6 @@
 .container-success {
-  background-color: var(--vscode-editorInfo-foreground);
-  opacity: 0.8;
+  background-color: var(--vscode-inputValidation-infoBackground);
+  border-color: var(--vscode-inputValidation-infoBorder);
   padding: 0.25rem;
   margin: 0.25rem;
   min-height: 3rem;
@@ -9,16 +9,17 @@
 }
 
 .container-fail {
-  background-color: var(--vscode-editorError-foreground);
-  opacity: 0.8;
+  background-color: var(--vscode-inputValidation-errorBackground);
+  border-color: var(--vscode-inputValidation-errorBorder);
   padding: 0.25rem;
   margin: 0.25rem;
   min-height: 3rem;
+  text-align: left;
 }
 
-.row{
-    width: 100%;
-    display: flex; 
-    align-items: baseline; 
-    justify-content: space-between;
+.row {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }

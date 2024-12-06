@@ -1,5 +1,5 @@
 <h2>Courses</h2>
-@if (!coursesWithScore()) {
+@if (coursesWithScore().length === 0) {
 <p>You are not enrolled into any courses that have a released programming exercise</p>
 }
 <div class="course-list">

@@ -1,0 +1,16 @@
+@if (result() ){
+<dialog #feedbackDialog>
+  <button class="close-button" (click)="feedbackDialog.close()">X</button>
+  <br />
+  <br />
+  <feedback-list [feedbackList]="result()!.feedbacks"></feedback-list>
+</dialog>
+<span
+  class="test-result"
+  [ngClass]="result()!.score === 100 ? 'text-success' : 'text-fail'"
+  (click)="feedbackDialog.showModal()"
+  >{{ absoluteScore() }} / {{ maxPoints() }}</span
+>
+} @else {
+<span [ngClass]="'no-result'"> No Graded Result</span>
+}

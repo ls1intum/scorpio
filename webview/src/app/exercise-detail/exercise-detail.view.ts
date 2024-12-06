@@ -1,21 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   input,
-  Input,
   OnInit,
-  signal,
-  WritableSignal,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
-import { Feedback } from "@shared/models/feedback.model";
-import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
-import { Participation } from "@shared/models/participation.model";
+import { CommandFromWebview } from "@shared/webview-commands";
 import { Result } from "@shared/models/result.model";
 import { vscode } from "src/app/vscode";
 import { Exercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
+import { StartButton } from "./start-button/start-button.component";
+import { ExerciseOverview } from "./header-table/overview.component";
 
 @Component({
   selector: "exercise-detail",
@@ -23,54 +22,42 @@ import { Course } from "@shared/models/course.model";
   styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ProblemStatementComponent],
+  imports: [CommonModule, StartButton, ExerciseOverview, ProblemStatementComponent],
 })
 export class ExerciseDetailView implements OnInit {
   course = input.required<Course>();
 
-  @Input({ required: true })
-  exercise!: WritableSignal<Exercise>;
+  exercise = input.required<Exercise>();
 
   repoKey = input.required<string>();
 
-  feedbackList: WritableSignal<Feedback[]> = signal([]);
+  latestResult = computed(() => {
+    return this.exercise()
+      .studentParticipations?.at(0)
+      ?.results?.sort((a: Result, b: Result) => a.id - b.id)
+      ?.at(0);
+  });
 
-  constructor() {}
+  feedbackList = computed(() => {
+    return this.latestResult()?.feedbacks ?? [];
+  });
+
+  now = computed(() => new Date());
+
+  constructor() {
+    effect(() => console.log(this.exercise()));
+  }
 
   ngOnInit() {
-    window.addEventListener("message", (event) => {
-      const message = event.data; // The JSON data
-      if (message.command === CommandFromExtension.SEND_FEEDBACK) {
-        const feedback: Feedback[] = JSON.parse(message.text);
-        this.feedbackList.set(feedback);
-      }
-    });
-
     // query exercise details for problem statement
     if (!this.exercise().problemStatement) {
+      // this will set the displayed exercise so retrieval is not needed
       vscode.postMessage({
         command: CommandFromWebview.GET_EXERCISE_DETAILS,
         text: JSON.stringify({
           exerciseId: this.exercise().id,
         }),
       });
-    }
-
-    // query Feedback
-    // participations and results should be passed from the parent component already
-    if (this.exercise().studentParticipations) {
-      const part: Participation = this.exercise().studentParticipations![0];
-      // get latest result
-      const result: Result | undefined = part.results?.[part.results.length - 1];
-      if (result) {
-        vscode.postMessage({
-          command: CommandFromWebview.GET_FEEDBACK,
-          text: JSON.stringify({
-            participationId: this.exercise().studentParticipations![0].id,
-            resultId: result.id,
-          }),
-        });
-      }
     }
   }
 }

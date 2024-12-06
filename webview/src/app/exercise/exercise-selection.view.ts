@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   CUSTOM_ELEMENTS_SCHEMA,
   Input,
   OnInit,
@@ -35,7 +36,19 @@ export class ExerciseSelectionView implements OnInit {
   @Input()
   course!: Course;
 
-  exercises: WritableSignal<Exercise[] | undefined> = signal(undefined);
+  private exercises: WritableSignal<Exercise[]> = signal([]);
+
+  exercisesDue = computed(() =>
+    this.exercises()
+      .filter((exercise) => exercise.dueDate && exercise.dueDate >= new Date())
+      .sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime())
+  );
+
+  exercisesPastDueDate = computed(() =>
+    this.exercises().filter((exercise) => exercise.dueDate && exercise.dueDate < new Date())
+  );
+
+  exercisesNoDueDate = computed(() => this.exercises().filter((exercise) => !exercise.dueDate));
 
   constructor() {}
 
