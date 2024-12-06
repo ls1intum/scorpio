@@ -4,4 +4,5 @@
 } @else if( !exercise().dueDate || exercise().dueDate! > now()){
 <start-button [exercise]="exercise()"></start-button>
 }
+<header-table [exercise]="exercise()"></header-table>
 <problem-statement [exercise]="exercise()" [feedbackList]="feedbackList()"> </problem-statement>
