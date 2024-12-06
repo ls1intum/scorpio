@@ -18,6 +18,7 @@ import { Result } from "@shared/models/result.model";
 import { vscode } from "src/app/vscode";
 import { Exercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
+import { ScoreButton } from "./score-button/score-button.component";
 
 @Component({
   selector: "exercise-detail",
@@ -25,7 +26,7 @@ import { Course } from "@shared/models/course.model";
   styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ProblemStatementComponent],
+  imports: [CommonModule, ScoreButton, ProblemStatementComponent],
 })
 export class ExerciseDetailView implements OnInit {
   course = input.required<Course>();
@@ -34,13 +35,15 @@ export class ExerciseDetailView implements OnInit {
 
   repoKey = input.required<string>();
 
+  latestResult = computed(() => {
+    return this.exercise()
+      .studentParticipations?.at(0)
+      ?.results?.sort((a: Result, b: Result) => a.id - b.id)
+      ?.at(0);
+  });
+
   feedbackList = computed(() => {
-    return (
-      this.exercise()
-        .studentParticipations?.at(0)
-        ?.results?.sort((a: Result, b: Result) => a.id - b.id)
-        ?.at(0)?.feedbacks ?? []
-    );
+    return this.latestResult()?.feedbacks ?? [];
   });
 
   constructor() {
