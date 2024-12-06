@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fetch_all_courses, fetch_course_by_courseId } from "./course.api";
+import { fetch_all_courses } from "./course.api";
 import { Course, TotalScores } from "@shared/models/course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
@@ -10,17 +10,6 @@ export type CourseOption = {
   detail: string;
   course: Course;
 };
-
-export async function fetch_course_by_id(courseId: number): Promise<Course> {
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
-  if (!session) {
-    throw new NotAuthenticatedError();
-  }
-
-  return fetch_course_by_courseId(session.accessToken, courseId);
-}
 
 export async function build_course_options(): Promise<Course> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {

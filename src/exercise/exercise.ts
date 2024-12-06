@@ -3,11 +3,16 @@ import { state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-import { fetch_latest_participation, start_exercise } from "../participation/participation.api";
+import {
+  fetch_feedback,
+  fetch_latest_participation,
+  start_exercise,
+} from "../participation/participation.api";
 import { Participation } from "@shared/models/participation.model";
 import { cloneRepository } from "../shared/repository";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { Result } from "@shared/models/result.model";
+import { fetch_course_exercise_projectKey } from "./exercise.api";
 
 function _getScoreString(exercise: Exercise): string {
   const score = exercise.studentParticipations
@@ -111,4 +116,38 @@ export async function cloneCurrentExercise() {
   }
 
   await cloneRepository(participation.repositoryUri, participation.participantIdentifier);
+}
+
+export async function get_course_exercise_by_projectKey(
+  projectKey: string
+): Promise<{ course: Course; exercise: Exercise }> {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
+
+  if (!session) {
+    throw new NotAuthenticatedError();
+  }
+
+  const { course: course, exercise: exercise } = await fetch_course_exercise_projectKey(
+    session.accessToken,
+    projectKey
+  );
+  // course.exercises = [exercise];
+
+  // if participation with result exists, then query feedback
+  // if (exercise.studentParticipations) {
+  //   const part: Participation = exercise.studentParticipations[0];
+  //   // get latest result
+  //   const result: Result | undefined = part.results?.sort(
+  //     (a, b) => a.completionDate.getTime() - b.completionDate.getTime()
+  //   )[0];
+
+  //   if (result) {
+  //     const feedback = await fetch_feedback(session.accessToken, part.id, result.id);
+  //     result.feedback = feedback;
+  //   }
+  // }
+
+  return { course: course, exercise: exercise };
 }

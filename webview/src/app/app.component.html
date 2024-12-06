@@ -6,6 +6,6 @@
   } @case (ViewState.EXERCISE_SELECTION){
   <exercise-selection [course]="course()!"></exercise-selection>
   } @case (ViewState.PROBLEM_STATEMENT){
-  <exercise-detail [course]="course()!" [exercise]="signal(exercise()!)" [repoKey]="repoKey()!"></exercise-detail>
+  <exercise-detail [course]="course()!" [exercise]="exercise()!" [repoKey]="repoKey()!"></exercise-detail>
   } }
 </main>

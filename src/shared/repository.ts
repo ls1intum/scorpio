@@ -4,12 +4,12 @@ import { NotAuthenticatedError } from "../authentication/not_authenticated.error
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-import { fetch_course_exercise_projectKey } from "../exercise/exercise.api";
 import { set_state, state } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
+import { get_course_exercise_by_projectKey } from "../exercise/exercise";
 
 var gitRepo: SimpleGit | undefined;
 
@@ -137,8 +137,7 @@ export async function detectRepoCourseAndExercise(): Promise<string | undefined>
 
   const projectKey = getProjectKeyFromRepoUrl(foundRepoAndRemote.remote.refs.fetch!);
 
-  const course_exercise: { course: Course; exercise: Exercise } = await fetch_course_exercise_projectKey(
-    session.accessToken,
+  const course_exercise: { course: Course; exercise: Exercise } = await get_course_exercise_by_projectKey(
     projectKey
   );
 
@@ -175,9 +174,9 @@ async function getArtemisRepo(
       const isRepo = await git.checkIsRepo();
       if (isRepo) {
         const remotes = await git.getRemotes(true);
-        for(const remote of remotes) {
+        for (const remote of remotes) {
           const url = new URL(remote.refs.fetch!);
-          if(url.hostname == new URL(settings.base_url).hostname && url.username == username) {
+          if (url.hostname == new URL(settings.base_url).hostname && url.username == username) {
             return { repo: git, remote: remote };
           }
         }
@@ -193,10 +192,10 @@ async function getArtemisRepo(
 function getProjectKeyFromRepoUrl(repoUrl: string): string {
   // extract projectKey {protocol}://{username}@{host}:{port}/git/{PROJECT_KEY}/{project_key}-{username}.git
   const parts = repoUrl.split("/");
-  if(parts.length < 5) {
+  if (parts.length < 5) {
     throw new Error("Invalid artemis repository URL does not contain project key");
   }
 
-  const projectKey = parts[4]
+  const projectKey = parts[4];
   return projectKey;
 }

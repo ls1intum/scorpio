@@ -8,7 +8,6 @@ export enum CommandFromWebview {
   CLONE_REPOSITORY = "cloneRepository",
   SUBMIT = "submit",
   SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
-  GET_FEEDBACK = "getFeedback",
 }
 
 export enum CommandFromExtension {
@@ -19,6 +18,5 @@ export enum CommandFromExtension {
   SEND_COURSE_OPTIONS = "sendCourseOptions",
   SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
   SEND_COURSE_AND_EXERCISE = "sendCourseAndExercise",
-  SEND_FEEDBACK = "sendFeedback",
   EASTER_EGG = "easterEgg",
 }

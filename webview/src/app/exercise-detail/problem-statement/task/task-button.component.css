@@ -2,6 +2,10 @@
   font-weight: bold;
 }
 
+.no-result {
+  color: var(--vscode-editorWarning-foreground);
+}
+
 .test-result {
   text-decoration: underline;
   cursor: pointer;

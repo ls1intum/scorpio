@@ -6,5 +6,5 @@ export type Participation = {
     repositoryUri: string,
     userIndependentRepositoryUri: string,
     participantIdentifier: string,
-    results: Result[] | undefined
+    results: Result[]
 }

@@ -5,7 +5,7 @@ export type Course = {
     title: string;
     description: string;
     shortName: string;
-    exercises: Exercise[] | undefined;
+    exercises: Exercise[];
 }
 
 export type TotalScores = {

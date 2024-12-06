@@ -12,9 +12,10 @@
 <i class="fa-regular fa-circle-xmark" [ngClass]="'text-fail'"></i>
 } }
 <span>&nbsp;</span>
-<span class="task-name" [innerHTML]="task().taskName &nbsp;"></span>
+<span class="task-name" [innerHTML]="task().taskName"></span>
+<span>&nbsp;</span>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
-<span>No Test Results</span>
+<span [ngClass]="'no-result'">No Test Results</span>
 } @case (TaskStatus.SUCCESS){
 <span class="test-result" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
   {{ positiveFeedback().length }} of {{ feedbackList().length }} passed

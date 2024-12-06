@@ -1,39 +1,6 @@
 import { settings } from "../shared/settings";
 import { Course, TotalScores } from "@shared/models/course.model";
 
-export async function fetch_course_by_courseId(
-  token: string,
-  courseId: number
-): Promise<Course> {
-  const url = `${settings.base_url}/api/courses/${courseId}`;
-
-  return fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `HTTP error! status: ${response.status} message: ${errorText}`
-        );
-      }
-
-      const data = await response.json();
-      return data as Course;
-    })
-    .catch((error) => {
-      if (error instanceof TypeError) {
-        throw new Error(`Could not reach the server: ${error.message}`);
-      }
-
-      throw error;
-    });
-}
-
 export async function fetch_all_courses(
   token: string
 ): Promise<{ course: Course; totalScores: TotalScores }[]> {
