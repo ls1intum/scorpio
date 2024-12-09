@@ -33,7 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+  if(!theiaEnv){
+    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+  }
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -114,8 +116,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
           vscode.window.showErrorMessage("Login failed");
           return;
         }
-
-        vscode.window.showInformationMessage("You are logged in now");
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to login");
       }
@@ -130,8 +130,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
         .then((value) => {
           if (value === "Sign out") {
             authenticationProvider.removeSession();
-            vscode.window.showInformationMessage("You have been logged out");
-
             vscode.authentication.getSession(AUTH_ID, [], {
               createIfNone: false,
             });
@@ -185,9 +183,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
       cloneCurrentExercise()
-        .then(() => {
-          vscode.window.showInformationMessage(`Repository cloned successfully.`);
-        })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
         });
@@ -197,13 +192,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to submit workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.submit", async () => {
-      submitCurrentWorkspace()
-        .then(() => {
-          vscode.window.showInformationMessage(`Workspace submitted successfully.`);
-        })
-        .catch((e) => {
-          _errorMessage(e, LogLevel.WARN, "Failed to submit workspace");
-        });
+      submitCurrentWorkspace().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
+      });
     })
   );
 
@@ -215,8 +206,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
           if (!projectKey) {
             return;
           }
-
-          vscode.window.showInformationMessage(`Repo detected successfully.`);
         })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
@@ -228,9 +217,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.sync", async () => {
       sync_problem_statement_with_workspace()
-        .then(() => {
-          vscode.window.showInformationMessage(`Workspace synced successfully.`);
-        })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
         });
@@ -241,7 +227,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.sidebar.refresh", () => {
       sidebar.resolveWebviewView(sidebar._view!);
-      vscode.window.showInformationMessage("Refreshed Artemis Sidebar");
     })
   );
 }

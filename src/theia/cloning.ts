@@ -8,7 +8,7 @@ export async function cloneTheia(cloneUrl: URL) {
   // Check if a workspace is available in which the exercise can be cloned
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
-    vscode.window.showErrorMessage("No workspace folder available");
+    console.error("No workspace folder available to clone repository");
     return;
   }
 
@@ -21,7 +21,7 @@ export async function cloneTheia(cloneUrl: URL) {
   // check if repo already exists
   const subfolders = await getLevel1Subfolders(vscode.Uri.file(destinationPath));
   if (subfolders.some((folder) => folder.fsPath === clonePath)) {
-    vscode.window.showInformationMessage("Repository already cloned");
+    console.log("Repository already cloned");
     return;
   }
 
@@ -31,12 +31,12 @@ export async function cloneTheia(cloneUrl: URL) {
   try {
     await git.clone(cloneUrl.toString(), clonePath);
   } catch (e: any) {
-    vscode.window.showErrorMessage(`Error cloning repository: ${e.message}`);
+    console.error(`Error cloning repository: ${e.message}`);
   }
   try {
     await git.addConfig("user.name", theiaEnv?.GIT_USER!, undefined, GitConfigScope.global);
     await git.addConfig("user.email", theiaEnv?.GIT_MAIL!, undefined, GitConfigScope.global);
   } catch (e: any) {
-    vscode.window.showErrorMessage(`Error setting git config: ${e.message}`);
+    console.error(`Error setting git config: ${e.message}`);
   }
 }

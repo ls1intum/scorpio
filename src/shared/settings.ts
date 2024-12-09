@@ -30,7 +30,7 @@ export function initSettings() {
 function getSettingsForVscode(): Settings {
   const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
   if (!base_url) {
-    vscode.window.showErrorMessage("Artemis API Base URL not set. Please set it in the settings.");
+    vscode.window.showErrorMessage("Artemis Base URL not set. Please set it in the settings.");
   }
 
   const default_repo_path = vscode.workspace.getConfiguration("scorpio").get<string>("defaults.repoPath");
@@ -48,12 +48,12 @@ async function handleSettingsChangeForVscode(e: vscode.ConfigurationChangeEvent)
   if (e.affectsConfiguration("scorpio.artemis.apiBaseUrl")) {
     const base_url = vscode.workspace.getConfiguration("scorpio").get<string>("artemis.apiBaseUrl");
     if (!base_url) {
-      vscode.window.showErrorMessage("Artemis API Base URL not set. Please set it in the settings.");
+      vscode.window.showErrorMessage("Artemis Base URL not set. Please set it in the settings.");
     }
     settings.base_url = base_url;
 
     await authenticationProvider.removeSession();
-    console.log("Restarting extension");
+    console.warn("Restarting extension");
     vscode.commands.executeCommand("scorpio.restart");
   }
 

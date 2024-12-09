@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  input,
-  OnInit,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
 import { CommandFromWebview } from "@shared/webview-commands";
@@ -44,9 +37,7 @@ export class ExerciseDetailView implements OnInit {
 
   now = computed(() => new Date());
 
-  constructor() {
-    effect(() => console.log(this.exercise()));
-  }
+  constructor() {}
 
   ngOnInit() {
     // query exercise details for problem statement
