@@ -42,7 +42,7 @@ export async function initTheia() {
     return;
   }
 
-  vscode.window.showInformationMessage("Theia environment detected");
+  console.log("Theia environment detected");
   if (
     !theiaEnv.ARTEMIS_TOKEN ||
     !theiaEnv.ARTEMIS_URL ||

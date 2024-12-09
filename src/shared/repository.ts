@@ -85,17 +85,8 @@ export async function submitCurrentWorkspace() {
     throw new Error("No changes to commit");
   }
 
-  const commitMessage = await vscode.window.showInputBox({
-    placeHolder: "Enter commit message",
-    prompt: "Enter commit message",
-    value: "Submit workspace from artemis plugin", // Set your default text here
-  });
-  if (!commitMessage) {
-    throw new Error("Commit process cancelled");
-  }
-
   const confirm = await vscode.window.showWarningMessage(
-    `Are you sure you want to submit your workspace with the following message? \n "${commitMessage}"`,
+    `Are you sure you want to submit your workspace \n`,
     { modal: true },
     "Confirm"
   );
@@ -104,7 +95,7 @@ export async function submitCurrentWorkspace() {
     throw new Error("Commit process cancelled");
   }
   await gitRepo.add(".");
-  await gitRepo.commit(commitMessage);
+  await gitRepo.commit("Submit workspace from artemis plugin");
   await gitRepo.push();
 }
 
