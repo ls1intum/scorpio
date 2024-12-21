@@ -1,24 +1,30 @@
+import { Result } from "./result.model";
 import { TestCase } from "./testcase.model";
 
 export enum FeedbackType {
-    MANUAL = "MANUAL",
-    MANUAL_UNREFERENCED = "MANUAL_UNREFERENCED",
-    AUTOMATIC_ADAPTED = "AUTOMATIC_ADAPTED",
-    AUTOMATIC = "AUTOMATIC",
+  MANUAL = "MANUAL",
+  MANUAL_UNREFERENCED = "MANUAL_UNREFERENCED",
+  AUTOMATIC_ADAPTED = "AUTOMATIC_ADAPTED",
+  AUTOMATIC = "AUTOMATIC",
 }
 
 export enum Visibility {
-    ALWAYS = "ALWAYS",
-    AFTER_DUE_DATE = "AFTER_DUE_DATE",
-    NEVER = "NEVER",
+  ALWAYS = "ALWAYS",
+  AFTER_DUE_DATE = "AFTER_DUE_DATE",
+  NEVER = "NEVER",
 }
 
-export type Feedback = {
-    id: number,
-    detailText: string,
-    testCase: TestCase,
-    credits: number,
-    positive: boolean,
-    type: FeedbackType,
-    visibility: Visibility,
+export class Feedback {
+  public id?: number;
+  public text?: string;
+  public detailText?: string;
+  public hasLongFeedbackText?: boolean;
+  public reference?: string;
+  public credits?: number;
+  public type?: FeedbackType;
+  public result?: Result;
+  public positive?: boolean;
+  public testCase?: TestCase;
+
+  constructor() {}
 }

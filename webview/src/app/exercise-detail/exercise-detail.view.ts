@@ -27,7 +27,7 @@ export class ExerciseDetailView implements OnInit {
   latestResult = computed(() => {
     return this.exercise()
       .studentParticipations?.at(0)
-      ?.results?.sort((a: Result, b: Result) => a.id - b.id)
+      ?.results?.sort((a: Result, b: Result) => a.id! - b.id!)
       ?.at(0);
   });
 

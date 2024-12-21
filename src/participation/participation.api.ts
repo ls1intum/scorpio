@@ -1,11 +1,11 @@
 import { settings } from "../shared/settings";
 import { Feedback } from "@shared/models/feedback.model";
-import { Participation } from "@shared/models/participation.model";
+import { StudentParticipation } from "@shared/models/participation.model";
 
 export async function start_exercise(
   token: string,
   exerciseId: number
-): Promise<Participation> {
+): Promise<StudentParticipation> {
   const url = `${settings.base_url}/api/exercises/${exerciseId}/participations`;
 
   return fetch(url, {
@@ -26,7 +26,7 @@ export async function start_exercise(
 
       const data = await response.json();
 
-      return data as Participation;
+      return data as StudentParticipation;
     })
     .catch((error) => {
       if (error instanceof TypeError) {
@@ -40,7 +40,7 @@ export async function start_exercise(
 export async function fetch_latest_participation(
   token: string,
   exerciseId: number
-): Promise<Participation> {
+): Promise<StudentParticipation> {
   const url = `${settings.base_url}/api/exercises/${exerciseId}/participation`;
 
   return fetch(url, {
@@ -61,7 +61,7 @@ export async function fetch_latest_participation(
 
       const data = await response.json();
 
-      return data as Participation;
+      return data as StudentParticipation;
     })
     .catch((error) => {
       if (error instanceof TypeError) {

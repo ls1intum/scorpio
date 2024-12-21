@@ -1,3 +1,4 @@
+import { ProgrammingExercise } from "./exercise.model"
 import { Visibility } from "./feedback.model"
 
 export enum TestCaseType {
@@ -6,13 +7,14 @@ export enum TestCaseType {
     DEFAULT = 'DEFAULT',
 }
 
-export type TestCase = {
-    id: number,
-    testName: string,
-    weight: number,
-    active: boolean,
-    visibility: Visibility
-    bonusMultiplier: number
-    bonusPoints: number
-    type: TestCaseType
+export class TestCase {
+    id?: number;
+    testName?: string;
+    weight?: number;
+    bonusMultiplier?: number;
+    bonusPoints?: number;
+    active?: boolean;
+    visibility?: Visibility;
+    exercise?: ProgrammingExercise;
+    type?: TestCaseType;
 }

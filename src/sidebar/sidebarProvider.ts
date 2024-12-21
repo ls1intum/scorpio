@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { onStateChange, set_state, State, state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
-import { Course, TotalScores } from "@shared/models/course.model";
+import { Course } from "@shared/models/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
 import { fetch_all_courses } from "../course/course.api";
@@ -91,12 +91,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const coursesWithScore: { course: Course; totalScores: TotalScores }[] = await fetch_all_courses(
+          const courses: Course[] = await fetch_all_courses(
             session.accessToken
           );
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_COURSE_OPTIONS,
-            text: JSON.stringify(coursesWithScore),
+            text: JSON.stringify(courses),
           });
           break;
         }
@@ -109,7 +109,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
           const exercises = await fetch_programming_exercises_by_courseId(
             session.accessToken,
-            state.displayedCourse!.id
+            state.displayedCourse!.id!
           );
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_EXERCISE_OPTIONS,
@@ -119,7 +119,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
           const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
-            state.displayedCourse!.shortName + state.displayedExercise!.shortName
+            state.displayedCourse!.shortName! + state.displayedExercise!.shortName!
           );
           set_state({
             displayedCourse: course,
@@ -215,7 +215,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private displayExercise() {
     const repoKey =
       state.repoCourse && state.repoExercise
-        ? state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase()
+        ? state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase()
         : undefined;
     const course = state.displayedCourse;
     const exercise = state.displayedExercise;

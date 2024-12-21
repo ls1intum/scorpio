@@ -2,18 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
-  Input,
   OnInit,
   signal,
-  ViewEncapsulation,
   WritableSignal,
 } from "@angular/core";
 import { vscode } from "../vscode";
-import { StateService, ViewState } from "../state.service";
 import { CommonModule } from "@angular/common";
-import { Course, TotalScores } from "@shared/models/course.model";
+import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-import { map } from "rxjs";
 
 enum OutgoingCommands {
   GET_COURSE_OPTIONS = "getCourseOptions",
@@ -34,9 +30,9 @@ enum IncomingCommands {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseSelectionView implements OnInit {
-  coursesWithScore: WritableSignal<
-    { course: Course; totalScores: TotalScores; nextDueExercise: Exercise | undefined }[]
-  > = signal([]);
+  coursesWithNextDue: WritableSignal<{ course: Course; nextDueExercise: Exercise | undefined }[]> = signal(
+    []
+  );
 
   constructor() {}
 
@@ -46,29 +42,24 @@ export class CourseSelectionView implements OnInit {
       const message = event.data; // The JSON data
       if (message.command === IncomingCommands.SEND_COURSE_OPTIONS) {
         const courses = JSON.parse(message.text);
-        courses
+        const coursesWithNextDue = courses
           // filter out courses without exercises, as they are not interesting for programming
-          .filter((courseWithScore: { course: Course; totalScores: TotalScores }) => {
-            return courseWithScore.course.exercises;
+          .filter((course: Course) => {
+            return course.exercises;
           })
           // for some reason, the dueDate is not correctly deserialized
-          .map((courseWithScore: { course: Course; totalScores: TotalScores }) => {
-            courseWithScore.course.exercises = courseWithScore.course.exercises!.map((exercise: Exercise) => {
+          .map((course: Course) => {
+            course.exercises = course.exercises!.map((exercise: Exercise) => {
               exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
               return exercise;
             });
-            return courseWithScore;
+            return course;
           })
-          .forEach(
-            (courseWithScore: {
-              course: Course;
-              totalScores: TotalScores;
-              nextDueExercise: Exercise | undefined;
-            }) => {
-              courseWithScore.nextDueExercise = this.getNextDueExercise(courseWithScore.course);
-            }
-          );
-        this.coursesWithScore.set(courses);
+          .map((course: Course) => {
+            console.log({ course: course, nextDueExercise: this.getNextDueExercise(course) });
+            return { course: course, nextDueExercise: this.getNextDueExercise(course) };
+          });
+        this.coursesWithNextDue.set(coursesWithNextDue);
       }
     });
     vscode.postMessage({ command: OutgoingCommands.GET_COURSE_OPTIONS, text: undefined });

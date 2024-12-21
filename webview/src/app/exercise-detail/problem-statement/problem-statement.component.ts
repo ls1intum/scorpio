@@ -105,7 +105,7 @@ export class ProblemStatementComponent implements OnChanges {
         // Added zero-width space as content so the div actually consumes a line to prevent a <ol> display bug in Safari
         acc.replace(
           new RegExp(escapeStringForUseInRegex(task), "g"),
-          `<div class="${taskDivElement(this.exercise().id, id)} d-flex">&#8203;</div>`
+          `<div class="${taskDivElement(this.exercise().id!, id)} d-flex">&#8203;</div>`
         ),
       problemStatementHtml
     );
@@ -115,7 +115,7 @@ export class ProblemStatementComponent implements OnChanges {
     this.renderer.setProperty(this.problemContainer.nativeElement, "innerHTML", this.problemStatement());
 
     this.tasks.forEach((task) => {
-      const taskHtmlContainers = document.getElementsByClassName(taskDivElement(this.exercise().id, task.id));
+      const taskHtmlContainers = document.getElementsByClassName(taskDivElement(this.exercise().id!, task.id));
 
       for (let i = 0; i < taskHtmlContainers.length; i++) {
         const taskHtmlContainer = taskHtmlContainers[i];
@@ -130,7 +130,7 @@ export class ProblemStatementComponent implements OnChanges {
     componentRef.setInput("task", task);
     // TODO only insert feedback related to tasks tests
     const matchedFeedback = this.feedbackList().filter((feedback: Feedback) =>
-      task.testIds.includes(feedback.testCase.id)
+      task.testIds.includes(feedback.testCase!.id!)
     );
     componentRef.setInput("feedbackList", matchedFeedback);
 
