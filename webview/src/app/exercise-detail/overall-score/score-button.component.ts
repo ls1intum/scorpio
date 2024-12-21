@@ -17,7 +17,7 @@ export class ScoreButton {
   maxPoints = input.required<number>();
 
   protected absoluteScore = computed(() => {
-    return ((this.result()!.score * this.maxPoints()) / 100).toFixed(1);
+    return ((this.result()!.score!  * this.maxPoints()) / 100).toFixed(1);
   });
 
   constructor() {}

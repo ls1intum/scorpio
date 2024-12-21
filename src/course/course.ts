@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { fetch_all_courses } from "./course.api";
-import { Course, TotalScores } from "@shared/models/course.model";
+import { Course } from "@shared/models/course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 
@@ -19,14 +19,14 @@ export async function build_course_options(): Promise<Course> {
   if (!session) {
     throw new NotAuthenticatedError();
   }
-  const coursesWithScore: { course: Course; totalScores: TotalScores }[] =
+  const courses: Course[] =
     await fetch_all_courses(session.accessToken);
 
-  const courseOptions: CourseOption[] = coursesWithScore
-    .map((courseWithScore) => ({
-      label: courseWithScore.course.title,
+  const courseOptions: CourseOption[] = courses
+    .map((course) => ({
+      label: course.title!,
       detail: (() => {
-        const nextExercise = courseWithScore.course?.exercises
+        const nextExercise = course.exercises
           ?.filter(
             (exercise) =>
               exercise.dueDate && exercise.dueDate > new Date()
@@ -38,8 +38,8 @@ export async function build_course_options(): Promise<Course> {
               nextExercise.dueDate!.toLocaleString()}`
           : "No upcoming exercise";
       })(),
-      description: `${courseWithScore.totalScores.studentScores.absoluteScore}/${courseWithScore.totalScores.reachablePoints} Points`,
-      course: courseWithScore.course,
+      description: `${course.absoluteScore}/${course.maxPoints} Points`,
+      course: course,
     }));
 
   const selectedCourse = await vscode.window.showQuickPick(courseOptions, {
