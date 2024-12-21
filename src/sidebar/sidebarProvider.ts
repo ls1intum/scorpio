@@ -160,11 +160,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     // The CSS file from the Angular build output
-    const stylesUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "styles.css"]);
+    const stylesUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "styles.css"]);
     // The JS files from the Angular build output
-    const runtimeUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "runtime.js"]);
-    const polyfillsUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "polyfills.js"]);
-    const scriptUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "main.js"]);
+    const polyfillsUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "polyfills.js"]);
+    const scriptUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "main.js"]);
 
     const nonce = getNonce();
 
@@ -180,7 +179,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         </head>
         <body>
           <app-root></app-root>
-          <script type="module" nonce="${nonce}" src="${runtimeUri}"></script>
           <script type="module" nonce="${nonce}" src="${polyfillsUri}"></script>
           <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
         </body>

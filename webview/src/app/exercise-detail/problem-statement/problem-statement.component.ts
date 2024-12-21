@@ -34,7 +34,7 @@ const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}
   styleUrls: ["./problem-statement.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, TaskButton],
+  imports: [CommonModule],
 })
 export class ProblemStatementComponent implements OnChanges {
   // accept exercise as input

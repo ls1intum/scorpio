@@ -56,7 +56,6 @@ export class CourseSelectionView implements OnInit {
             return course;
           })
           .map((course: Course) => {
-            console.log({ course: course, nextDueExercise: this.getNextDueExercise(course) });
             return { course: course, nextDueExercise: this.getNextDueExercise(course) };
           });
         this.coursesWithNextDue.set(coursesWithNextDue);
