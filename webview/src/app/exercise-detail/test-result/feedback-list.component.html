@@ -1,15 +1,12 @@
 @for (failedFeedback of failedFeedbackList(); track failedFeedback) {
-<div [ngClass]="'container-fail'">
+<div class="d-flex flex-column align-items-start justify-content-center p-1 m-1" [ngClass]="'container-fail'">
   <b>Test Case</b>
-  <br />
   <p>{{ failedFeedback.detailText }}</p>
 </div>
 <br />
 } @for (passedFeedback of passedFeedbackList(); track passedFeedback) {
-<div [ngClass]="'container-success'">
-  <div class="row">
+<div class="d-flex justify-content-between align-items-center p-1 m-1" [ngClass]="'container-success'">
     <b>Test Case</b>
     <b>{{ passedFeedback.credits | number : "1.1-1" }} </b>
-  </div>
 </div>
 }

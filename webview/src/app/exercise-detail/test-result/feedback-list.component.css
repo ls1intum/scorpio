@@ -1,25 +1,11 @@
 .container-success {
   background-color: var(--vscode-inputValidation-infoBackground);
   border-color: var(--vscode-inputValidation-infoBorder);
-  padding: 0.25rem;
-  margin: 0.25rem;
   min-height: 3rem;
-  display: flex;
-  align-items: center;
 }
 
 .container-fail {
   background-color: var(--vscode-inputValidation-errorBackground);
   border-color: var(--vscode-inputValidation-errorBorder);
-  padding: 0.25rem;
-  margin: 0.25rem;
   min-height: 3rem;
-  text-align: left;
-}
-
-.row {
-  width: 100%;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
 }

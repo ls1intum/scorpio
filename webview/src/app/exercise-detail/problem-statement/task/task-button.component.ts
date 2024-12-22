@@ -3,6 +3,9 @@ import { ChangeDetectionStrategy, Component, computed, input } from "@angular/co
 import { Task } from "./task.model";
 import { Feedback } from "@shared/models/feedback.model";
 import { FeedbackListComponent } from "../../test-result/feedback-list.component";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faCircleCheck, faCircleQuestion, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+
 
 @Component({
   selector: "task-button",
@@ -10,7 +13,7 @@ import { FeedbackListComponent } from "../../test-result/feedback-list.component
   styleUrls: ["./task-button.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, FeedbackListComponent],
+  imports: [CommonModule, FeedbackListComponent, FontAwesomeModule],
 })
 export class TaskButton {
   task = input.required<Task>({ alias: "task" });
@@ -26,6 +29,10 @@ export class TaskButton {
       ? TaskStatus.SUCCESS
       : TaskStatus.FAIL;
   });
+
+  protected readonly faCircleQuestion = faCircleQuestion;
+  protected readonly faCircleCheck = faCircleCheck;
+  protected readonly faCircleXmark = faCircleXmark;
 
   constructor() {}
 }
