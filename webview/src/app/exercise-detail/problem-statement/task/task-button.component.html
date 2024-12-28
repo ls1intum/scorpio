@@ -1,5 +1,7 @@
 <dialog #feedbackDialog>
-  <button class="close-button" (click)="feedbackDialog.close()">X</button>
+  <button class="close-button position-absolute top-0 end-0 m-3 py-0 align-middle" (click)="feedbackDialog.close()">
+    <fa-icon [icon]="faX"></fa-icon>
+  </button>
   <br />
   <br />
   <feedback-list [feedbackList]="feedbackList()"></feedback-list>

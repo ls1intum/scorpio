@@ -1,6 +1,8 @@
 @if (result() ){
 <dialog #feedbackDialog>
-  <button class="close-button position-absolute top-0 end-0 m-3 px-3 align-middle" (click)="feedbackDialog.close()" aria-label="Close">x</button>
+  <button class="close-button position-absolute top-0 end-0 m-3 py-0 align-middle" (click)="feedbackDialog.close()" aria-label="Close">
+    <fa-icon [icon]="faX"></fa-icon>
+  </button>
   <br />
   <br />
   <feedback-list [feedbackList]="result()!.feedbacks"></feedback-list>
