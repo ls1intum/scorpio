@@ -7,7 +7,7 @@ import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercis
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
 import { set_state, state } from "./shared/state";
-import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository";
+import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/gitRepo";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";

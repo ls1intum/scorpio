@@ -9,7 +9,7 @@ import {
   start_exercise,
 } from "../participation/participation.api";
 import { StudentParticipation } from "@shared/models/participation.model";
-import { cloneRepository } from "../shared/repository";
+import { cloneRepository } from "../shared/gitRepo";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { Result } from "@shared/models/result.model";
 import { fetch_course_exercise_projectKey } from "./exercise.api";
