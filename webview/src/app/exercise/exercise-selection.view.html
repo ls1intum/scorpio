@@ -1,29 +1,25 @@
 <h2>Exercises in {{ course.title }}</h2>
-@if (exercisesDue().length > 0) {
-<h3>Due Next</h3>
-}
-<ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesDue() }"></ng-container>
-
-@if (exercisesPastDueDate().length > 0) {
-<h3>Past Due Date</h3>
-}
-<ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesPastDueDate() }"></ng-container>
-
-@if (exercisesNoDueDate().length > 0) {
-<h3>No Due Date</h3>
-}
-<ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesNoDueDate() }"></ng-container>
+<div class="d-flex flex-wrap">
+  @if (exercisesDue().length > 0) {
+  <h5 class="w-100">Due Next</h5>
+  <ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesDue() }"></ng-container>
+  } @if (exercisesPastDueDate().length > 0) {
+  <h5 class="w-100">Past Due Date</h5>
+  <ng-container
+    *ngTemplateOutlet="exerciselist; context: { exercises: exercisesPastDueDate() }"
+  ></ng-container>
+  } @if (exercisesNoDueDate().length > 0) {
+  <h5 class="w-100">No Due Date</h5>
+  <ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesNoDueDate() }"></ng-container>
+  }
+</div>
 
 <ng-template #exerciselist let-exercises="exercises">
-  <div class="exercise-list">
-    @for (exercise of exercises; track exercise) {
-    <vscode-button class="exercise-item" (click)="clickExercise(exercise)">
-      <div class="column">
-        <h3 class="title">{{ exercise.title }}</h3>
-        <div>{{getScore(exercise) ?? "No graded result"}}</div>
-        <div>{{exercise.dueDate?.toLocaleString() ?? "No due date"}}</div>
-      </div>
-    </vscode-button>
-    }
-  </div>
+  @for (exercise of exercises; track exercise) {
+  <button class="d-flex flex-column align-items-center m-1 p-2" (click)="clickExercise(exercise)">
+    <b>{{ exercise.title }}</b>
+    <div>{{getScore(exercise) ?? "No graded result"}}</div>
+    <div>{{exercise.dueDate?.toLocaleString() ?? "No due date"}}</div>
+  </button>
+  }
 </ng-template>

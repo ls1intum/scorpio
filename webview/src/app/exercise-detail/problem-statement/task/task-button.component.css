@@ -21,11 +21,5 @@ dialog::backdrop {
 }
 
 .close-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
   cursor: pointer;
-  width: 1rem;
-  height: 1rem;
-  padding: 0;
 }

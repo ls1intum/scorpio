@@ -40,7 +40,7 @@ export const set_state = (changes: State) => {
 
   if (state.repoCourse && state.repoExercise) {
     vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
-      state.repoCourse.shortName.toUpperCase() + state.repoExercise.shortName.toUpperCase(),
+      state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase(),
     ]);
   } else {
     vscode.commands.executeCommand("setContext", "scorpio.repoKey", null);
@@ -51,7 +51,7 @@ export const set_state = (changes: State) => {
       vscode.commands.executeCommand(
         "setContext",
         "scorpio.displayedKey",
-        state.displayedCourse.shortName.toUpperCase() + state.displayedExercise.shortName.toUpperCase()
+        state.displayedCourse.shortName!.toUpperCase() + state.displayedExercise.shortName!.toUpperCase()
       );
     }
 

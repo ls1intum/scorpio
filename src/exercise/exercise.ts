@@ -8,7 +8,7 @@ import {
   fetch_latest_participation,
   start_exercise,
 } from "../participation/participation.api";
-import { Participation } from "@shared/models/participation.model";
+import { StudentParticipation } from "@shared/models/participation.model";
 import { cloneRepository } from "../shared/repository";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { Result } from "@shared/models/result.model";
@@ -18,7 +18,7 @@ function _getScoreString(exercise: Exercise): string {
   const score = exercise.studentParticipations
     ?.at(0)
     ?.results?.filter((result: Result) => result.rated)
-    .sort((a: Result, b: Result) => b.completionDate.getTime() - a.completionDate.getTime())
+    .sort((a: Result, b: Result) => b.completionDate!.getTime() - a.completionDate!.getTime())
     .at(0)?.score;
   return score ? `${score} %` : "No graded result";
 }
@@ -34,7 +34,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .filter((exercise) => !exercise.dueDate)
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
-      label: exercise.title,
+      label: exercise.title!,
       description: _getScoreString(exercise),
       detail: "No due date",
       exercise: exercise,
@@ -44,7 +44,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .filter((exercise) => exercise.dueDate && exercise.dueDate < now)
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
-      label: exercise.title,
+      label: exercise.title!,
       description: _getScoreString(exercise),
       detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
       exercise: exercise,
@@ -55,7 +55,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .filter((exercise) => exercise.dueDate && exercise.dueDate >= now)
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
-      label: exercise.title,
+      label: exercise.title!,
       description: _getScoreString(exercise),
       detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
       exercise: exercise,
@@ -108,17 +108,17 @@ export async function cloneCurrentExercise() {
     throw new NotAuthenticatedError();
   }
 
-  let participation: Participation;
+  let participation: StudentParticipation;
   try {
-    participation = await fetch_latest_participation(session.accessToken, displayedExercise.id);
+    participation = await fetch_latest_participation(session.accessToken, displayedExercise.id!);
   } catch (e) {
     if (displayedExercise.dueDate! < new Date()) {
       throw new Error("Exercise is past due date and cannot be started");
     }
-    participation = await start_exercise(session.accessToken, displayedExercise.id);
+    participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
 
-  await cloneRepository(participation.repositoryUri, participation.participantIdentifier);
+  await cloneRepository(participation.repositoryUri!, participation.participantIdentifier!);
 }
 
 export async function get_course_exercise_by_projectKey(
@@ -136,21 +136,6 @@ export async function get_course_exercise_by_projectKey(
     session.accessToken,
     projectKey
   );
-  // course.exercises = [exercise];
-
-  // if participation with result exists, then query feedback
-  // if (exercise.studentParticipations) {
-  //   const part: Participation = exercise.studentParticipations[0];
-  //   // get latest result
-  //   const result: Result | undefined = part.results?.sort(
-  //     (a, b) => a.completionDate.getTime() - b.completionDate.getTime()
-  //   )[0];
-
-  //   if (result) {
-  //     const feedback = await fetch_feedback(session.accessToken, part.id, result.id);
-  //     result.feedback = feedback;
-  //   }
-  // }
 
   return { course: course, exercise: exercise };
 }

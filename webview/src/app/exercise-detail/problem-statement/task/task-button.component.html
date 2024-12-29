@@ -1,15 +1,17 @@
 <dialog #feedbackDialog>
-  <button class="close-button" (click)="feedbackDialog.close()">X</button>
+  <button class="close-button position-absolute top-0 end-0 m-3 py-0 align-middle" (click)="feedbackDialog.close()">
+    <fa-icon [icon]="faX"></fa-icon>
+  </button>
   <br />
   <br />
   <feedback-list [feedbackList]="feedbackList()"></feedback-list>
 </dialog>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
-<i class="fa-regular fa-circle-question"></i>
+<fa-icon [icon]="faCircleQuestion"></fa-icon>
 } @case (TaskStatus.SUCCESS){
-<i class="fa-regular fa-circle-check" [ngClass]="'text-success'"></i>
+<fa-icon [icon]="faCircleCheck" [ngClass]="'text-success'"></fa-icon>
 } @case (TaskStatus.FAIL){
-<i class="fa-regular fa-circle-xmark" [ngClass]="'text-fail'"></i>
+<fa-icon [icon]="faCircleXmark" [ngClass]="'text-fail'"></fa-icon>
 } }
 <span>&nbsp;</span>
 <span class="task-name" [innerHTML]="task().taskName"></span>
