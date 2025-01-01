@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../shared/state";
+import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
@@ -95,7 +95,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
 }
 
 export async function cloneCurrentExercise() {
-  const displayedExercise = state.displayedExercise;
+  const displayedExercise = getState().displayedExercise;
   if (!displayedExercise) {
     throw new Error("No exercise selected");
   }

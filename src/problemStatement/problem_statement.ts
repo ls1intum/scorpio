@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { set_state, state } from "../shared/state";
+import { set_state, getState } from "../shared/state";
 
 export async function sync_problem_statement_with_workspace() {
+  const state = getState();
   if (!state.repoCourse || !state.repoExercise) {
     await vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
