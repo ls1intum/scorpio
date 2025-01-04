@@ -3,10 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, input } from "@angular/co
 import { Task } from "./task.model";
 import { Feedback } from "@shared/models/feedback.model";
 import { FeedbackListComponent } from "../../test-result/feedback-list.component";
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCircleCheck, faCircleQuestion, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { faX } from "@fortawesome/free-solid-svg-icons";
-
+import { FaIconComponent } from "@fortawesome/angular-fontawesome";
+import { faCircleCheck, faCircleQuestion, faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 
 @Component({
   selector: "task-button",
@@ -17,8 +15,8 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
   imports: [CommonModule, FeedbackListComponent, FaIconComponent],
 })
 export class TaskButton {
-  task = input.required<Task>({ alias: "task" });
-  feedbackList = input.required<Feedback[]>({ alias: "feedbackList" });
+  task = input.required<Task>();
+  feedbackList = input.required<Feedback[]>();
 
   protected positiveFeedback = computed(() => this.feedbackList().filter((feedback) => feedback.positive));
   protected TaskStatus = TaskStatus;
@@ -34,7 +32,6 @@ export class TaskButton {
   protected readonly faCircleQuestion = faCircleQuestion;
   protected readonly faCircleCheck = faCircleCheck;
   protected readonly faCircleXmark = faCircleXmark;
-  protected readonly faX = faX;
 
   constructor() {}
 }

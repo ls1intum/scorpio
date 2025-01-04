@@ -10,7 +10,6 @@ import {
   inject,
   Renderer2,
   ViewContainerRef,
-  SimpleChanges,
 } from "@angular/core";
 import { htmlForMarkdown } from "./markdown.converter";
 import { CommonModule } from "@angular/common";
@@ -36,7 +35,7 @@ const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}
   standalone: true,
   imports: [CommonModule],
 })
-export class ProblemStatementComponent implements OnChanges {
+export class ProblemStatementComponent {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
@@ -52,14 +51,6 @@ export class ProblemStatementComponent implements OnChanges {
   private viewContainerRef = inject(ViewContainerRef);
 
   constructor() {}
-
-  public ngOnChanges(changes: SimpleChanges) {
-    if (changes["feedbackList"]) {
-      this.tasks = [];
-      this.taskIndex = 0;
-      this.problemStatement = computed(() => this.renderMarkdown(this.exercise().problemStatement));
-    }
-  }
 
   renderMarkdown(problemStatement: string | undefined): string {
     if (!problemStatement) {
