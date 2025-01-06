@@ -23,4 +23,13 @@ export class StudentParticipation {
 
     constructor() {
     }
+
+    public getLatestResult(): Result | undefined {
+        if (this.results.length === 0) {
+            return undefined;
+        }
+        return this.results.reduce((latestResult, currentResult) => {
+            return latestResult.id! > currentResult.id! ? latestResult : currentResult;
+        });
+    }
 }

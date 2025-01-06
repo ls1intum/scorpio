@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 import { vscode } from "../vscode";
 import { CommonModule } from "@angular/common";
-
-enum OutgoingCommands {
-  LOGIN = "login",
-}
+import { CommandFromWebview } from "@shared/webview-commands";
 
 @Component({
   selector: "login",
@@ -17,6 +14,6 @@ enum OutgoingCommands {
 })
 export class LoginView {
   requestLogin() {
-    vscode.postMessage({ command: OutgoingCommands.LOGIN, text: undefined });
+    vscode.postMessage({ command: CommandFromWebview.LOGIN, text: undefined });
   }
 }

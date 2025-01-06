@@ -125,3 +125,9 @@ dialog::backdrop {
 .cursor-pointer {
   cursor: pointer;
 }
+
+[id^=plantUml-]>* {
+  height: 100% !important;
+  max-width: 100%;
+}
+

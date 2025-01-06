@@ -10,21 +10,22 @@ import {
   inject,
   Renderer2,
   ViewContainerRef,
+  OnDestroy,
 } from "@angular/core";
-import { htmlForMarkdown } from "./markdown.converter";
+import { htmlForMarkdown } from "./markdown-util/markdown.converter";
 import { CommonModule } from "@angular/common";
 import { Task, TaskArray } from "./task/task.model";
 import { TaskButton } from "./task/task-button.component";
 import { Feedback } from "@shared/models/feedback.model";
 import { Exercise } from "@shared/models/exercise.model";
+import { PluginSimple } from "markdown-it";
+import { escapeStringForUseInRegex } from "./regex.util";
+import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/plant-uml.plugin";
+import { merge, Subscription } from "rxjs";
+import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
 
 const taskRegex =
   /\[task]\[([^[\]]+)]\(((?:[^(),]+(?:\([^()]*\)[^(),]*)?(?:,[^(),]+(?:\([^()]*\)[^(),]*)?)*)?)\)/g;
-const testSplitRegex = /,(?![^(]*?\))/;
-const testIdRegex = /<testid>(\d+)<\/testid>/;
-const escapeStringForUseInRegex = (text: string) => {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-};
 const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}-task-${taskId}`;
 
 @Component({
@@ -35,7 +36,7 @@ const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}
   standalone: true,
   imports: [CommonModule],
 })
-export class ProblemStatementComponent {
+export class ProblemStatementComponent implements OnDestroy {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
@@ -50,16 +51,41 @@ export class ProblemStatementComponent {
   private renderer = inject(Renderer2);
   private viewContainerRef = inject(ViewContainerRef);
 
-  constructor() {}
+  private markdownExtensions: PluginSimple[];
+  private injectableContentFoundSubscription: Subscription;
+  private injectableContentForMarkdownCallbacks: Array<() => void> = [];
+
+  constructor(
+    private programmingExerciseInstructionService: ProgrammingExerciseInstructionService,
+    private plantUmlPlugin: ProgrammingExercisePlantUmlExtensionWrapper
+  ) {
+    this.markdownExtensions = [this.plantUmlPlugin.getExtension()];
+
+    this.injectableContentFoundSubscription = merge(
+      plantUmlPlugin.subscribeForInjectableElementsFound()
+    ).subscribe((injectableCallback) => {
+      this.injectableContentForMarkdownCallbacks = [
+        ...this.injectableContentForMarkdownCallbacks,
+        injectableCallback,
+      ];
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.injectableContentFoundSubscription.unsubscribe();
+  }
 
   renderMarkdown(problemStatement: string | undefined): string {
     if (!problemStatement) {
       return "";
     }
 
-    let html = htmlForMarkdown(problemStatement);
+    let html = htmlForMarkdown(problemStatement, this.markdownExtensions);
     html = this.prepareTasks(html);
     setTimeout(() => {
+      this.injectableContentForMarkdownCallbacks.forEach((callback) => {
+        callback();
+      });
       this.injectTasksIntoDocument();
     }, 1);
 
@@ -82,10 +108,7 @@ export class ProblemStatementComponent {
           id: nextIndex,
           completeString: testMatch![0],
           taskName: testMatch![1],
-          testIds: testMatch![2]
-            .split(testSplitRegex)
-            .map((testCaseString) => testCaseString.trim())
-            .map((testCaseString) => parseInt(testIdRegex.exec(testCaseString)![1])),
+          testIds: testMatch![2] ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], undefined) : [],
         };
       });
 
@@ -106,7 +129,9 @@ export class ProblemStatementComponent {
     this.renderer.setProperty(this.problemContainer.nativeElement, "innerHTML", this.problemStatement());
 
     this.tasks.forEach((task) => {
-      const taskHtmlContainers = document.getElementsByClassName(taskDivElement(this.exercise().id!, task.id));
+      const taskHtmlContainers = document.getElementsByClassName(
+        taskDivElement(this.exercise().id!, task.id)
+      );
 
       for (let i = 0; i < taskHtmlContainers.length; i++) {
         const taskHtmlContainer = taskHtmlContainers[i];
