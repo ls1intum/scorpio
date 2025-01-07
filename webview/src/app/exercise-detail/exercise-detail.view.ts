@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit, Signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
 import { CommandFromWebview } from "@shared/webview-commands";
@@ -24,16 +24,13 @@ export class ExerciseDetailView implements OnInit {
 
   repoKey = input.required<string>();
 
-  latestResult = computed(() => {
-    return this.exercise()
+  latestResult: Signal<Result | undefined> = computed(() =>
+    this.exercise()
       .studentParticipations?.at(0)
-      ?.results?.sort((a: Result, b: Result) => a.id! - b.id!)
-      ?.at(0);
-  });
-
-  feedbackList = computed(() => {
-    return this.latestResult()?.feedbacks ?? [];
-  });
+      ?.results.reduce((latestResult, currentResult) => {
+        return latestResult.id! > currentResult.id! ? latestResult : currentResult;
+      })
+  );
 
   now = computed(() => new Date());
 

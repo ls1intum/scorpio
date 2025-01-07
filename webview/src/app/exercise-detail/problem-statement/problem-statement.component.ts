@@ -11,6 +11,7 @@ import {
   Renderer2,
   ViewContainerRef,
   OnDestroy,
+  effect,
 } from "@angular/core";
 import { htmlForMarkdown } from "./markdown-util/markdown.converter";
 import { CommonModule } from "@angular/common";
@@ -23,6 +24,7 @@ import { escapeStringForUseInRegex } from "./regex.util";
 import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/plant-uml.plugin";
 import { merge, Subscription } from "rxjs";
 import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
+import { Result } from "@shared/models/result.model";
 
 const taskRegex =
   /\[task]\[([^[\]]+)]\(((?:[^(),]+(?:\([^()]*\)[^(),]*)?(?:,[^(),]+(?:\([^()]*\)[^(),]*)?)*)?)\)/g;
@@ -40,7 +42,9 @@ export class ProblemStatementComponent implements OnDestroy {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
-  feedbackList = input.required<Feedback[]>();
+  latestResult = input.required<Result | undefined>();
+
+  feedbackList: Signal<Feedback[]> = computed(() => this.latestResult()?.feedbacks ?? []);
 
   problemStatement: Signal<string> = computed(() => this.renderMarkdown(this.exercise().problemStatement));
 
@@ -59,6 +63,10 @@ export class ProblemStatementComponent implements OnDestroy {
     private programmingExerciseInstructionService: ProgrammingExerciseInstructionService,
     private plantUmlPlugin: ProgrammingExercisePlantUmlExtensionWrapper
   ) {
+    effect(() => {
+      this.plantUmlPlugin.setLatestResult(this.latestResult());
+    });
+
     this.markdownExtensions = [this.plantUmlPlugin.getExtension()];
 
     this.injectableContentFoundSubscription = merge(
@@ -108,7 +116,9 @@ export class ProblemStatementComponent implements OnDestroy {
           id: nextIndex,
           completeString: testMatch![0],
           taskName: testMatch![1],
-          testIds: testMatch![2] ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], undefined) : [],
+          testIds: testMatch![2]
+            ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], undefined)
+            : [],
         };
       });
 
