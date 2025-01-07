@@ -1,32 +1,10 @@
-// import DOMPurify, { Config } from "dompurify";
-import type MarkdownIt from "markdown-it";
+import DOMPurify, { Config } from "dompurify";
 import type { PluginSimple } from "markdown-it";
 import markdownIt from "markdown-it";
 import markdownItClass from "markdown-it-class";
 import markdownItKatex from "@vscode/markdown-it-katex";
 import markdownItHighlightjs from "markdown-it-highlightjs";
-
-/**
- * Markdown-It plugin that allows replacing text in the raw markdown before tokenizing.
- * See more about Markdown-It plugins here: https://github.com/markdown-it/markdown-it/tree/master/docs
- */
-export abstract class ArtemisTextReplacementPlugin {
-  getExtension(): PluginSimple {
-    return (md: MarkdownIt): void => {
-      md.core.ruler.before("normalize", "artemis_text_replacement", (state: any) => {
-        // Perform the replacement on the raw markdown text
-        state.src = this.replaceText(state.src);
-      });
-    };
-  }
-
-  /**
-   * Performs text replacement on the raw markdown before parsing.
-   * @param text The raw markdown text.
-   * @returns The modified markdown text after replacements.
-   */
-  abstract replaceText(text: string): string;
-}
+import { ArtemisTextReplacementPlugin } from "./artemis-text-replacement.plugin";
 
 // An inline math formula has some other characters before or after the formula and uses $$ as delimiters
 const inlineFormulaRegex = /(?:.+\$\$[^\$]+\$\$)|(?:\$\$[^\$]+\$\$.+)/g;
@@ -99,15 +77,15 @@ export function htmlForMarkdown(
     markdownRender = markdownRender.slice(0, -1);
   }
 
-  return markdownRender;
-//   const purifyParameters = {} as Config;
-//   // Prevents sanitizer from deleting <testid>id</testid>
-//   purifyParameters["ADD_TAGS"] = ["testid"];
-//   if (allowedHtmlTags) {
-//     purifyParameters["ALLOWED_TAGS"] = allowedHtmlTags;
-//   }
-//   if (allowedHtmlAttributes) {
-//     purifyParameters["ALLOWED_ATTR"] = allowedHtmlAttributes;
-//   }
-//   return DOMPurify.sanitize(markdownRender, purifyParameters) as string;
+  // return markdownRender;
+  const purifyParameters = {} as Config;
+  // Prevents sanitizer from deleting <testid>id</testid>
+  purifyParameters["ADD_TAGS"] = ["testid"];
+  if (allowedHtmlTags) {
+    purifyParameters["ALLOWED_TAGS"] = allowedHtmlTags;
+  }
+  if (allowedHtmlAttributes) {
+    purifyParameters["ALLOWED_ATTR"] = allowedHtmlAttributes;
+  }
+  return DOMPurify.sanitize(markdownRender, purifyParameters) as string;
 }

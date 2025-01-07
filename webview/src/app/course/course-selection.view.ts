@@ -10,15 +10,7 @@ import { vscode } from "../vscode";
 import { CommonModule } from "@angular/common";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-
-enum OutgoingCommands {
-  GET_COURSE_OPTIONS = "getCourseOptions",
-  SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
-}
-
-enum IncomingCommands {
-  SEND_COURSE_OPTIONS = "sendCourseOptions",
-}
+import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 
 @Component({
   selector: "course-selection",
@@ -40,7 +32,7 @@ export class CourseSelectionView implements OnInit {
     // query courses from API
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
-      if (message.command === IncomingCommands.SEND_COURSE_OPTIONS) {
+      if (message.command === CommandFromExtension.SEND_COURSE_OPTIONS) {
         const courses = JSON.parse(message.text);
         const coursesWithNextDue = courses
           // filter out courses without exercises, as they are not interesting for programming
@@ -61,12 +53,12 @@ export class CourseSelectionView implements OnInit {
         this.coursesWithNextDue.set(coursesWithNextDue);
       }
     });
-    vscode.postMessage({ command: OutgoingCommands.GET_COURSE_OPTIONS, text: undefined });
+    vscode.postMessage({ command: CommandFromWebview.GET_COURSE_OPTIONS, text: undefined });
   }
 
   clickCourse(course: any) {
     vscode.postMessage({
-      command: OutgoingCommands.SET_COURSE_AND_EXERCISE,
+      command: CommandFromWebview.SET_COURSE_AND_EXERCISE,
       text: JSON.stringify({ course: course, exercise: undefined }),
     });
 

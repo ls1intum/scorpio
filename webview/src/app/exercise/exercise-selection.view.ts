@@ -13,15 +13,7 @@ import { StateService, ViewState } from "../state.service";
 import { CommonModule } from "@angular/common";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-
-enum OutgoingCommands {
-  GET_EXERCISE_OPTIONS = "getExerciseOptions",
-  SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
-}
-
-enum IncomingCommands {
-  SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
-}
+import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 
 @Component({
   selector: "exercise-selection",
@@ -56,7 +48,7 @@ export class ExerciseSelectionView implements OnInit {
     // query courses from API
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
-      if (message.command === IncomingCommands.SEND_EXERCISE_OPTIONS) {
+      if (message.command === CommandFromExtension.SEND_EXERCISE_OPTIONS) {
         const exercises = JSON.parse(message.text);
         // for some reason, the dueDate is not correctly deserialized
         exercises.map((exercise: Exercise) => {
@@ -66,12 +58,12 @@ export class ExerciseSelectionView implements OnInit {
         this.exercises.set(exercises);
       }
     });
-    vscode.postMessage({ command: OutgoingCommands.GET_EXERCISE_OPTIONS, text: undefined });
+    vscode.postMessage({ command: CommandFromWebview.GET_EXERCISE_OPTIONS, text: undefined });
   }
 
   clickExercise(exercise: Exercise) {
     vscode.postMessage({
-      command: OutgoingCommands.SET_COURSE_AND_EXERCISE,
+      command: CommandFromWebview.SET_COURSE_AND_EXERCISE,
       text: JSON.stringify({ course: this.course, exercise: exercise }),
     });
 

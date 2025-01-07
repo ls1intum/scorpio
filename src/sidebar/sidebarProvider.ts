@@ -11,6 +11,7 @@ import {
 } from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import { get_course_exercise_by_projectKey } from "../exercise/exercise";
+import { fetch_uml } from "../problemStatement/uml.api";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -64,7 +65,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.initState();
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      switch (data.command) {
+      const pathParts = data.command.split("/");
+      switch (pathParts[0]) {
         case CommandFromWebview.INFO: {
           if (!data.text) {
             return;
@@ -126,6 +128,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             displayedExercise: exercise,
             repoCourse: state.repoCourse,
             repoExercise: state.repoExercise,
+          });
+          break;
+        }
+        case CommandFromWebview.GET_UML: {
+          if (!data.text) {
+            return;
+          }
+
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+          const plantUml = await fetch_uml(session.accessToken, data.text);
+          this._view?.webview.postMessage({
+            command: CommandFromExtension.SEND_UML + "/" + pathParts[1],
+            text: plantUml,
           });
           break;
         }

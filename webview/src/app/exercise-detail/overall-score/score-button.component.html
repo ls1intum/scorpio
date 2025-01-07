@@ -1,18 +1,13 @@
 @if (result() ){
-<dialog #feedbackDialog>
-  <button class="close-button position-absolute top-0 end-0 m-3 py-0 align-middle" (click)="feedbackDialog.close()" aria-label="Close">
-    <fa-icon [icon]="faX"></fa-icon>
-  </button>
-  <br />
-  <br />
-  <feedback-list [feedbackList]="result()!.feedbacks"></feedback-list>
-</dialog>
-<span
-  class="test-result"
+  <dialog #feedbackDialog class="feedbackDialog">
+    <feedback-list [feedbackList]="result()!.feedbacks" (onClose)="feedbackDialog.close()"></feedback-list>
+  </dialog>
+  <u
+  class="cursor-pointer"
   [ngClass]="result()!.score === 100 ? 'text-success' : 'text-fail'"
   (click)="feedbackDialog.showModal()"
-  >{{ absoluteScore() }} / {{ maxPoints() }}</span
+  >{{ absoluteScore() }} / {{ maxPoints() }}</u
 >
 } @else {
-<span [ngClass]="'no-result'"> No Graded Result</span>
+<em [ngClass]="'no-result'"> No Graded Result</em>
 }
