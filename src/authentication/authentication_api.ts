@@ -5,7 +5,6 @@ export async function authenticateToken(
   password: string
 ): Promise<{access_token: string}> {
   const url = new URL(`${settings.base_url}/api/public/authenticate`);
-  url.searchParams.append("as-bearer", "true");
   url.searchParams.append("tool", "SCORPIO");
 
   return fetch(url, {

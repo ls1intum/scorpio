@@ -6,12 +6,14 @@ import { build_course_options } from "./course/course";
 import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
-import { set_state, state } from "./shared/state";
+import { set_state, getState } from "./shared/state";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
+import { Result } from "@shared/models/result.model";
+import { ResultWebsocket } from "./participation/result.websocket";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -33,9 +35,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  if(!theiaEnv){
+  if (!theiaEnv) {
     vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
+
+  const resultWebsocket = ResultWebsocket.instance;
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -43,8 +47,6 @@ function initAuthentication(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(authenticationProvider);
 
-  // check if user is already authenticated
-  // is needed for the login button to be displayed on the profile button
   (async () => {
     let session: vscode.AuthenticationSession | undefined;
     if (theiaEnv) {
@@ -58,9 +60,13 @@ function initAuthentication(context: vscode.ExtensionContext) {
         }
       } while (!session);
     } else {
+      // check if user is already authenticated
+      // is needed for the login button to be displayed on the profile button
       session = await vscode.authentication.getSession(AUTH_ID, [], {
         createIfNone: false,
       });
+
+      // TODO logout if session expired
     }
 
     vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
@@ -146,6 +152,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 
         const exercise = await build_exercise_options(course);
 
+        const state = getState();
         set_state({
           displayedCourse: course,
           displayedExercise: exercise,
@@ -160,6 +167,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.back", () => {
+      const state = getState();
       if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
         set_state({
@@ -182,10 +190,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to clone repository
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
-      cloneCurrentExercise()
-        .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
-        });
+      cloneCurrentExercise().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
+      });
     })
   );
 
@@ -216,10 +223,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to sync problem statement with workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.sync", async () => {
-      sync_problem_statement_with_workspace()
-        .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
-        });
+      sync_problem_statement_with_workspace().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
+      });
     })
   );
 

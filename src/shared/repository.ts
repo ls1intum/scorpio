@@ -4,7 +4,7 @@ import { NotAuthenticatedError } from "../authentication/not_authenticated.error
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-import { set_state, state } from "./state";
+import { set_state, getState } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
@@ -34,7 +34,7 @@ export async function cloneRepository(repoUrl: string, username: string) {
 
   const vcsToken = await retrieveVcsAccessToken(
     session.accessToken,
-    state.displayedExercise?.studentParticipations![0].id!
+    getState().displayedExercise?.studentParticipations![0].id!
   );
   // Clone the repository
   const cloneUrlString = addVcsTokenToUrl(repoUrl, username, vcsToken);
@@ -113,8 +113,11 @@ export async function detectRepoCourseAndExercise(): Promise<string | undefined>
   }
 
   const foundRepoAndRemote = await getArtemisRepo(session.account.id);
+  const state = getState();
+
   if (!foundRepoAndRemote) {
     gitRepo = undefined;
+
     set_state({
       repoCourse: undefined,
       repoExercise: undefined,

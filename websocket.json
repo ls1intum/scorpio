@@ -1,0 +1,181 @@
+{
+  "id": 34,
+  "completionDate": "2024-12-06T23:44:16.662318+01:00",
+  "successful": false,
+  "score": 0.0,
+  "rated": true,
+  "submission": {
+    "id": 34,
+    "submitted": true,
+    "type": "MANUAL",
+    "submissionDate": "2024-12-06T22:44:04.744Z",
+    "commitHash": "a368415bca52aa7ae9161a5393a5f165536bdfb3",
+    "buildFailed": false,
+    "buildArtifact": false,
+    "participation": {
+      "id": 36,
+      "testRun": false,
+      "type": "programming",
+      "exercise": {
+        "id": 11,
+        "exerciseType": "PROGRAMMING",
+        "type": "programming",
+        "assessmentType": "AUTOMATIC",
+        "dueDate": "2024-12-31T13:55:00Z",
+        "maxPoints": 15.0,
+        "course": { "id": 8, "accuracyOfScores": 1 }
+      }
+    },
+    "submissionExerciseType": "programming"
+  },
+  "participation": {
+    "id": 36,
+    "testRun": false,
+    "type": "programming",
+    "exercise": {
+      "id": 11,
+      "exerciseType": "PROGRAMMING",
+      "type": "programming",
+      "assessmentType": "AUTOMATIC",
+      "dueDate": "2024-12-31T13:55:00Z",
+      "maxPoints": 15.0,
+      "course": { "id": 8, "accuracyOfScores": 1 }
+    }
+  },
+  "feedbacks": [
+    {
+      "id": 430,
+      "detailText": "The exercise expects a class with the name Context in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 132 }
+    },
+    {
+      "id": 431,
+      "detailText": "The exercise expects a class with the name Policy in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 133 }
+    },
+    {
+      "id": 432,
+      "detailText": "The class 'MergeSort' does not implement the interface 'SortStrategy' as expected. Implement the interface and its methods.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 137 }
+    },
+    {
+      "id": 433,
+      "detailText": "The exercise expects a class with the name SortStrategy in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 138 }
+    },
+    {
+      "id": 434,
+      "detailText": "The class 'BubbleSort' does not implement the interface 'SortStrategy' as expected. Implement the interface and its methods.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 131 }
+    },
+    {
+      "id": 435,
+      "detailText": "The exercise expects a class with the name Policy in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 139 }
+    },
+    {
+      "id": 436,
+      "detailText": "The exercise expects a class with the name Context in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 140 }
+    },
+    {
+      "id": 437,
+      "detailText": "The exercise expects a class with the name Policy in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 142 }
+    },
+    {
+      "id": 438,
+      "detailText": "The exercise expects a class with the name SortStrategy in the package due. You did not implement the class in the exercise.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 143 }
+    },
+    {
+      "id": 439,
+      "detailText": "MergeSort does not sort correctly",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 134 }
+    },
+    {
+      "id": 440,
+      "detailText": "The class 'Context' was not found within the submission. Make sure to implement it properly.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 136 }
+    },
+    {
+      "id": 441,
+      "detailText": "BubbleSort does not sort correctly",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 141 }
+    },
+    {
+      "id": 442,
+      "detailText": "The class 'Context' was not found within the submission. Make sure to implement it properly.",
+      "hasLongFeedbackText": false,
+      "credits": 0.0,
+      "positive": false,
+      "type": "AUTOMATIC",
+      "visibility": "ALWAYS",
+      "testCase": { "id": 135 }
+    }
+  ],
+  "assessmentType": "AUTOMATIC",
+  "testCaseCount": 13,
+  "passedTestCaseCount": 0,
+  "codeIssueCount": 0
+}
