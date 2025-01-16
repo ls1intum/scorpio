@@ -133,15 +133,15 @@
       "commandPalette": [
         {
           "command": "scorpio.login",
-          "when": "!scorpio.theia && !scorpio.authenticated"
+          "when": "!scorpio.authenticated"
         },
         {
           "command": "scorpio.logout",
-          "when": "!scorpio.theia && scorpio.authenticated"
+          "when": "scorpio.authenticated"
         },
         {
           "command": "scorpio.displayExercise",
-          "when": "!scorpio.theia && scorpio.authenticated"
+          "when": "!scorpio.theia.givenExercise && scorpio.authenticated"
         },
         {
           "command": "scorpio.displayedExercise.back",
@@ -149,7 +149,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "!scorpio.theia && scorpio.authenticated && scorpio.displayedKey"
+          "when": "!scorpio.theia.givenExercise && scorpio.authenticated && scorpio.displayedKey"
         },
         {
           "command": "scorpio.workspace.submit",
@@ -184,7 +184,7 @@
         },
         {
           "command": "scorpio.displayedExercise.clone",
-          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
+          "when": "!scorpio.theia.givenExercise && (view == artemis-sidebar) && scorpio.authenticated && (scorpio.displayedKey && scorpio.displayedKey not in scorpio.repoKey)",
           "group": "navigation@3"
         },
         {
@@ -194,7 +194,7 @@
         },
         {
           "command": "scorpio.displayedExercise.back",
-          "when": "!scorpio.theia && (view == artemis-sidebar) && scorpio.displayBackButton",
+          "when": "!scorpio.theia.givenExercise && (view == artemis-sidebar) && scorpio.displayBackButton",
           "group": "navigation@1"
         }
       ]

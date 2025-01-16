@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import simpleGit, { GitConfigScope } from "simple-git";
+import simpleGit from "simple-git";
 import * as path from "path";
-import { theiaEnv } from "./theia";
 import { getLevel1Subfolders } from "../utils/filetree";
 
 export async function cloneTheia(cloneUrl: URL) {
@@ -32,11 +31,5 @@ export async function cloneTheia(cloneUrl: URL) {
     await git.clone(cloneUrl.toString(), clonePath);
   } catch (e: any) {
     console.error(`Error cloning repository: ${e.message}`);
-  }
-  try {
-    await git.addConfig("user.name", theiaEnv?.GIT_USER!, undefined, GitConfigScope.global);
-    await git.addConfig("user.email", theiaEnv?.GIT_MAIL!, undefined, GitConfigScope.global);
-  } catch (e: any) {
-    console.error(`Error setting git config: ${e.message}`);
   }
 }
