@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  if(!theiaEnv){
+  if (!theiaEnv.GIT_URI) {
     vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
 }
@@ -47,21 +47,9 @@ function initAuthentication(context: vscode.ExtensionContext) {
   // is needed for the login button to be displayed on the profile button
   (async () => {
     let session: vscode.AuthenticationSession | undefined;
-    if (theiaEnv) {
-      do {
-        try {
-          session = await vscode.authentication.getSession(AUTH_ID, [], {
-            createIfNone: true,
-          });
-        } catch (e) {
-          session = undefined;
-        }
-      } while (!session);
-    } else {
-      session = await vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: false,
-      });
-    }
+    session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
+    });
 
     vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
   })();
@@ -182,10 +170,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to clone repository
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
-      cloneCurrentExercise()
-        .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
-        });
+      cloneCurrentExercise().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
+      });
     })
   );
 
@@ -216,10 +203,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to sync problem statement with workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.sync", async () => {
-      sync_problem_statement_with_workspace()
-        .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
-        });
+      sync_problem_statement_with_workspace().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
+      });
     })
   );
 
