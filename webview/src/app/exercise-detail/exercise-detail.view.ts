@@ -27,7 +27,7 @@ export class ExerciseDetailView implements OnInit {
   latestResult: Signal<Result | undefined> = computed(() =>
     this.exercise()
       .studentParticipations?.at(0)
-      ?.results.reduce((latestResult, currentResult) => {
+      ?.results?.reduce((latestResult, currentResult) => {
         return latestResult.id! > currentResult.id! ? latestResult : currentResult;
       })
   );
