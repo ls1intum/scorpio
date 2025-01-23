@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,6 +15,7 @@ import { CommonModule } from "@angular/common";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
+import * as bootstrap from "bootstrap";
 
 @Component({
   selector: "exercise-selection",
@@ -24,7 +26,7 @@ import { CommandFromExtension, CommandFromWebview } from "@shared/webview-comman
   imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ExerciseSelectionView implements OnInit {
+export class ExerciseSelectionView implements OnInit, AfterViewInit {
   @Input()
   course!: Course;
 
@@ -60,6 +62,14 @@ export class ExerciseSelectionView implements OnInit {
     });
     vscode.postMessage({ command: CommandFromWebview.GET_EXERCISE_OPTIONS, text: undefined });
   }
+
+  ngAfterViewInit(): void {
+      // Initialize all tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+      }
 
   clickExercise(exercise: Exercise) {
     vscode.postMessage({
