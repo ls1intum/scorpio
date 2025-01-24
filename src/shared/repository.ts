@@ -10,10 +10,11 @@ import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
 import { get_course_exercise_by_projectKey } from "../exercise/exercise";
+import { cloneRepoIntoTheia } from "../theia/cloning";
 
 var gitRepo: SimpleGit | undefined;
 
-export async function cloneRepository(repoUrl: string, username: string) {
+export async function cloneUserRepoLocally(repoUrl: string, username: string) {
   // Open a dialog to select the folder where the repo will be cloned
   const selectedFolder = await vscode.window.showOpenDialog({
     canSelectFolders: true,
@@ -62,6 +63,27 @@ export async function cloneRepository(repoUrl: string, username: string) {
   } else if (openIn === "Open in New Window") {
     vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(clonePath), true);
   }
+}
+
+export async function cloneUserRepoInTheia(repoUrl: string, username: string) {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
+  if (!session) {
+    throw new NotAuthenticatedError();
+  }
+
+  const vcsToken = await retrieveVcsAccessToken(
+    session.accessToken,
+    state.displayedExercise?.studentParticipations![0].id!
+  );
+  // Clone the repository
+  const cloneUrlString = addVcsTokenToUrl(repoUrl, username, vcsToken);
+  const cloneUrl = new URL(cloneUrlString);
+
+  cloneRepoIntoTheia(cloneUrl);
+
+  await vscode.window.showInformationMessage(`The repository has been cloned into your workspace.`);
 }
 
 function addVcsTokenToUrl(url: string, username: string, vsctoken: string): string {

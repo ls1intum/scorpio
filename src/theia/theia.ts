@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { cloneTheia } from "./cloning";
+import { cloneRepoIntoTheia } from "./cloning";
 import { execSync } from "child_process";
 import simpleGit, { GitConfigScope } from "simple-git";
 import { hostname } from "os";
@@ -46,7 +46,7 @@ export async function initTheia() {
 
   // clone repository
   if (theiaEnv.GIT_URI) {
-    cloneTheia(theiaEnv.GIT_URI);
+    cloneRepoIntoTheia(theiaEnv.GIT_URI);
   }
 
   // set git config values
@@ -55,7 +55,11 @@ export async function initTheia() {
       const git = simpleGit();
       const hostnameConst = hostname();
       theiaEnv.GIT_USER = theiaEnv.GIT_USER ? theiaEnv.GIT_USER : hostnameConst;
-      theiaEnv.GIT_MAIL = theiaEnv.GIT_MAIL ? theiaEnv.GIT_MAIL : hostnameConst + "@artemis-theia.de";
+      theiaEnv.GIT_MAIL = theiaEnv.GIT_MAIL
+        ? theiaEnv.GIT_MAIL
+        : theiaEnv.GIT_USER
+        ? theiaEnv.GIT_USER + "@artemis-theia.de"
+        : hostnameConst + "@artemis-theia.de";
 
       await git.addConfig("user.name", theiaEnv.GIT_USER, undefined, GitConfigScope.global);
       await git.addConfig("user.email", theiaEnv.GIT_MAIL, undefined, GitConfigScope.global);

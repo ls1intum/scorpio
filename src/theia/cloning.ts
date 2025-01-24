@@ -3,7 +3,7 @@ import simpleGit from "simple-git";
 import * as path from "path";
 import { getLevel1Subfolders } from "../utils/filetree";
 
-export async function cloneTheia(cloneUrl: URL) {
+export async function cloneRepoIntoTheia(cloneUrl: URL) {
   // Check if a workspace is available in which the exercise can be cloned
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {

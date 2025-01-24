@@ -9,10 +9,11 @@ import {
   start_exercise,
 } from "../participation/participation.api";
 import { StudentParticipation } from "@shared/models/participation.model";
-import { cloneRepository } from "../shared/repository";
+import { cloneUserRepoLocally, cloneUserRepoInTheia } from "../shared/repository";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { Result } from "@shared/models/result.model";
 import { fetch_course_exercise_projectKey } from "./exercise.api";
+import { theiaEnv } from "../theia/theia";
 
 function _getScoreString(exercise: Exercise): string {
   const score = exercise.studentParticipations
@@ -118,7 +119,11 @@ export async function cloneCurrentExercise() {
     participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
 
-  await cloneRepository(participation.repositoryUri!, participation.participantIdentifier!);
+  if (theiaEnv.THEIA_FLAG) {
+    await cloneUserRepoInTheia(participation.repositoryUri!, participation.participantIdentifier!);
+  } else {
+    await cloneUserRepoLocally(participation.repositoryUri!, participation.participantIdentifier!);
+  }
 }
 
 export async function get_course_exercise_by_projectKey(
