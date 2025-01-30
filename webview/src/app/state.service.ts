@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Course } from "@shared/models/course.model";
-import { Exercise } from "@shared/models/exercise.model";
+import { ProgrammingExercise } from "@shared/models/exercise.model";
 import { CommandFromExtension } from "@shared/webview-commands";
 import { BehaviorSubject } from "rxjs";
 
@@ -14,7 +14,7 @@ export enum ViewState {
 export interface State {
   viewState: ViewState;
   course: Course | undefined;
-  exercise: Exercise | undefined;
+  exercise: ProgrammingExercise | undefined;
   repoKey: string | undefined;
 }
 
