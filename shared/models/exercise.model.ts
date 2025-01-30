@@ -96,3 +96,11 @@ export enum ProgrammingLanguage {
     TYPESCRIPT = 'TYPESCRIPT',
     VHDL = 'VHDL',
 }
+
+export function getProjectKey(course: Course | undefined, exercise: Exercise | undefined): string | undefined {
+    if (!course || !exercise) {
+        return undefined;
+    }
+    
+    return `${course.shortName!.toUpperCase()}${exercise.shortName!.toUpperCase()}`;
+}

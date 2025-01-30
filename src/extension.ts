@@ -171,11 +171,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
       detectRepoCourseAndExercise()
-        .then((projectKey: string | undefined) => {
-          if (!projectKey) {
-            return;
-          }
-        })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
         });

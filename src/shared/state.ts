@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Course } from "@shared/models//course.model";
-import { Exercise } from "@shared/models/exercise.model";
+import { Exercise, getProjectKey } from "@shared/models/exercise.model";
 
 export interface State {
   displayedCourse: Course | undefined;
@@ -22,13 +22,13 @@ export function set_displayed_state(course: Course | undefined, exercise: Exerci
   state.displayedCourse = course;
   state.displayedExercise = exercise;
 
-  if (state.displayedCourse) {
-    if (state.displayedExercise) {
-      vscode.commands.executeCommand(
-        "setContext",
-        "scorpio.displayedKey",
-        state.displayedCourse.shortName!.toUpperCase() + state.displayedExercise.shortName!.toUpperCase()
-      );
+  if (course) {
+    // if an exercise is displayed and it was not due yet, set the displayedKey to enable the clone button
+    if (exercise && (!exercise.dueDate || new Date(exercise.dueDate) >= new Date())) {
+      vscode.commands.executeCommand("setContext", "scorpio.displayedKey", getProjectKey(course, exercise));
+    }else{
+      // if the exercise was due, disable the clone button
+      vscode.commands.executeCommand("setContext", "scorpio.displayedKey", null);
     }
 
     vscode.commands.executeCommand("setContext", "scorpio.displayBackButton", true);
@@ -45,9 +45,10 @@ export function set_repo_state(course: Course, exercise: Exercise) {
   state.repoCourse = course;
   state.repoExercise = exercise;
 
-  vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
-    state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase(),
-  ]);
+  // if the exercise is not due yet, set the repoKey to enable the push button
+  if (!exercise.dueDate || new Date(exercise.dueDate) >= new Date()) {
+    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [getProjectKey(course, exercise)]);
+  }
 
   if (!state.displayedCourse || !state.displayedExercise) {
     // this methode will fire the onStateChange event
