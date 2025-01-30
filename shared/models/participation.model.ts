@@ -1,16 +1,12 @@
 import { Exercise } from "./exercise.model";
 import { Result } from "./result.model";
+import { ProgrammingSubmission } from "./submission.model";
 
 export class StudentParticipation {
   public id?: number;
 
   public individualDueDate?: Date;
-  public presentationScore?: number;
-  /**
-   * @deprecated This property will be removed in Artemis 8.0. Use `submissions.results` instead.
-   */
-  public results: Result[] = [];
-  // public submissions?: Submission[];
+  public submissions?: ProgrammingSubmission[];
   public exercise?: Exercise;
 
   // workaround for strict template here, only used in case of StudentParticipation
@@ -22,10 +18,12 @@ export class StudentParticipation {
   public branch?: string;
 
   constructor() {}
+}
 
-  public getLatestResult(): Result | undefined {
-    return this.results.reduce((latestResult, currentResult) => {
-      return latestResult.id! > currentResult.id! ? latestResult : currentResult;
-    });
-  }
+export function getLatestResult(participation: StudentParticipation | undefined): Result | undefined {
+  return participation?.submissions?.reduce((latestSubmission, currentSubmission) => {
+    return latestSubmission.id! > currentSubmission.id! ? latestSubmission : currentSubmission;
+  })?.results?.reduce((latestResult, currentResult) => {
+    return latestResult.id! > currentResult.id! ? latestResult : currentResult;
+  })
 }

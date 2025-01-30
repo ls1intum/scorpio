@@ -1,8 +1,8 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { Exercise } from "@shared/models/exercise.model";
-import { Result } from "@shared/models/result.model";
 import { ScoreButton } from "../overall-score/score-button.component";
+import { getLatestResult } from "@shared/models/participation.model";
 
 @Component({
   selector: "overview",
@@ -15,12 +15,7 @@ import { ScoreButton } from "../overall-score/score-button.component";
 export class ExerciseOverview {
   exercise = input.required<Exercise>();
 
-  protected latestResult = computed(() => {
-    return this.exercise()
-      .studentParticipations?.at(0)
-      ?.results?.sort((a: Result, b: Result) => a.id! - b.id!)
-      ?.at(0);
-  });
+  protected latestResult = computed(() => getLatestResult(this.exercise().studentParticipations?.at(0)));
 
   constructor() {}
 }

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { cloneRepoIntoTheia } from "./cloning";
 import { execSync } from "child_process";
 import simpleGit, { GitConfigScope } from "simple-git";
 import { hostname } from "os";
+import { cloneByGivenURL } from "../participation/cloning.service";
 
 type theiaEnv = {
   THEIA_FLAG: boolean;
@@ -39,6 +39,10 @@ function readTheiaEnv(): theiaEnv {
 
 export const theiaEnv: theiaEnv = readTheiaEnv();
 
+export function getWorkspaceFolder(){
+  return vscode.workspace.workspaceFolders?.at(0)?.uri;
+}
+
 export async function initTheia() {
   if (theiaEnv.GIT_URI) {
     vscode.commands.executeCommand("setContext", "scorpio.theia.givenExercise", true);
@@ -46,7 +50,13 @@ export async function initTheia() {
 
   // clone repository
   if (theiaEnv.GIT_URI) {
-    cloneRepoIntoTheia(theiaEnv.GIT_URI);
+      const workspaceFolderUri = getWorkspaceFolder();
+      if (!workspaceFolderUri) {
+        vscode.window.showErrorMessage("No workspace folder available to clone repository");
+        return;
+      }
+    
+    cloneByGivenURL(theiaEnv.GIT_URI, workspaceFolderUri.fsPath);
   }
 
   // set git config values

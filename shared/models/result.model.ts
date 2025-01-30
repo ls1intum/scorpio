@@ -1,6 +1,6 @@
 import { AssessmentType } from "./exercise.model";
 import { Feedback } from "./feedback.model"
-import { StudentParticipation } from "./participation.model";
+import { ProgrammingSubmission } from "./submission.model";
 
 export class Result {
     public id?: number;
@@ -19,14 +19,9 @@ export class Result {
     public testCaseCount?: number;
     public passedTestCaseCount?: number;
     public codeIssueCount?: number;
-    public buildJobId?: string;
 
-    // public submission?: Submission;
+    public submission?: ProgrammingSubmission;
     public feedbacks: Feedback[] = [];
-    /**
-     * @deprecated This property will be removed in Artemis 8.0. Use `submission.participation` instead.
-     */
-    public participation?: StudentParticipation;
 
     constructor() {
     }

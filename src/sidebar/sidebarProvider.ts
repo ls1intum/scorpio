@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { onStateChange, set_state, State, state } from "../shared/state";
+import { onStateChange, set_displayed_state, State, state } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
@@ -123,12 +123,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
             state.displayedCourse!.shortName! + state.displayedExercise!.shortName!
           );
-          set_state({
-            displayedCourse: course,
-            displayedExercise: exercise,
-            repoCourse: state.repoCourse,
-            repoExercise: state.repoExercise,
-          });
+          set_displayed_state(course, exercise);
           break;
         }
         case CommandFromWebview.GET_UML: {
@@ -162,12 +157,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           const { course, exercise } = JSON.parse(data.text);
-          set_state({
-            displayedCourse: course,
-            displayedExercise: exercise,
-            repoCourse: state.repoCourse,
-            repoExercise: state.repoExercise,
-          });
+          
+          set_displayed_state(course, exercise);
           break;
         }
       }
