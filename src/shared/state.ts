@@ -18,33 +18,9 @@ export var state: State = {
   repoExercise: undefined,
 };
 
-export const set_state = (changes: State) => {
-  // nothing is displayed, but repo was detected
-  if (
-    !state.displayedCourse &&
-    !changes.displayedCourse &&
-    changes.repoCourse &&
-    !state.displayedExercise &&
-    !changes.displayedExercise &&
-    changes.repoExercise
-  ) {
-    changes.displayedCourse = changes.repoCourse;
-    changes.displayedExercise = changes.repoExercise;
-  }
-
-  state.repoCourse = changes.repoCourse;
-  state.repoExercise = changes.repoExercise;
-
-  state.displayedCourse = changes.displayedCourse;
-  state.displayedExercise = changes.displayedExercise;
-
-  if (state.repoCourse && state.repoExercise) {
-    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
-      state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase(),
-    ]);
-  } else {
-    vscode.commands.executeCommand("setContext", "scorpio.repoKey", null);
-  }
+export function set_displayed_state(course: Course | undefined, exercise: Exercise | undefined) {
+  state.displayedCourse = course;
+  state.displayedExercise = exercise;
 
   if (state.displayedCourse) {
     if (state.displayedExercise) {
@@ -57,10 +33,34 @@ export const set_state = (changes: State) => {
 
     vscode.commands.executeCommand("setContext", "scorpio.displayBackButton", true);
   } else {
+    // nothing is selected (in course selection) -> no back button
     vscode.commands.executeCommand("setContext", "scorpio.displayedKey", null);
-
     vscode.commands.executeCommand("setContext", "scorpio.displayBackButton", false);
   }
 
-  onStateChange.fire(changes);
-};
+  onStateChange.fire(state);
+}
+
+export function set_repo_state(course: Course, exercise: Exercise) {
+  state.repoCourse = course;
+  state.repoExercise = exercise;
+
+  vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
+    state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase(),
+  ]);
+
+  if (!state.displayedCourse || !state.displayedExercise) {
+    // this methode will fire the onStateChange event
+    set_displayed_state(course, exercise);
+  } else {
+    onStateChange.fire(state);
+  }
+}
+
+export function clear_repo_state() {
+  state.repoCourse = undefined;
+  state.repoExercise = undefined;
+
+  vscode.commands.executeCommand("setContext", "scorpio.repoKey", null);
+  onStateChange.fire(state);
+}

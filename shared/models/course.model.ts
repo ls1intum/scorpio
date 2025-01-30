@@ -29,7 +29,6 @@ export class Course {
   public numberOfInstructors?: number;
 
   public exercises?: Exercise[];
-  // public exams?: Exam[];
 
   // helper attributes
   public relativeScore?: number;

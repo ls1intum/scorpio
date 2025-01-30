@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { set_state, state } from "../shared/state";
+import { set_displayed_state, state } from "../shared/state";
 
 export async function sync_problem_statement_with_workspace() {
   if (!state.repoCourse || !state.repoExercise) {
@@ -9,10 +9,5 @@ export async function sync_problem_statement_with_workspace() {
     return;
   }
 
-  set_state({
-    displayedCourse: state.repoCourse,
-    displayedExercise: state.repoExercise,
-    repoCourse: state.repoCourse,
-    repoExercise: state.repoExercise,
-  });
+  set_displayed_state(state.repoCourse, state.repoExercise);
 }

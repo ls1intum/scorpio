@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  OnChanges,
   input,
   Signal,
   ViewChild,
@@ -13,6 +12,7 @@ import {
   OnDestroy,
   effect,
 } from "@angular/core";
+import hljs from 'highlight.js';
 import { htmlForMarkdown } from "./markdown-util/markdown.converter";
 import { CommonModule } from "@angular/common";
 import { Task, TaskArray } from "./task/task.model";
@@ -25,9 +25,8 @@ import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/pla
 import { merge, Subscription } from "rxjs";
 import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
 import { Result } from "@shared/models/result.model";
+import { ProgrammingExerciseTaskExtensionWrapper, taskRegex } from "./markdown-util/task.plugin";
 
-const taskRegex =
-  /\[task]\[([^[\]]+)]\(((?:[^(),]+(?:\([^()]*\)[^(),]*)?(?:,[^(),]+(?:\([^()]*\)[^(),]*)?)*)?)\)/g;
 const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}-task-${taskId}`;
 
 @Component({
@@ -61,13 +60,14 @@ export class ProblemStatementComponent implements OnDestroy {
 
   constructor(
     private programmingExerciseInstructionService: ProgrammingExerciseInstructionService,
+    private taskPlugin: ProgrammingExerciseTaskExtensionWrapper,
     private plantUmlPlugin: ProgrammingExercisePlantUmlExtensionWrapper
   ) {
     effect(() => {
       this.plantUmlPlugin.setLatestResult(this.latestResult());
     });
 
-    this.markdownExtensions = [this.plantUmlPlugin.getExtension()];
+    this.markdownExtensions = [this.taskPlugin.getExtension(), this.plantUmlPlugin.getExtension()];
 
     this.injectableContentFoundSubscription = merge(
       plantUmlPlugin.subscribeForInjectableElementsFound()
@@ -95,6 +95,7 @@ export class ProblemStatementComponent implements OnDestroy {
         callback();
       });
       this.injectTasksIntoDocument();
+      this.highlightCodeBlocks();
     }, 1);
 
     return html;
@@ -154,12 +155,18 @@ export class ProblemStatementComponent implements OnDestroy {
     const componentRef = this.viewContainerRef.createComponent(TaskButton);
 
     componentRef.setInput("task", task);
-    // TODO only insert feedback related to tasks tests
     const matchedFeedback = this.feedbackList().filter((feedback: Feedback) =>
       task.testIds.includes(feedback.testCase!.id!)
     );
-    componentRef.setInput("feedbackList", matchedFeedback);
+    componentRef.setInput("feedbackList", matchedFeedback ?? []);
 
     this.renderer.appendChild(taskHtmlContainer, componentRef.location.nativeElement);
+  }
+
+  private highlightCodeBlocks() {
+    const codeBlocks = this.problemContainer.nativeElement.querySelectorAll("pre code");
+    codeBlocks.forEach((block: HTMLElement) => {
+      hljs.highlightBlock(block);
+    });
   }
 }

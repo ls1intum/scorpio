@@ -8,6 +8,7 @@ import { Exercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
 import { StartButton } from "./start-button/start-button.component";
 import { ExerciseOverview } from "./header-table/overview.component";
+import { getLatestResult } from "@shared/models/participation.model";
 
 @Component({
   selector: "exercise-detail",
@@ -25,11 +26,7 @@ export class ExerciseDetailView implements OnInit {
   repoKey = input.required<string>();
 
   latestResult: Signal<Result | undefined> = computed(() =>
-    this.exercise()
-      .studentParticipations?.at(0)
-      ?.results?.reduce((latestResult, currentResult) => {
-        return latestResult.id! > currentResult.id! ? latestResult : currentResult;
-      })
+    getLatestResult(this.exercise().studentParticipations?.at(0))
   );
 
   now = computed(() => new Date());

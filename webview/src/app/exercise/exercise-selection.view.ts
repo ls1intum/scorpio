@@ -16,6 +16,7 @@ import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import * as bootstrap from "bootstrap";
+import { getLatestResult } from "@shared/models/participation.model";
 
 @Component({
   selector: "exercise-selection",
@@ -64,12 +65,12 @@ export class ExerciseSelectionView implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-      // Initialize all tooltips
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
-      }
+    // Initialize all tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }
 
   clickExercise(exercise: Exercise) {
     vscode.postMessage({
@@ -81,10 +82,6 @@ export class ExerciseSelectionView implements OnInit, AfterViewInit {
   }
 
   getScore(exercise: Exercise): number | undefined {
-    return exercise.studentParticipations
-      ?.at(0)
-      ?.results?.filter((result) => result.rated)
-      .sort((a, b) => new Date(a.completionDate!).getTime() - new Date(b.completionDate!).getTime())
-      .at(0)?.score;
+    return getLatestResult(exercise.studentParticipations?.at(0))?.score;
   }
 }

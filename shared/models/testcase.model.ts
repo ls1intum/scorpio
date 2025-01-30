@@ -1,11 +1,16 @@
 import { ProgrammingExercise } from "./exercise.model"
-import { Visibility } from "./feedback.model"
 
 export enum TestCaseType {
     STRUCTURAL = 'STRUCTURAL',
     BEHAVIORAL = 'BEHAVIORAL',
     DEFAULT = 'DEFAULT',
 }
+
+export enum Visibility {
+    ALWAYS = "ALWAYS",
+    AFTER_DUE_DATE = "AFTER_DUE_DATE",
+    NEVER = "NEVER",
+  }
 
 export class TestCase {
     id?: number;

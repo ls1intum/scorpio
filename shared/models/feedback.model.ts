@@ -8,12 +8,6 @@ export enum FeedbackType {
   AUTOMATIC = "AUTOMATIC",
 }
 
-export enum Visibility {
-  ALWAYS = "ALWAYS",
-  AFTER_DUE_DATE = "AFTER_DUE_DATE",
-  NEVER = "NEVER",
-}
-
 export class Feedback {
   public id?: number;
   public text?: string;
