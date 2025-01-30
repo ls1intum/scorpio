@@ -3,8 +3,8 @@ import { settings } from "./settings";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
-import { Exercise } from "@shared/models/exercise.model";
-import { clear_repo_state, set_repo_state } from "./state";
+import { Exercise, getProjectKey } from "@shared/models/exercise.model";
+import { clear_repo_state, set_repo_state, state } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
 import { get_course_exercise_by_projectKey } from "../exercise/exercise";
@@ -36,12 +36,7 @@ export async function submitCurrentWorkspace() {
   await gitRepo.push();
 }
 
-export async function detectRepoCourseAndExercise(): Promise<string | undefined> {
-  if (gitRepo) {
-    console.log("Repo already detected");
-    return undefined;
-  }
-
+export async function detectRepoCourseAndExercise() {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
   });
@@ -55,10 +50,15 @@ export async function detectRepoCourseAndExercise(): Promise<string | undefined>
     clear_repo_state();
 
     console.log("No Artemis repository found");
-    return undefined;
+    return;
   }
 
   const projectKey = getProjectKeyFromRepoUrl(foundRepoAndRemote.remote.refs.fetch!);
+  if(projectKey === getProjectKey(state.repoCourse, state.repoExercise)) {
+    console.log("Repo already detected");
+    gitRepo = foundRepoAndRemote.repo;
+    return;
+  }
 
   const course_exercise: { course: Course; exercise: Exercise } = await get_course_exercise_by_projectKey(
     projectKey

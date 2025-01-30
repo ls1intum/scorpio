@@ -12,6 +12,7 @@ import {
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import { get_course_exercise_by_projectKey } from "../exercise/exercise";
 import { fetch_uml } from "../problemStatement/uml.api";
+import { getProjectKey } from "@shared/models/exercise.model";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -224,7 +225,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private displayExercise() {
     const repoKey =
       state.repoCourse && state.repoExercise
-        ? state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase()
+        ? getProjectKey(state.repoCourse, state.repoExercise)
         : undefined;
     const course = state.displayedCourse;
     const exercise = state.displayedExercise;
