@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { onStateChange, set_displayed_state, State, state } from "../shared/state";
+import { onStateChange, set_displayed_state, State, getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
@@ -112,7 +112,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
           const exercises = await fetch_programming_exercises_by_courseId(
             session.accessToken,
-            state.displayedCourse!.id!
+            getState().displayedCourse!.id!
           );
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_EXERCISE_OPTIONS,
@@ -121,6 +121,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
+          const state = getState();
+
           const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
             state.displayedCourse!.shortName! + state.displayedExercise!.shortName!
           );
@@ -223,6 +225,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private displayExercise() {
+    const state = getState();
+    
     const repoKey =
       state.repoCourse && state.repoExercise
         ? getProjectKey(state.repoCourse, state.repoExercise)

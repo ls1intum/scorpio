@@ -1,3 +1,4 @@
+import { StudentParticipation } from "./participation.model";
 import { Result } from "./result.model";
 
 const enum SubmissionType {
@@ -20,4 +21,6 @@ export class ProgrammingSubmission{
 
     public commitHash?: string;
     public buildFailed?: boolean;
+
+    public participation?: StudentParticipation;
 }

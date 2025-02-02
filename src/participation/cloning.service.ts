@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { settings } from "../shared/settings";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { AUTH_ID } from "../authentication/authentication_provider";
-import { state } from "../shared/state";
+import { getState } from "../shared/state";
 import simpleGit from "simple-git";
 import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
@@ -42,7 +42,7 @@ export async function cloneUserRepo(repoUrl: string, username: string) {
 
   const vcsToken = await retrieveVcsAccessToken(
     session.accessToken,
-    state.displayedExercise?.studentParticipations![0].id!
+    getState().displayedExercise?.studentParticipations![0].id!
   );
   // Clone the repository
   const cloneUrlWithToken = new URL(addVcsTokenToUrl(repoUrl, username, vcsToken));
