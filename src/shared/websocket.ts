@@ -20,16 +20,14 @@ export class GenericWebSocket<T> {
 
   constructor(authToken: string, topic: string) {
     const url = new URL(settings.base_url!);
-    // url.protocol = url.protocol === "http:" ? "ws" : "wss";
     url.pathname = "/websocket";
     console.log(`WebSocket URL: ${url}`);
 
     this.stompClient = new StompJs.Client({
       brokerURL: url.toString(),
-      webSocketFactory: () => new WebSocket(url), // Use 'ws' library
+      webSocketFactory: () => new SockJS(url.toString()),
       connectHeaders: {
         Authorization: `Bearer ${authToken}`,
-        login: `Bearer ${authToken}`,
       },
       debug: function (str: string) {
         console.log(str);

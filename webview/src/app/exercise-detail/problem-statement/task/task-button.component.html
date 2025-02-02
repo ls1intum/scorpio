@@ -1,10 +1,5 @@
-<dialog #feedbackDialog>
-  <button class="close-button position-absolute top-0 end-0 m-3 py-0 align-middle" (click)="feedbackDialog.close()">
-    <fa-icon [icon]="faX"></fa-icon>
-  </button>
-  <br />
-  <br />
-  <feedback-list [feedbackList]="feedbackList()"></feedback-list>
+<dialog #feedbackDialog class="feedbackDialog">
+  <feedback-list [feedbackList]="feedbackList()" (onClose)="feedbackDialog.close()"></feedback-list>
 </dialog>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
 <fa-icon [icon]="faCircleQuestion"></fa-icon>
@@ -14,16 +9,16 @@
 <fa-icon [icon]="faCircleXmark" [ngClass]="'text-fail'"></fa-icon>
 } }
 <span>&nbsp;</span>
-<span class="task-name" [innerHTML]="task().taskName"></span>
+<b [innerHTML]="task().taskName"></b>
 <span>&nbsp;</span>
 @switch (status()){ @case (TaskStatus.NO_RESULT){
-<span [ngClass]="'no-result'">No Test Results</span>
+<em [ngClass]="'no-result'">No Test Results</em>
 } @case (TaskStatus.SUCCESS){
-<span class="test-result" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
+<u class="cursor-pointer" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
   {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
-</span>
+</u>
 } @case (TaskStatus.FAIL){
-<span class="test-result" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()">
+<u class="cursor-pointer" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()">
   {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
-</span>
+</u>
 }}

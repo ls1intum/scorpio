@@ -2,8 +2,6 @@ import { CommonModule } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
 import { Result } from "@shared/models/result.model";
 import { FeedbackListComponent } from "../test-result/feedback-list.component";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faX } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: "score-button",
@@ -11,7 +9,7 @@ import { faX } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ["./score-button.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, FeedbackListComponent, FaIconComponent],
+  imports: [CommonModule, FeedbackListComponent],
 })
 export class ScoreButton {
   result = input<Result>();
@@ -19,10 +17,8 @@ export class ScoreButton {
   maxPoints = input.required<number>();
 
   protected absoluteScore = computed(() => {
-    return ((this.result()!.score!  * this.maxPoints()) / 100).toFixed(1);
+    return ((this.result()!.score! * this.maxPoints()) / 100).toFixed(1);
   });
-
-  protected faX = faX
 
   constructor() {}
 }

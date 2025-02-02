@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit, Signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
 import { CommandFromWebview } from "@shared/webview-commands";
 import { Result } from "@shared/models/result.model";
 import { vscode } from "src/app/vscode";
-import { Exercise } from "@shared/models/exercise.model";
+import { ProgrammingExercise } from "@shared/models/exercise.model";
 import { Course } from "@shared/models/course.model";
-import { StartButton } from "./start-button/start-button.component";
+import { CloneButton } from "./clone-button/clone-button.component";
 import { ExerciseOverview } from "./header-table/overview.component";
+import { getLatestResult } from "@shared/models/participation.model";
+import { SubmitButton } from "./submit-button/submit-button.component";
 
 @Component({
   selector: "exercise-detail",
@@ -15,25 +17,19 @@ import { ExerciseOverview } from "./header-table/overview.component";
   styleUrls: ["./exercise-detail.view.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, StartButton, ExerciseOverview, ProblemStatementComponent],
+  imports: [CommonModule, CloneButton, SubmitButton, ExerciseOverview, ProblemStatementComponent],
 })
 export class ExerciseDetailView implements OnInit {
   course = input.required<Course>();
 
-  exercise = input.required<Exercise>();
+  exercise = input.required<ProgrammingExercise>();
 
   repoKey = input.required<string>();
+  protected repoKeyEqualsDisplayed = computed(() => this.repoKey() === this.exercise().projectKey);
 
-  latestResult = computed(() => {
-    return this.exercise()
-      .studentParticipations?.at(0)
-      ?.results?.sort((a: Result, b: Result) => a.id! - b.id!)
-      ?.at(0);
-  });
-
-  feedbackList = computed(() => {
-    return this.latestResult()?.feedbacks ?? [];
-  });
+  latestResult: Signal<Result | undefined> = computed(() =>
+    getLatestResult(this.exercise().studentParticipations?.at(0))
+  );
 
   now = computed(() => new Date());
 

@@ -1,19 +1,18 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import "./utils/fetch.interceptor";
 import { build_course_options } from "./course/course";
 import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
-import { set_state, getState } from "./shared/state";
-import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository";
+import { clear_repo_state, getState, set_displayed_state } from "./shared/state";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
 import { Result } from "@shared/models/result.model";
 import { ResultWebsocket } from "./participation/result.websocket";
+import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -35,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  if (!theiaEnv) {
+  if (!theiaEnv.GIT_URI) {
     vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
 
@@ -48,26 +47,11 @@ function initAuthentication(context: vscode.ExtensionContext) {
   context.subscriptions.push(authenticationProvider);
 
   (async () => {
-    let session: vscode.AuthenticationSession | undefined;
-    if (theiaEnv) {
-      do {
-        try {
-          session = await vscode.authentication.getSession(AUTH_ID, [], {
-            createIfNone: true,
-          });
-        } catch (e) {
-          session = undefined;
-        }
-      } while (!session);
-    } else {
-      // check if user is already authenticated
+    // check if user is already authenticated
       // is needed for the login button to be displayed on the profile button
-      session = await vscode.authentication.getSession(AUTH_ID, [], {
-        createIfNone: false,
-      });
-
-      // TODO logout if session expired
-    }
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
+    });
 
     vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
   })();
@@ -81,12 +65,9 @@ function initAuthentication(context: vscode.ExtensionContext) {
 
     if (removed && removed.length > 0) {
       vscode.commands.executeCommand("setContext", "scorpio.authenticated", false);
-      set_state({
-        displayedCourse: undefined,
-        displayedExercise: undefined,
-        repoCourse: undefined,
-        repoExercise: undefined,
-      });
+
+      clear_repo_state();
+      set_displayed_state(undefined, undefined);
       return;
     }
   });
@@ -152,13 +133,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 
         const exercise = await build_exercise_options(course);
 
-        const state = getState();
-        set_state({
-          displayedCourse: course,
-          displayedExercise: exercise,
-          repoCourse: state.repoCourse,
-          repoExercise: state.repoExercise,
-        });
+        set_displayed_state(course, exercise);
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to display Exercise");
       }
@@ -170,19 +145,10 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
       const state = getState();
       if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
-        set_state({
-          displayedCourse: state.displayedCourse,
-          displayedExercise: undefined,
-          repoCourse: state.repoCourse,
-          repoExercise: state.repoExercise,
-        });
+        set_displayed_state(state.displayedCourse, undefined);
       } else {
-        set_state({
-          displayedCourse: undefined,
-          displayedExercise: undefined,
-          repoCourse: state.repoCourse,
-          repoExercise: state.repoExercise,
-        });
+        // remove course to get into course selection
+        set_displayed_state(undefined, undefined);
       }
     })
   );
@@ -209,11 +175,6 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
       detectRepoCourseAndExercise()
-        .then((projectKey: string | undefined) => {
-          if (!projectKey) {
-            return;
-          }
-        })
         .catch((e) => {
           _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
         });

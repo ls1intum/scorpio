@@ -97,6 +97,19 @@ dialog {
   color: var(--vscode-button-foreground);
 }
 
+dialog::backdrop {
+  background-color: var(--vscode-sideBar-background);
+  opacity: 0.5;
+}
+
+.feedbackDialog{
+    width: 86%;
+    height: 86%;
+    position: fixed;
+    top: 4%;
+    left: 2%;
+}
+
 .no-result {
   color: var(--vscode-editorWarning-foreground);
 }
@@ -108,3 +121,13 @@ dialog {
 .text-fail {
   color: var(--vscode-editorError-foreground);
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+[id^=plantUml-]>* {
+  height: 100% !important;
+  max-width: 100%;
+}
+

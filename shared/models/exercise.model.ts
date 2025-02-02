@@ -30,12 +30,9 @@ export abstract class Exercise {
 
 export class ProgrammingExercise extends Exercise {
     public projectKey?: string;
-    public testRepositoryUri?: string;
 
     public programmingLanguage?: ProgrammingLanguage;
-    public packageName?: string;
     public showTestNamesToStudents?: boolean;
-    public releaseTestsWithExampleSolution?: boolean;
 
     /**
      * This attribute is used to generate a programming exercise with no connection to the VCS and CI.
@@ -98,4 +95,12 @@ export enum ProgrammingLanguage {
     SWIFT = 'SWIFT',
     TYPESCRIPT = 'TYPESCRIPT',
     VHDL = 'VHDL',
+}
+
+export function getProjectKey(course: Course | undefined, exercise: Exercise | undefined): string | undefined {
+    if (!course || !exercise) {
+        return undefined;
+    }
+    
+    return `${course.shortName!.toUpperCase()}${exercise.shortName!.toUpperCase()}`;
 }

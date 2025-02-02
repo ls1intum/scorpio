@@ -88,16 +88,16 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
   public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
     var token = "";
     var username = "";
-    if (theiaEnv) {
-      token = theiaEnv.ARTEMIS_TOKEN!;
-      username = theiaEnv.GIT_URI!.username;
+    if (theiaEnv.ARTEMIS_TOKEN) {
+      token = theiaEnv.ARTEMIS_TOKEN;
+      username = theiaEnv.GIT_USER ?? "undefined";
     } else {
       const { username: _username, password: _password } = await this.loginDialog();
       token = (await authenticateToken(_username, _password)).access_token;
       if (!token) {
         throw new Error(`login failure`);
       }
-      
+
       username = _username;
     }
 
@@ -116,10 +116,6 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
 
   // This function is called when the end user signs out of the account.
   async removeSession(_sessionId: string = ""): Promise<void> {
-    if (theiaEnv) {
-      throw Error("Cannot sign out in theia environment");
-    }
-
     const session = await this.sessionPromise;
     if (!session) {
       return;

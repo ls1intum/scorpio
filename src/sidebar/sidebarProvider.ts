@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { onStateChange, set_state, State, getState } from "../shared/state";
+import { onStateChange, set_displayed_state, State, getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
@@ -11,6 +11,8 @@ import {
 } from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import { get_course_exercise_by_projectKey } from "../exercise/exercise";
+import { fetch_uml } from "../problemStatement/uml.api";
+import { getProjectKey } from "@shared/models/exercise.model";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -64,7 +66,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.initState();
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
-      switch (data.command) {
+      const pathParts = data.command.split("/");
+      switch (pathParts[0]) {
         case CommandFromWebview.INFO: {
           if (!data.text) {
             return;
@@ -123,11 +126,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
             state.displayedCourse!.shortName! + state.displayedExercise!.shortName!
           );
-          set_state({
-            displayedCourse: course,
-            displayedExercise: exercise,
-            repoCourse: state.repoCourse,
-            repoExercise: state.repoExercise,
+          set_displayed_state(course, exercise);
+          break;
+        }
+        case CommandFromWebview.GET_UML: {
+          if (!data.text) {
+            return;
+          }
+
+          const session = await vscode.authentication.getSession(AUTH_ID, [], {
+            createIfNone: false,
+          });
+          if (!session) {
+            return;
+          }
+          const plantUml = await fetch_uml(session.accessToken, data.text);
+          this._view?.webview.postMessage({
+            command: CommandFromExtension.SEND_UML + "/" + pathParts[1],
+            text: plantUml,
           });
           break;
         }
@@ -144,14 +160,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           const { course, exercise } = JSON.parse(data.text);
-
-          const state = getState();
-          set_state({
-            displayedCourse: course,
-            displayedExercise: exercise,
-            repoCourse: state.repoCourse,
-            repoExercise: state.repoExercise,
-          });
+          
+          set_displayed_state(course, exercise);
           break;
         }
       }
@@ -219,7 +229,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     
     const repoKey =
       state.repoCourse && state.repoExercise
-        ? state.repoCourse.shortName!.toUpperCase() + state.repoExercise.shortName!.toUpperCase()
+        ? getProjectKey(state.repoCourse, state.repoExercise)
         : undefined;
     const course = state.displayedCourse;
     const exercise = state.displayedExercise;

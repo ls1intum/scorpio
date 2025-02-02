@@ -4,22 +4,15 @@ import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
 import {
-  fetch_feedback,
-  fetch_latest_participation,
   start_exercise,
 } from "../participation/participation.api";
-import { StudentParticipation } from "@shared/models/participation.model";
-import { cloneRepository } from "../shared/repository";
+import { getLatestResult } from "@shared/models/participation.model";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
-import { Result } from "@shared/models/result.model";
 import { fetch_course_exercise_projectKey } from "./exercise.api";
+import { cloneUserRepo } from "../participation/cloning.service";
 
 function _getScoreString(exercise: Exercise): string {
-  const score = exercise.studentParticipations
-    ?.at(0)
-    ?.results?.filter((result: Result) => result.rated)
-    .sort((a: Result, b: Result) => b.completionDate!.getTime() - a.completionDate!.getTime())
-    .at(0)?.score;
+  const score = getLatestResult(exercise.studentParticipations?.at(0))?.score;
   return score ? `${score} %` : "No graded result";
 }
 
@@ -100,25 +93,23 @@ export async function cloneCurrentExercise() {
     throw new Error("No exercise selected");
   }
 
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
-
-  if (!session) {
-    throw new NotAuthenticatedError();
-  }
-
-  let participation: StudentParticipation;
-  try {
-    participation = await fetch_latest_participation(session.accessToken, displayedExercise.id!);
-  } catch (e) {
+  let participation = displayedExercise.studentParticipations?.at(0);
+  if (!participation) {
     if (displayedExercise.dueDate! < new Date()) {
       throw new Error("Exercise is past due date and cannot be started");
     }
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: false,
+    });
+    if (!session) {
+      throw new NotAuthenticatedError();
+    }
+    
     participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
+  displayedExercise.studentParticipations = [participation];
 
-  await cloneRepository(participation.repositoryUri!, participation.participantIdentifier!);
+  await cloneUserRepo(participation.repositoryUri!, participation.participantIdentifier!);
 }
 
 export async function get_course_exercise_by_projectKey(

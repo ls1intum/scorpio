@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -13,15 +14,9 @@ import { StateService, ViewState } from "../state.service";
 import { CommonModule } from "@angular/common";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
-
-enum OutgoingCommands {
-  GET_EXERCISE_OPTIONS = "getExerciseOptions",
-  SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
-}
-
-enum IncomingCommands {
-  SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
-}
+import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
+import * as bootstrap from "bootstrap";
+import { getLatestResult } from "@shared/models/participation.model";
 
 @Component({
   selector: "exercise-selection",
@@ -32,7 +27,7 @@ enum IncomingCommands {
   imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ExerciseSelectionView implements OnInit {
+export class ExerciseSelectionView implements OnInit, AfterViewInit {
   @Input()
   course!: Course;
 
@@ -56,7 +51,7 @@ export class ExerciseSelectionView implements OnInit {
     // query courses from API
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
-      if (message.command === IncomingCommands.SEND_EXERCISE_OPTIONS) {
+      if (message.command === CommandFromExtension.SEND_EXERCISE_OPTIONS) {
         const exercises = JSON.parse(message.text);
         // for some reason, the dueDate is not correctly deserialized
         exercises.map((exercise: Exercise) => {
@@ -66,12 +61,20 @@ export class ExerciseSelectionView implements OnInit {
         this.exercises.set(exercises);
       }
     });
-    vscode.postMessage({ command: OutgoingCommands.GET_EXERCISE_OPTIONS, text: undefined });
+    vscode.postMessage({ command: CommandFromWebview.GET_EXERCISE_OPTIONS, text: undefined });
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize all tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
   }
 
   clickExercise(exercise: Exercise) {
     vscode.postMessage({
-      command: OutgoingCommands.SET_COURSE_AND_EXERCISE,
+      command: CommandFromWebview.SET_COURSE_AND_EXERCISE,
       text: JSON.stringify({ course: this.course, exercise: exercise }),
     });
 
@@ -79,10 +82,6 @@ export class ExerciseSelectionView implements OnInit {
   }
 
   getScore(exercise: Exercise): number | undefined {
-    return exercise.studentParticipations
-      ?.at(0)
-      ?.results?.filter((result) => result.rated)
-      .sort((a, b) => new Date(a.completionDate!).getTime() - new Date(b.completionDate!).getTime())
-      .at(0)?.score;
+    return getLatestResult(exercise.studentParticipations?.at(0))?.score;
   }
 }

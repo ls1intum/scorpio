@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { set_state, getState } from "../shared/state";
+import { getState, set_displayed_state } from "../shared/state";
 
 export async function sync_problem_statement_with_workspace() {
   const state = getState();
@@ -10,10 +10,5 @@ export async function sync_problem_statement_with_workspace() {
     return;
   }
 
-  set_state({
-    displayedCourse: state.repoCourse,
-    displayedExercise: state.repoExercise,
-    repoCourse: state.repoCourse,
-    repoExercise: state.repoExercise,
-  });
+  set_displayed_state(state.repoCourse, state.repoExercise);
 }

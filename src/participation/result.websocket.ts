@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Result } from "@shared/models/result.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
-import { getState, set_state } from "../shared/state";
+import { getState } from "../shared/state";
 import { GenericWebSocket } from "../shared/websocket";
 
 const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newResults`;
@@ -27,7 +27,7 @@ export class ResultWebsocket {
   public static get instance(): ResultWebsocket {
     // instantiate the singleton if it is not already
     return new ResultWebsocket();
-}
+  }
 
   private async initWebsocket() {
     const session = await vscode.authentication.getSession(AUTH_ID, [], {
@@ -57,19 +57,22 @@ export class ResultWebsocket {
   private handleError(error: Error) {}
 
   private handleMessage(result: Result) {
-    let state = getState();
-    let exercise = state.displayedExercise;
-    if (exercise?.id !== result.participation?.exercise?.id) {
+    const participationId = result.submission?.participation?.id;
+
+    let displayedStudentParticipation = getState().displayedExercise?.studentParticipations?.find(
+      (participation) => participation.id === participationId
+    );
+    if (!displayedStudentParticipation) {
       return;
     }
 
-    exercise?.studentParticipations?.at(0)?.results.push(result);
+    let submission = result.submission;
+    submission!.participation = undefined;
+    result.submission = undefined;
+    submission!.results!.push(result);
 
-    set_state({
-      displayedCourse: state.displayedCourse,
-      displayedExercise: exercise,
-      repoCourse: state.repoCourse,
-      repoExercise: state.repoExercise,
-    });
+    displayedStudentParticipation.submissions
+      ? displayedStudentParticipation.submissions?.push(submission!)
+      : (displayedStudentParticipation.submissions = [submission!]);
   }
 }
