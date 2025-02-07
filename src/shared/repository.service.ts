@@ -94,7 +94,7 @@ async function getArtemisRepo(
         const remotes = await git.getRemotes(true);
         for (const remote of remotes) {
           const url = new URL(remote.refs.fetch!);
-          if (url.hostname == new URL(settings.base_url).hostname && url.username == username) {
+          if (url.hostname == new URL(settings.base_url).hostname) {
             return { repo: git, remote: remote };
           }
         }

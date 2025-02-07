@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { authenticateToken } from "./authentication_api";
 import { theiaEnv } from "../theia/theia";
 import { settings } from "../shared/settings";
+import { hostname } from "os";
 
 export const AUTH_ID = "artemis";
 const AUTH_NAME = `Credentials`; // what is displayed on the profile button
@@ -90,7 +91,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
     var username = "";
     if (theiaEnv.ARTEMIS_TOKEN) {
       token = theiaEnv.ARTEMIS_TOKEN;
-      username = theiaEnv.GIT_USER ?? "undefined";
+      username = theiaEnv.GIT_USER ?? hostname();
     } else {
       const { username: _username, password: _password } = await this.loginDialog();
       token = (await authenticateToken(_username, _password)).access_token;
