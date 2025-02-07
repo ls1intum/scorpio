@@ -13,6 +13,7 @@ import { initSettings } from "./shared/settings";
 import { Result } from "@shared/models/result.model";
 import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
+import { GenericWebSocket } from "./shared/websocket";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -38,7 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
 
-  const resultWebsocket = ResultWebsocket.instance;
+  // initialize the websocket
+  GenericWebSocket.instance;
+
+  const resultWebsocket = new ResultWebsocket();
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {

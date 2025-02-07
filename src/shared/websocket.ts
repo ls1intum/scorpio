@@ -1,59 +1,77 @@
+import * as vscode from "vscode";
 import { EventEmitter } from "vscode";
+import { AUTH_ID } from "../authentication/authentication_provider";
 import WebSocket from "ws";
 import { settings } from "./settings";
 const StompJs = require("@stomp/stompjs");
 import SockJS from "sockjs-client";
+import { Result } from "@shared/models/result.model";
 
-export type WebSocketMessage<T> = {
-  data: T;
-};
+export class GenericWebSocket {
+  static #instance: GenericWebSocket;
 
-export type WebSocketError = {
-  error: Error;
-};
-
-export class GenericWebSocket<T> {
   private stompClient: any;
   private isConnecting: boolean = false;
 
-  public readonly subscription: EventEmitter<WebSocketMessage<T> | WebSocketError> = new EventEmitter();
+  private subscriptions = new Map<string, EventEmitter<any>>();
 
-  constructor(authToken: string, topic: string) {
+  constructor() {
+    // if already instantiated return the instance
+    if (GenericWebSocket.#instance) {
+      return GenericWebSocket.#instance;
+    }
+
+    // otherwise create instance
+    this.setup()
+      .then(() => {
+        GenericWebSocket.#instance = this;
+        this.connect();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  public static get instance(): GenericWebSocket {
+    // instantiate the singleton if it is not already
+    return new GenericWebSocket();
+  }
+
+  public get connected(): boolean {
+    return this.stompClient && this.stompClient.connected;
+  }
+
+  private async setup() {
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: false,
+    });
+
+    if (!session) {
+      throw Error("Not authenticated");
+    }
+
     const url = new URL(settings.base_url!);
     url.pathname = "/websocket";
-    console.log(`WebSocket URL: ${url}`);
+    // url.searchParams.append("token", session.accessToken);
 
     this.stompClient = new StompJs.Client({
       brokerURL: url.toString(),
-      webSocketFactory: () => new SockJS(url.toString()),
+      webSocketFactory: () => new WebSocket(url, { headers: { Authorization: `Bearer ${session.accessToken}` } }),
       connectHeaders: {
-        Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${session.accessToken}`,
       },
       debug: function (str: string) {
-        console.log(str);
+        console.debug(str);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
     });
 
-    // Fallback code
-    if (typeof WebSocket !== "function") {
-      // For SockJS you need to set a factory that creates a new SockJS instance
-      // to be used for each (re)connect
-      this.stompClient.webSocketFactory = function () {
-        console.log(`Creating SockJS instance for URL: ${url.toString()}`);
-        return new SockJS(url.toString());
-      };
-    }
-
     this.stompClient.onConnect = (frame: any) => {
-      this.subscribeToTopic(topic);
       this.onConnect(frame);
     };
     this.stompClient.onStompError = this.onError;
-
-    this.connect();
   }
 
   private onConnect(frame: any) {
@@ -62,12 +80,11 @@ export class GenericWebSocket<T> {
 
   private onError(frame: any) {
     console.error(`Error: ${frame.body}`);
-    this.subscription.fire({ error: new Error(frame.body) });
   }
 
   private connect(): void {
     if (this.isConnecting) {
-      console.log("Already connecting to WebSocket.");
+      console.warn("Already connecting to WebSocket.");
       return;
     }
 
@@ -75,24 +92,30 @@ export class GenericWebSocket<T> {
     this.stompClient.activate();
   }
 
-  private subscribeToTopic(topic: string): void {
-    if (!this.stompClient.connected) {
-      console.error("Cannot subscribe to topic: WebSocket is not connected.");
-      this.subscription.fire({ error: new Error("WebSocket is not connected.") });
-      return;
+  public subscribeToTopic<T>(topic: string): EventEmitter<T> {
+    if (this.subscriptions.has(topic)) {
+      return this.subscriptions.get(topic)!;
     }
 
+    if (!this.stompClient.connected) {
+      throw Error(`Cannot subscribe to topic ${topic}: WebSocket is not connected.`);
+    }
+
+    const subscription = new EventEmitter<T>();
+    this.subscriptions.set(topic, subscription);
+
     this.stompClient.subscribe(topic, (message: any) => {
-      console.log(`Received message: ${message.body}`);
-      this.subscription.fire({ data: JSON.parse(message.body) });
+      let json = JSON.parse(message.body);
+
+      subscription.fire(json as T);
     });
-    console.log(`Subscribed to topic: ${topic}`);
+    console.debug(`Subscribed to topic: ${topic}`);
+    return subscription;
   }
 
   public sendMessage(topic: string, message: object): void {
     if (!this.stompClient.connected) {
       console.error("Cannot send message: WebSocket is not connected.");
-      this.subscription.fire({ error: new Error("WebSocket is not connected.") });
       return;
     }
 

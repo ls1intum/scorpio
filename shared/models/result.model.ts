@@ -20,9 +20,18 @@ export class Result {
     public passedTestCaseCount?: number;
     public codeIssueCount?: number;
 
-    public submission?: ProgrammingSubmission;
+    public submission?: ProgrammingSubmission = new ProgrammingSubmission();
     public feedbacks: Feedback[] = [];
 
     constructor() {
+    }
+
+    static fromJSON(json: any): Result {
+        const result = Object.assign(new Result(), json);
+        if (json.submission) {
+            result.submission = Object.assign(new ProgrammingSubmission(), json.submission);
+        }
+
+        return result;
     }
 }

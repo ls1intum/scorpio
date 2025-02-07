@@ -1,6 +1,4 @@
-import * as vscode from "vscode";
 import { Result } from "@shared/models/result.model";
-import { AUTH_ID } from "../authentication/authentication_provider";
 import { getState } from "../shared/state";
 import { GenericWebSocket } from "../shared/websocket";
 
@@ -8,60 +6,29 @@ const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newResults`;
 
 /// Handles the WebSocket connection for the results of a personal participation.
 export class ResultWebsocket {
-  static #instance: ResultWebsocket;
-
-  private resultWebsocket: GenericWebSocket<Result> | undefined;
-
   constructor() {
-    // if already instantiated return the instance
-    if (ResultWebsocket.#instance) {
-      return ResultWebsocket.#instance;
-    }
-
-    // otherwise create instance
-    ResultWebsocket.#instance = this;
-
     this.initWebsocket();
   }
 
-  public static get instance(): ResultWebsocket {
-    // instantiate the singleton if it is not already
-    return new ResultWebsocket();
-  }
-
   private async initWebsocket() {
-    const session = await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: false,
-    });
+    do {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.debug("Waiting for websocket connection...");
+    } while (!GenericWebSocket.instance.connected);
 
-    if (!session) {
-      console.error("Not authenticated");
-      return;
-    }
-
-    this.resultWebsocket = new GenericWebSocket<Result>(session.accessToken, PERSONAL_PARTICIPATION_TOPIC);
-
-    this.resultWebsocket.subscription.event((message) => {
-      if ("error" in message) {
-        console.error("Error in WebSocket", message.error);
-        this.handleError(message.error);
-        return;
-      } else if ("data" in message) {
-        console.log("New result", message.data);
-        this.handleMessage(message.data);
-        return;
-      }
+    const subscription = GenericWebSocket.instance.subscribeToTopic<Result>(PERSONAL_PARTICIPATION_TOPIC);
+    subscription.event((result) => {
+      this.handleMessage(result);
     });
   }
-
-  private handleError(error: Error) {}
 
   private handleMessage(result: Result) {
     const participationId = result.submission?.participation?.id;
 
     let displayedStudentParticipation = getState().displayedExercise?.studentParticipations?.find(
       (participation) => participation.id === participationId
-    );
+    );   
+
     if (!displayedStudentParticipation) {
       return;
     }
