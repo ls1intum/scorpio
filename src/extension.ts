@@ -32,9 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  if (!theiaEnv.GIT_URI) {
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
-  }
+  vscode.commands.executeCommand("scorpio.workspace.detectRepo");
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -172,8 +170,8 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
     vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
       detectRepoCourseAndExercise()
         .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
-        });
+        _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
+      });
     })
   );
 
