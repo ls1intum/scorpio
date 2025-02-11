@@ -21,7 +21,7 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install Dependencies
-              run: npm run install:all
+              run: npm run install
 
             - name: Build Project
-              run: npm run build:all
+              run: npm run build

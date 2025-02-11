@@ -12,13 +12,10 @@ export enum CommandFromWebview {
 }
 
 export enum CommandFromExtension {
-  SHOW_LOGIN = "showLogin",
-  SHOW_COURSE_SELECTION = "showCourseSelection",
-  SHOW_EXERCISE_SELECTION = "showExerciseSelection",
-  SHOW_PROBLEM_STATEMENT = "showProblemStatement",
+  SEND_LOGIN_STATE = "showLogin",
+  SEND_COURSE_EXERCISE_REPOKEY = "sendCourseAndExercise",
   SEND_COURSE_OPTIONS = "sendCourseOptions",
   SEND_EXERCISE_OPTIONS = "sendExerciseOptions",
-  SEND_COURSE_AND_EXERCISE = "sendCourseAndExercise",
   SEND_UML = "sendUml",
   EASTER_EGG = "easterEgg",
 }

@@ -10,9 +10,10 @@ import {
   fetch_programming_exercises_by_courseId,
 } from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
-import { get_course_exercise_by_projectKey } from "../exercise/exercise";
+import { get_problem_statement_details } from "../exercise/exercise";
 import { fetch_uml } from "../problemStatement/uml.api";
 import { getProjectKey } from "@shared/models/exercise.model";
+import { text } from "stream/consumers";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -121,8 +122,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
-          const { course: course, exercise: exercise } = await get_course_exercise_by_projectKey(
-            state.displayedCourse!.shortName! + state.displayedExercise!.shortName!
+          const { course: course, exercise: exercise } = await get_problem_statement_details(
+            state.displayedExercise!
           );
           set_displayed_state(course, exercise);
           break;
@@ -212,13 +213,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private login(session: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
-      command: CommandFromExtension.SHOW_COURSE_SELECTION,
+      command: CommandFromExtension.SEND_LOGIN_STATE,
+      text: true,
     });
   }
 
   private logout() {
     this._view?.webview.postMessage({
-      command: CommandFromExtension.SHOW_LOGIN,
+      command: CommandFromExtension.SEND_LOGIN_STATE,
+      text: false,
     });
   }
 
@@ -230,34 +233,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const course = state.displayedCourse;
     const exercise = state.displayedExercise;
 
-    if (!course && !exercise) {
-      this._view?.webview.postMessage({
-        command: CommandFromExtension.SHOW_COURSE_SELECTION,
-      });
-      return;
-    }
-
-    if (course && !exercise) {
-      this._view?.webview.postMessage({
-        command: CommandFromExtension.SHOW_EXERCISE_SELECTION,
-        text: JSON.stringify({
-          course: course,
-        }),
-      });
-      return;
-    }
-
-    if (course && exercise) {
-      this._view?.webview.postMessage({
-        command: CommandFromExtension.SHOW_PROBLEM_STATEMENT,
-        text: JSON.stringify({
-          course: course,
-          exercise: exercise,
-          repoKey: repoKey,
-        }),
-      });
-      return;
-    }
+    this._view?.webview.postMessage({
+      command: CommandFromExtension.SEND_COURSE_EXERCISE_REPOKEY,
+      text: JSON.stringify({
+        course: course,
+        exercise: exercise,
+        repoKey: repoKey,
+      }),
+    });
   }
 
   private easterEgg() {

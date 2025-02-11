@@ -38,10 +38,10 @@ jobs:
               run: npm version ${{ inputs.version }} --no-git-tag-version
 
             - name: Install Dependencies
-              run: npm run install:all
+              run: npm run install
                 
             - name: Build Project
-              run: npm run build:all
+              run: npm run build
 
             - name: Package VSIX
               run: npm run package

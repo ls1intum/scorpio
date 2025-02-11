@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
     "build": "ng build --output-hashing=none",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
