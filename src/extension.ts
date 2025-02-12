@@ -35,9 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  if (!theiaEnv.GIT_URI) {
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
-  }
+  detectRepoCourseAndExercise().catch((e) => {
+    console.error(e);
+  });
 
   // initialize the websocket
   GenericWebSocket.instance;
@@ -52,7 +52,7 @@ function initAuthentication(context: vscode.ExtensionContext) {
 
   (async () => {
     // check if user is already authenticated
-      // is needed for the login button to be displayed on the profile button
+    // is needed for the login button to be displayed on the profile button
     const session = await vscode.authentication.getSession(AUTH_ID, [], {
       createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
     });
@@ -178,10 +178,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to detect repo in workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
-      detectRepoCourseAndExercise()
-        .catch((e) => {
-          _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
-        });
+      detectRepoCourseAndExercise().catch((e) => {
+        _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
+      });
     })
   );
 
@@ -205,7 +204,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 function listenToEvents() {
   // listen to workspace changes to display problem statement
   vscode.workspace.onDidChangeWorkspaceFolders((event) => {
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+    detectRepoCourseAndExercise().catch((e) => {
+      console.error(e);
+    });
   });
 }
 

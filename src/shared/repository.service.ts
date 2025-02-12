@@ -7,8 +7,8 @@ import { Exercise, getProjectKey } from "@shared/models/exercise.model";
 import { clear_repo_state, set_repo_state, getState } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
-import { get_course_exercise_by_projectKey } from "../exercise/exercise";
-import { getProjectKeyFromRepoUrl } from "../utils/cloning.utils";
+import { get_course_exercise_by_repoUrl } from "../exercise/exercise";
+import { getProjectKeyFromRepoUrl } from "@shared/models/participation.model";
 
 var gitRepo: SimpleGit | undefined;
 
@@ -34,6 +34,8 @@ export async function submitCurrentWorkspace() {
   await gitRepo.add(".");
   await gitRepo.commit("Submit workspace from artemis plugin");
   await gitRepo.push();
+
+  vscode.window.showInformationMessage("Workspace submitted successfully");
 }
 
 export async function detectRepoCourseAndExercise() {
@@ -53,21 +55,19 @@ export async function detectRepoCourseAndExercise() {
     return;
   }
 
-  const projectKey = getProjectKeyFromRepoUrl(foundRepoAndRemote.remote.refs.fetch!);
-  if(projectKey === getProjectKey(getState().repoCourse, getState().repoExercise)) {
+  const repoUrl = foundRepoAndRemote.remote.refs.fetch!;
+  if(getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(getState().repoCourse, getState().repoExercise)) {
     console.log("Repo already detected");
     gitRepo = foundRepoAndRemote.repo;
     return;
   }
 
-  const course_exercise: { course: Course; exercise: Exercise } = await get_course_exercise_by_projectKey(
-    projectKey
+  const course_exercise: { course: Course; exercise: Exercise } = await get_course_exercise_by_repoUrl(
+    repoUrl
   );
 
   gitRepo = foundRepoAndRemote.repo;
   set_repo_state(course_exercise.course, course_exercise.exercise);
-
-  return projectKey;
 }
 
 async function getArtemisRepo(
@@ -94,7 +94,7 @@ async function getArtemisRepo(
         const remotes = await git.getRemotes(true);
         for (const remote of remotes) {
           const url = new URL(remote.refs.fetch!);
-          if (url.hostname == new URL(settings.base_url).hostname && url.username == username) {
+          if (url.hostname == new URL(settings.base_url).hostname) {
             return { repo: git, remote: remote };
           }
         }

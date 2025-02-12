@@ -7,7 +7,7 @@ import simpleGit from "simple-git";
 import * as path from "path";
 import { retrieveVcsAccessToken } from "../authentication/authentication_api";
 import { getWorkspaceFolder, theiaEnv } from "../theia/theia";
-import { addVcsTokenToUrl } from "../utils/cloning.utils";
+import { addVcsTokenToUrl } from "@shared/models/participation.model";
 
 export async function cloneUserRepo(repoUrl: string, username: string) {
   // get folder to clone repo into

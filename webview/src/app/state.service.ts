@@ -35,34 +35,36 @@ export class StateService {
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
       switch (message.command) {
-        case CommandFromExtension.SHOW_LOGIN:
+        case CommandFromExtension.SEND_LOGIN_STATE:
+          const loggedIn = message.text;
           this.changeState({
-            viewState: ViewState.LOGIN,
+            viewState: loggedIn ? ViewState.COURSE_SELECTION : ViewState.LOGIN,
             course: undefined,
             exercise: undefined,
             repoKey: undefined,
           });
           break;
-        case CommandFromExtension.SHOW_COURSE_SELECTION:
-          this.changeState({
-            viewState: ViewState.COURSE_SELECTION,
-            course: undefined,
-            exercise: undefined,
-            repoKey: undefined,
-          });
-          break;
-        case CommandFromExtension.SHOW_EXERCISE_SELECTION:
-          const {course: courseData} = JSON.parse(message.text);
-          this.changeState({
-            viewState: ViewState.EXERCISE_SELECTION,
-            course: courseData,
-            exercise: undefined,
-            repoKey: undefined,
-          });
-          break;
-        case CommandFromExtension.SHOW_PROBLEM_STATEMENT:
+        case CommandFromExtension.SEND_COURSE_EXERCISE_REPOKEY:
           const { course: course, exercise: exercise, repoKey: repoKey } = JSON.parse(message.text);
+          if (!course) {
+            this.changeState({
+              viewState: ViewState.COURSE_SELECTION,
+              course: undefined,
+              exercise: undefined,
+              repoKey: undefined,
+            });
+            break;
+          }
 
+          if (!exercise) {
+            this.changeState({
+              viewState: ViewState.EXERCISE_SELECTION,
+              course: course,
+              exercise: undefined,
+              repoKey: undefined,
+            });
+            break;
+          }
           exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : exercise.dueDate;
           this.changeState({
             viewState: ViewState.PROBLEM_STATEMENT,

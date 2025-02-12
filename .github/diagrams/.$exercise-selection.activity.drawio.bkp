@@ -1,0 +1,104 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.9 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.9">
+  <diagram name="Page-1" id="FZ_zVQ5ZrnK9juhTJ7ce">
+    <mxGraphModel dx="954" dy="610" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="vfILtizNH-qsvsKeou2O-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-4" target="vfILtizNH-qsvsKeou2O-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-4" value="" style="ellipse;html=1;shape=startState;" vertex="1" parent="1">
+          <mxGeometry x="115" y="70" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-6" value="Select Course" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="70" y="330" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=classic;endSize=6;rounded=0;endFill=1;" edge="1" source="vfILtizNH-qsvsKeou2O-6" parent="1" target="vfILtizNH-qsvsKeou2O-13">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-8" target="vfILtizNH-qsvsKeou2O-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-8" value="Course Selection" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="75" y="220" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-10" target="vfILtizNH-qsvsKeou2O-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-10" value="Exercise Selection" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="75" y="520" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-11" value="Select Exercise" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="70" y="630" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=classic;endSize=6;rounded=0;endFill=1;" edge="1" source="vfILtizNH-qsvsKeou2O-11" parent="1" target="vfILtizNH-qsvsKeou2O-19">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-13" target="vfILtizNH-qsvsKeou2O-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-13" value="Fetch Exercise Dashboard" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="70" y="430" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-15" target="vfILtizNH-qsvsKeou2O-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-15" value="Fetch Course Dashboard" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="70" y="140" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-19" value="Exercise has Participation" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="740" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-20" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;verticalAlign=bottom;endArrow=classic;endSize=6;rounded=0;endFill=1;" edge="1" source="vfILtizNH-qsvsKeou2O-19" parent="1" target="vfILtizNH-qsvsKeou2O-22">
+          <mxGeometry x="-1" relative="1" as="geometry">
+            <mxPoint x="270" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-21" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;align=left;verticalAlign=top;endArrow=classic;endSize=6;rounded=0;endFill=1;" edge="1" source="vfILtizNH-qsvsKeou2O-19" parent="1" target="vfILtizNH-qsvsKeou2O-24">
+          <mxGeometry x="-1" relative="1" as="geometry">
+            <mxPoint x="130" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-22" value="Fetch Participation by RepoUrl" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="275" y="750" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-23" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;verticalAlign=bottom;endArrow=classic;endSize=6;rounded=0;endFill=1;" edge="1" source="vfILtizNH-qsvsKeou2O-22" parent="1" target="vfILtizNH-qsvsKeou2O-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-24" target="vfILtizNH-qsvsKeou2O-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-24" value="Fetch Exercise Details" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="70" y="850" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-25" target="vfILtizNH-qsvsKeou2O-33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-25" value="ProblemStatement" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="280" y="845" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-27" target="vfILtizNH-qsvsKeou2O-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-27" value="Detect Repository" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;" vertex="1" parent="1">
+          <mxGeometry x="275" y="630" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="vfILtizNH-qsvsKeou2O-30" target="vfILtizNH-qsvsKeou2O-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-30" value="" style="ellipse;html=1;shape=startState;" vertex="1" parent="1">
+          <mxGeometry x="320" y="70" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vfILtizNH-qsvsKeou2O-33" value="" style="ellipse;html=1;shape=endState;" vertex="1" parent="1">
+          <mxGeometry x="320" y="960" width="30" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

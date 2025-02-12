@@ -2,19 +2,11 @@ import * as vscode from "vscode";
 import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
-import { Exercise } from "@shared/models/exercise.model";
-import {
-  start_exercise,
-} from "../participation/participation.api";
-import { getLatestResult } from "@shared/models/participation.model";
+import { Exercise, getScoreString } from "@shared/models/exercise.model";
+import { start_exercise } from "../participation/participation.api";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
-import { fetch_course_exercise_projectKey } from "./exercise.api";
+import { fetch_course_exercise_by_repo_name, fetch_exercise_by_id } from "./exercise.api";
 import { cloneUserRepo } from "../participation/cloning.service";
-
-function _getScoreString(exercise: Exercise): string {
-  const score = getLatestResult(exercise.studentParticipations?.at(0))?.score;
-  return score ? `${score} %` : "No graded result";
-}
 
 export async function build_exercise_options(course: Course): Promise<Exercise> {
   const exercises = course.exercises;
@@ -28,7 +20,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
       label: exercise.title!,
-      description: _getScoreString(exercise),
+      description: getScoreString(exercise),
       detail: "No due date",
       exercise: exercise,
     }));
@@ -38,7 +30,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
       label: exercise.title!,
-      description: _getScoreString(exercise),
+      description: getScoreString(exercise),
       detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
       exercise: exercise,
     }))
@@ -49,7 +41,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     .map((exercise) => ({
       kind: vscode.QuickPickItemKind.Default,
       label: exercise.title!,
-      description: _getScoreString(exercise),
+      description: getScoreString(exercise),
       detail: `Due on ${exercise.dueDate!.toLocaleString()}`,
       exercise: exercise,
     }))
@@ -112,8 +104,26 @@ export async function cloneCurrentExercise() {
   await cloneUserRepo(participation.repositoryUri!, participation.participantIdentifier!);
 }
 
-export async function get_course_exercise_by_projectKey(
-  projectKey: string
+export async function get_problem_statement_details(exercise: Exercise) {
+  // check if exercise has an active participation
+  let course: Course;
+
+  const studentParticipation = exercise.studentParticipations?.at(0);
+  if (studentParticipation) {
+    // if so query the details by repoUrl of the latest participation
+    ({ course: course, exercise: exercise } = await get_course_exercise_by_repoUrl(
+      studentParticipation.repositoryUri!
+    ));
+  } else {
+    // if not query the details (mainly the problem statement) by the exercise id
+    ({ course, exercise } = await get_course_exercise_by_exercise_id(exercise.id!));
+  }
+
+  return { course: course, exercise: exercise };
+}
+
+export async function get_course_exercise_by_repoUrl(
+  repoUrl: string
 ): Promise<{ course: Course; exercise: Exercise }> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
@@ -123,10 +133,26 @@ export async function get_course_exercise_by_projectKey(
     throw new NotAuthenticatedError();
   }
 
-  const { course: course, exercise: exercise } = await fetch_course_exercise_projectKey(
+  const repoName = repoUrl.split("/").pop()!.replace(".git", "");
+
+  const { course: course, exercise: exercise } = await fetch_course_exercise_by_repo_name(
     session.accessToken,
-    projectKey
+    repoName
   );
+
+  return { course: course, exercise: exercise };
+}
+
+async function get_course_exercise_by_exercise_id(exerciseId: number) {
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: false,
+  });
+
+  if (!session) {
+    throw new NotAuthenticatedError();
+  }
+
+  const { course: course, exercise: exercise } = await fetch_exercise_by_id(session.accessToken, exerciseId);
 
   return { course: course, exercise: exercise };
 }

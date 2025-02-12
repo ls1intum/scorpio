@@ -201,21 +201,26 @@
     }
   },
   "scripts": {
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "build": "webpack --mode production",
+    "install:all": "npm run install:webview && npm run install:extension",
+    "build": "npm run build:webview && npm run build:extension",
+    "watch": "npm run watch:webview && npm run watch:extension",
+
+    "install:extension": "npm install --no-scripts",
+    "build:extension": "webpack --mode production",
+    "compile:extension": "webpack",
+    "watch:extension": "webpack --watch",
+
+    "install:webview": "cd webview && npm install",
+    "build:webview": "cd webview && npm run build",
+    "watch:webview": "cd webview && npm run watch",
+
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-    "pretest": "npm run compile",
+    "pretest": "npm run compile:extension",
+    "lint": "eslint src --ext ts",
     "package": "vsce package",
     "vscode:prepublish": "npm run build",
-    "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
-    "start:webview": "cd webview && npm run start",
-    "build:webview": "cd webview && npm run build",
-    "install:webview": "cd webview && npm install",
-    "install:all": "npm install && npm run install:webview",
-    "build:all": "npm run build && npm run build:webview"
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",

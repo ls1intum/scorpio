@@ -24,8 +24,8 @@ import { escapeStringForUseInRegex } from "./regex.util";
 import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/plant-uml.plugin";
 import { merge, Subscription } from "rxjs";
 import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
-import { Result } from "@shared/models/result.model";
 import { ProgrammingExerciseTaskExtensionWrapper, taskRegex } from "./markdown-util/task.plugin";
+import { getLatestResult } from "@shared/models/participation.model";
 
 const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}-task-${taskId}`;
 
@@ -41,9 +41,7 @@ export class ProblemStatementComponent implements OnDestroy {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
-  latestResult = input.required<Result | undefined>();
-
-  feedbackList: Signal<Feedback[]> = computed(() => this.latestResult()?.feedbacks ?? []);
+  latestResult = computed(() => getLatestResult(this.exercise().studentParticipations?.at(0)));
 
   problemStatement: Signal<string> = computed(() => this.renderMarkdown(this.exercise().problemStatement));
 
@@ -118,7 +116,7 @@ export class ProblemStatementComponent implements OnDestroy {
           completeString: testMatch![0],
           taskName: testMatch![1],
           testIds: testMatch![2]
-            ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], undefined)
+            ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], this.exercise().testCases)
             : [],
         };
       });
@@ -155,9 +153,9 @@ export class ProblemStatementComponent implements OnDestroy {
     const componentRef = this.viewContainerRef.createComponent(TaskButton);
 
     componentRef.setInput("task", task);
-    const matchedFeedback = this.feedbackList().filter((feedback: Feedback) =>
-      task.testIds.includes(feedback.testCase!.id!)
-    );
+    const matchedFeedback = this.latestResult()?.feedbacks?.filter((feedback: Feedback) =>
+      !feedback.testCaseId || task.testIds.includes(feedback.testCaseId)
+    ) ?? [];
     componentRef.setInput("feedbackList", matchedFeedback ?? []);
 
     this.renderer.appendChild(taskHtmlContainer, componentRef.location.nativeElement);
