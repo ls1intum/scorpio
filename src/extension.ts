@@ -5,12 +5,15 @@ import { build_course_options } from "./course/course";
 import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
-import { clear_repo_state, set_displayed_state, state } from "./shared/state";
+import { clear_repo_state, getState, set_displayed_state } from "./shared/state";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
+import { Result } from "@shared/models/result.model";
+import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
+import { GenericWebSocket } from "./shared/websocket";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -35,6 +38,11 @@ export function activate(context: vscode.ExtensionContext) {
   detectRepoCourseAndExercise().catch((e) => {
     console.error(e);
   });
+
+  // initialize the websocket
+  GenericWebSocket.instance;
+
+  const resultWebsocket = new ResultWebsocket();
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -42,11 +50,10 @@ function initAuthentication(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(authenticationProvider);
 
-  // check if user is already authenticated
-  // is needed for the login button to be displayed on the profile button
   (async () => {
-    let session: vscode.AuthenticationSession | undefined;
-    session = await vscode.authentication.getSession(AUTH_ID, [], {
+    // check if user is already authenticated
+    // is needed for the login button to be displayed on the profile button
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
       createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
     });
 
@@ -139,6 +146,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.back", () => {
+      const state = getState();
       if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
         set_displayed_state(state.displayedCourse, undefined);

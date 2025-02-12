@@ -4,7 +4,7 @@ import { NotAuthenticatedError } from "../authentication/not_authenticated.error
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getProjectKey } from "@shared/models/exercise.model";
-import { clear_repo_state, set_repo_state, state } from "./state";
+import { clear_repo_state, set_repo_state, getState } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
 import { get_course_exercise_by_repoUrl } from "../exercise/exercise";
@@ -56,7 +56,7 @@ export async function detectRepoCourseAndExercise() {
   }
 
   const repoUrl = foundRepoAndRemote.remote.refs.fetch!;
-  if(getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(state.repoCourse, state.repoExercise)) {
+  if(getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(getState().repoCourse, getState().repoExercise)) {
     console.log("Repo already detected");
     gitRepo = foundRepoAndRemote.repo;
     return;
