@@ -27,10 +27,6 @@ export class ExerciseDetailView implements OnInit {
   repoKey = input.required<string>();
   protected repoKeyEqualsDisplayed = computed(() => this.repoKey() === this.exercise().projectKey);
 
-  latestResult: Signal<Result | undefined> = computed(() =>
-    getLatestResult(this.exercise().studentParticipations?.at(0))
-  );
-
   now = computed(() => new Date());
 
   constructor() {}
