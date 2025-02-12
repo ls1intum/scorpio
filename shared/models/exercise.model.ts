@@ -1,5 +1,6 @@
 import { Course } from "./course.model";
-import { StudentParticipation } from "./participation.model";
+import { getLatestResult, StudentParticipation } from "./participation.model";
+import { TestCase } from "./testcase.model";
 
 export abstract class Exercise {
     public id?: number;
@@ -23,6 +24,7 @@ export abstract class Exercise {
     public exampleSolutionPublicationDate?: Date;
 
     public studentParticipations?: StudentParticipation[];
+    public testCases?: TestCase[];
     public course?: Course;
 
     constructor(type: ExerciseType) {}
@@ -103,4 +105,9 @@ export function getProjectKey(course: Course | undefined, exercise: Exercise | u
     }
     
     return `${course.shortName!.toUpperCase()}${exercise.shortName!.toUpperCase()}`;
+}
+
+export function getScoreString(exercise: Exercise): string {
+  const score = getLatestResult(exercise.studentParticipations?.at(0))?.score;
+  return score ? `${score} %` : "No graded result";
 }

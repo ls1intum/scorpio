@@ -19,6 +19,7 @@ export class Feedback {
   public result?: Result;
   public positive?: boolean;
   public testCase?: TestCase;
+  public testCaseId?: number;
 
   constructor() {}
 }

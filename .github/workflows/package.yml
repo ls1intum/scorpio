@@ -41,7 +41,7 @@ jobs:
               run: npm run install:all
                 
             - name: Build Project
-              run: npm run build:all
+              run: npm run build
 
             - name: Package VSIX
               run: npm run package

@@ -32,7 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   listenToEvents();
 
-  vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+  detectRepoCourseAndExercise().catch((e) => {
+    console.error(e);
+  });
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -168,8 +170,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to detect repo in workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.detectRepo", async () => {
-      detectRepoCourseAndExercise()
-        .catch((e) => {
+      detectRepoCourseAndExercise().catch((e) => {
         _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
       });
     })
@@ -195,7 +196,9 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 function listenToEvents() {
   // listen to workspace changes to display problem statement
   vscode.workspace.onDidChangeWorkspaceFolders((event) => {
-    vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+    detectRepoCourseAndExercise().catch((e) => {
+      console.error(e);
+    });
   });
 }
 
