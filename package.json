@@ -44,11 +44,6 @@
           "editPresentation": "singlelineText",
           "type": "string",
           "format": "path"
-        },
-        "scorpio.?": {
-          "order": 99,
-          "description": "Wait and see",
-          "type": "boolean"
         }
       }
     },
