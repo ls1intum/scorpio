@@ -20,13 +20,22 @@ export class StudentParticipation {
   constructor() {}
 }
 
-export function getLatestResult(participation: StudentParticipation | undefined): Result | undefined {
+export function getLatestSubmission(participation: StudentParticipation | undefined): ProgrammingSubmission | undefined {
   return participation?.submissions?.reduce((latestSubmission, currentSubmission) => {
     return latestSubmission.id! > currentSubmission.id! ? latestSubmission : currentSubmission;
-  })?.results?.reduce((latestResult, currentResult) => {
+  });
+}
+
+export function getLatestResultBySubmission(submission: ProgrammingSubmission | undefined): Result | undefined {
+  return submission?.results?.reduce((latestResult, currentResult) => {
     return latestResult.id! > currentResult.id! ? latestResult : currentResult;
   })
 }
+
+export function getLatestResult(participation: StudentParticipation | undefined): Result | undefined {
+  return getLatestResultBySubmission(getLatestSubmission(participation));
+}
+
 
 export function getProjectKeyFromRepoUrl(repoUrl: string): string {
   // extract projectKey {protocol}://{username}@{host}:{port}/git/{PROJECT_KEY}/{project_key}-{username}.git

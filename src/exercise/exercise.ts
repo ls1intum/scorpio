@@ -7,6 +7,7 @@ import { start_exercise } from "../participation/participation.api";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { fetch_course_exercise_by_repo_name, fetch_exercise_by_id } from "./exercise.api";
 import { cloneUserRepo } from "../participation/cloning.service";
+import { POLLING_INTERVAL, pollNewResults } from "../utils/polling";
 
 export async function build_exercise_options(course: Course): Promise<Exercise> {
   const exercises = course.exercises;
@@ -96,7 +97,7 @@ export async function cloneCurrentExercise() {
     if (!session) {
       throw new NotAuthenticatedError();
     }
-    
+
     participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
   displayedExercise.studentParticipations = [participation];
@@ -139,6 +140,13 @@ export async function get_course_exercise_by_repoUrl(
     session.accessToken,
     repoName
   );
+    // if studentparticipation has a submission but not a result yet, we are currently building
+    // therefore we should poll for new results
+    const submission = exercise.studentParticipations?.at(0)?.submissions?.at(0);
+    const result = submission?.results?.at(0);
+    if (!!submission && !result) {
+      setTimeout(pollNewResults, POLLING_INTERVAL);
+    }
 
   return { course: course, exercise: exercise };
 }
