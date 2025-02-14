@@ -33,14 +33,12 @@ export class ExerciseDetailView implements OnInit {
 
   ngOnInit() {
     // query exercise details for problem statement
-    if (!this.exercise().problemStatement) {
-      // this will set the displayed exercise so retrieval is not needed
-      vscode.postMessage({
-        command: CommandFromWebview.GET_EXERCISE_DETAILS,
-        text: JSON.stringify({
-          exerciseId: this.exercise().id,
-        }),
-      });
-    }
+    // this will set the displayed exercise so retrieval is not needed
+    vscode.postMessage({
+      command: CommandFromWebview.GET_EXERCISE_DETAILS,
+      text: JSON.stringify({
+        exerciseId: this.exercise().id,
+      }),
+    });
   }
 }
