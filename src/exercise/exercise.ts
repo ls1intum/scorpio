@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { state } from "../shared/state";
+import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getScoreString } from "@shared/models/exercise.model";
@@ -80,14 +80,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
 }
 
 export async function cloneCurrentExercise() {
-  const session = await vscode.authentication.getSession(AUTH_ID, [], {
-    createIfNone: false,
-  });
-  if (!session) {
-    throw new NotAuthenticatedError();
-  }
-
-  const displayedExercise = state.displayedExercise;
+  const displayedExercise = getState().displayedExercise;
   if (!displayedExercise) {
     throw new Error("No exercise selected");
   }
@@ -97,6 +90,13 @@ export async function cloneCurrentExercise() {
     if (displayedExercise.dueDate! < new Date()) {
       throw new Error("Exercise is past due date and cannot be started");
     }
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
+      createIfNone: false,
+    });
+    if (!session) {
+      throw new NotAuthenticatedError();
+    }
+    
     participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
   displayedExercise.studentParticipations = [participation];

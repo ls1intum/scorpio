@@ -53,16 +53,7 @@ const extensionConfig = {
             loader: "ts-loader",
           },
         ],
-      },
-      {
-        test: /\.html$/,
-        use: "html-loader",
-      },
-      {
-        test: /artemis\.js$/,
-        exclude: /node_modules/,
-        use: "raw-loader",
-      },
+      }
     ],
   },
   plugins: [
