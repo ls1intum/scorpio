@@ -17,6 +17,7 @@ import { faCircleCheck, faCircleQuestion, faCircleXmark } from "@fortawesome/fre
 export class TaskButton {
   task = input.required<Task>();
   feedbackList = input.required<Feedback[]>();
+  loading = input.required<boolean>();
 
   protected positiveFeedback = computed(() => this.feedbackList().filter((feedback) => feedback.positive));
   protected TaskStatus = TaskStatus;

@@ -5,7 +5,7 @@ import { build_course_options } from "./course/course";
 import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
-import { clear_repo_state, set_displayed_state, state } from "./shared/state";
+import { clear_repo_state, set_displayed_state, getState } from "./shared/state";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
@@ -139,6 +139,7 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
 
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.back", () => {
+      const state = getState();
       if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
         set_displayed_state(state.displayedCourse, undefined);
