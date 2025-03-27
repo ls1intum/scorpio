@@ -7,7 +7,7 @@ export async function fetch_programming_exercises_by_courseId(
   token: string,
   courseId: number
 ): Promise<Exercise[]> {
-  const url = `${settings.base_url}/api/courses/${courseId}/for-dashboard`;
+  const url = `${settings.base_url}/api/core/courses/${courseId}/for-dashboard`;
 
   return fetch(url, {
     method: "GET",
@@ -48,7 +48,7 @@ export async function fetch_course_exercise_by_repo_name(
   token: string,
   repoName: string
 ): Promise<{ course: Course; exercise: Exercise }> {
-  const url = `${settings.base_url}/api/programming-exercise-participations/repo-name/${repoName}`;
+  const url = `${settings.base_url}/api/programming/programming-exercise-participations/repo-name/${repoName}`;
 
   return fetch(url, {
     method: "GET",
@@ -90,7 +90,7 @@ export async function fetch_exercise_by_id(
   token: string,
   exerciseId: number
 ): Promise<{ course: Course; exercise: Exercise }> {
-  const url = `${settings.base_url}/api/exercises/${exerciseId}`;
+  const url = `${settings.base_url}/api/exercise/exercises/${exerciseId}`;
 
   return fetch(url, {
     method: "GET",
