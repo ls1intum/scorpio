@@ -6,7 +6,7 @@ export async function start_exercise(
   token: string,
   exerciseId: number
 ): Promise<StudentParticipation> {
-  const url = `${settings.base_url}/api/exercises/${exerciseId}/participations`;
+  const url = `${settings.base_url}/api/exercise/exercises/${exerciseId}/participations`;
 
   return fetch(url, {
     method: "POST",

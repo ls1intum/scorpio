@@ -2,7 +2,7 @@ import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
 
 export async function fetch_all_courses(token: string): Promise<Course[]> {
-  const url = `${settings.base_url}/api/courses/for-dashboard`;
+  const url = `${settings.base_url}/api/core/courses/for-dashboard`;
 
   return fetch(url, {
     method: "GET",
