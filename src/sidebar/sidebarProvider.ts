@@ -125,7 +125,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const state = getState();
 
           const { course: course, exercise: exercise } = await get_problem_statement_details(
-            state.displayedExercise!
+            getState().displayedExercise!
           );
           set_displayed_state(course, exercise);
           break;
@@ -229,7 +229,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private displayExercise() {
     const state = getState();
-    
     const repoKey =
       state.repoCourse && state.repoExercise
         ? getProjectKey(state.repoCourse, state.repoExercise)

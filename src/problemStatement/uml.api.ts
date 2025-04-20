@@ -5,7 +5,7 @@ export async function fetch_uml(token: string, plantUml: string): Promise<string
   const encodedPlantUml = encodeURIComponent(plantUml);
 
   // automatically
-  const url = `${settings.base_url}/api/plantuml/svg?plantuml=${encodedPlantUml}&useDarkTheme=true`;
+  const url = `${settings.base_url}/api/programming/plantuml/svg?plantuml=${encodedPlantUml}&useDarkTheme=true`;
 
   return fetch(url, {
     method: "GET",

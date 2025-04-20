@@ -4,7 +4,7 @@ export async function authenticateToken(
   username: string,
   password: string
 ): Promise<{access_token: string}> {
-  const url = new URL(`${settings.base_url}/api/public/authenticate`);
+  const url = new URL(`${settings.base_url}/api/core/public/authenticate`);
   url.searchParams.append("tool", "SCORPIO");
 
   return fetch(url, {
@@ -45,7 +45,7 @@ export function retrieveVcsAccessToken(token: string, participationId: number,):
 }
 
 function getVcsAccessToken(token: string, participationId: number, method: string): Promise<string> {
-  const url = new URL(`${settings.base_url}/api/account/participation-vcs-access-token`);
+  const url = new URL(`${settings.base_url}/api/core/account/participation-vcs-access-token`);
   url.searchParams.append("participationId", participationId.toString());
 
   return fetch(url, {
