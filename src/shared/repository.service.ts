@@ -33,9 +33,10 @@ export async function submitCurrentWorkspace() {
   }
   await gitRepo.add(".");
   await gitRepo.commit("Submit workspace from artemis plugin");
-  await gitRepo.push();
+  await gitRepo.push().then((res) => {
+    vscode.window.showInformationMessage("Workspace submitted successfully");
+  });
 
-  vscode.window.showInformationMessage("Workspace submitted successfully");
 }
 
 export async function detectRepoCourseAndExercise() {

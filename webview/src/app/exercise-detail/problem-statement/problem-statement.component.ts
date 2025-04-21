@@ -25,7 +25,7 @@ import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/pla
 import { merge, Subscription } from "rxjs";
 import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
 import { ProgrammingExerciseTaskExtensionWrapper, taskRegex } from "./markdown-util/task.plugin";
-import { getLatestResult } from "@shared/models/participation.model";
+import { getLatestResult, getLatestResultBySubmission, getLatestSubmission } from "@shared/models/participation.model";
 
 const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}-task-${taskId}`;
 
@@ -41,8 +41,10 @@ export class ProblemStatementComponent implements OnDestroy {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
-  latestResult = computed(() => getLatestResult(this.exercise().studentParticipations?.at(0)));
-
+  latestSubmission = computed(() => getLatestSubmission(this.exercise().studentParticipations?.at(0)));
+  latestResult = computed(() => getLatestResultBySubmission(this.latestSubmission()));
+  loading = computed(() => !!this.latestSubmission() && !this.latestResult());
+  
   problemStatement: Signal<string> = computed(() => this.renderMarkdown(this.exercise().problemStatement));
 
   public tasks: TaskArray = [];
@@ -157,6 +159,7 @@ export class ProblemStatementComponent implements OnDestroy {
       !feedback.testCaseId || task.testIds.includes(feedback.testCaseId)
     ) ?? [];
     componentRef.setInput("feedbackList", matchedFeedback ?? []);
+    componentRef.setInput("loading", this.loading());
 
     this.renderer.appendChild(taskHtmlContainer, componentRef.location.nativeElement);
   }

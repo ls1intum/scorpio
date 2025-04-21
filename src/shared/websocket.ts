@@ -51,7 +51,7 @@ export class GenericWebSocket {
     }
 
     const url = new URL(settings.base_url!);
-    url.pathname = "/websocket";
+    url.pathname = "/websocket/websocket";
     // url.searchParams.append("token", session.accessToken);
 
     this.stompClient = new StompJs.Client({

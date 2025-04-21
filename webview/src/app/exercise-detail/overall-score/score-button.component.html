@@ -1,4 +1,9 @@
-@if (result() ){
+@if(loading()){
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <em>Loading...</em>
+}@else if (result() ){
   <dialog #feedbackDialog class="feedbackDialog">
     <feedback-list [feedbackList]="result()!.feedbacks" (onClose)="feedbackDialog.close()"></feedback-list>
   </dialog>

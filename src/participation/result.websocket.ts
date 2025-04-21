@@ -1,5 +1,5 @@
 import { Result } from "@shared/models/result.model";
-import { getState } from "../shared/state";
+import { getState, set_displayed_state } from "../shared/state";
 import { GenericWebSocket } from "../shared/websocket";
 
 const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newResults`;
@@ -25,21 +25,28 @@ export class ResultWebsocket {
   private handleMessage(result: Result) {
     const participationId = result.submission?.participation?.id;
 
-    let displayedStudentParticipation = getState().displayedExercise?.studentParticipations?.find(
+    const state = getState();
+    let displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
       (participation) => participation.id === participationId
-    );   
+    );
 
     if (!displayedStudentParticipation) {
+      console.debug("No displayed student participation found");
       return;
     }
 
+    // flip submission result relationship
     let submission = result.submission;
     submission!.participation = undefined;
-    result.submission = undefined;
-    submission!.results!.push(result);
 
+    result.submission = undefined;
+    submission!.results = [result];
+    
     displayedStudentParticipation.submissions
       ? displayedStudentParticipation.submissions?.push(submission!)
       : (displayedStudentParticipation.submissions = [submission!]);
+
+    // update displayed exercise to trigger re-render
+    set_displayed_state(state.displayedCourse, state.displayedExercise);
   }
 }
