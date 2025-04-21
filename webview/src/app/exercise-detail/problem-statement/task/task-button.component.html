@@ -2,7 +2,7 @@
   <feedback-list [feedbackList]="feedbackList()" (onClose)="feedbackDialog.close()"></feedback-list>
 </dialog>
 @if(loading()){
-<div class="spinner-border" role="status">
+<div class="spinner-grow spinner-grow-sm" role="status">
   <span class="visually-hidden">Loading...</span>
 </div>
 } @else{ @switch (status()){ @case (TaskStatus.NO_RESULT){
@@ -15,9 +15,9 @@
 <span>&nbsp;</span>
 <b [innerHTML]="task().taskName"></b>
 <span>&nbsp;</span>
-@if(loading()){
-<em>Loading...</em>
-} @else{ @switch (status()){ @case (TaskStatus.NO_RESULT){<em [ngClass]="'no-result'">No Test Results</em>
+@if(!loading()){ @switch (status()){ @case (TaskStatus.NO_RESULT){<em [ngClass]="'no-result'"
+  >No Test Results</em
+>
 } @case (TaskStatus.SUCCESS){
 <u class="cursor-pointer" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
   {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
