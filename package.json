@@ -220,8 +220,10 @@
   "devDependencies": {
     "@types/assert": "^1.5.10",
     "@types/mocha": "^10.0.9",
+    "@types/sockjs-client": "^1.5.4",
     "@types/vscode": "^1.94.0",
     "@types/webpack-env": "^1.18.5",
+    "@types/ws": "^8.5.13",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "@vscode/test-web": "^0.0.62",
@@ -238,14 +240,17 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "@vscode/vsce": "^3.1.1",
     "fetch-cookie": "^3.0.1",
     "markdown-it": "^14.1.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "simple-git": "^3.27.0",
+    "sockjs-client": "^1.6.1",
     "ts-node": "^10.9.2",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
   },
   "extensionDependencies": [
     "vscode.git"

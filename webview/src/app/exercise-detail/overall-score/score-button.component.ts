@@ -12,6 +12,7 @@ import { FeedbackListComponent } from "../test-result/feedback-list.component";
   imports: [CommonModule, FeedbackListComponent],
 })
 export class ScoreButton {
+  loading = input.required<boolean>();
   result = input<Result>();
 
   maxPoints = input.required<number>();

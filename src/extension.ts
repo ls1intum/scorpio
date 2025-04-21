@@ -10,7 +10,11 @@ import { sync_problem_statement_with_workspace } from "./problemStatement/proble
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
+import { Result } from "@shared/models/result.model";
+import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
+import { GenericWebSocket } from "./shared/websocket";
+import { SubmissionWebsocket } from "./participation/submission.websocket";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -35,6 +39,12 @@ export function activate(context: vscode.ExtensionContext) {
   detectRepoCourseAndExercise().catch((e) => {
     console.error(e);
   });
+
+  // initialize the websocket
+  GenericWebSocket.instance;
+
+  const resultWebsocket = new ResultWebsocket();
+  const submissionWebsocket = new SubmissionWebsocket();
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {
@@ -42,11 +52,10 @@ function initAuthentication(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(authenticationProvider);
 
-  // check if user is already authenticated
-  // is needed for the login button to be displayed on the profile button
   (async () => {
-    let session: vscode.AuthenticationSession | undefined;
-    session = await vscode.authentication.getSession(AUTH_ID, [], {
+    // check if user is already authenticated
+    // is needed for the login button to be displayed on the profile button
+    const session = await vscode.authentication.getSession(AUTH_ID, [], {
       createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
     });
 
