@@ -33,10 +33,9 @@ export async function submitCurrentWorkspace() {
   }
   await gitRepo.add(".");
   await gitRepo.commit("Submit workspace from artemis plugin");
-  await gitRepo.push().then((res) => {
-    vscode.window.showInformationMessage("Workspace submitted successfully");
-  });
+  await gitRepo.push()
 
+  vscode.window.showInformationMessage("Workspace submitted successfully");
 }
 
 export async function detectRepoCourseAndExercise() {
@@ -57,7 +56,7 @@ export async function detectRepoCourseAndExercise() {
   }
 
   const repoUrl = foundRepoAndRemote.remote.refs.fetch!;
-  if(getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(getState().repoCourse, getState().repoExercise)) {
+  if (getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(getState().repoCourse, getState().repoExercise)) {
     console.log("Repo already detected");
     gitRepo = foundRepoAndRemote.repo;
     return;
@@ -84,28 +83,47 @@ async function getArtemisRepo(
     return undefined;
   }
 
+  // Check if the workspace is a git repository
+  for (const folder of workspaceFolders) {
+    var foundRepo = await checkIfArtemisRepo(folder.uri.fsPath, settings.base_url);
+    if (foundRepo) {
+      return foundRepo;
+    }
+  }
+
   // Get all level 1 subfolders of the workspace
   const level1SubfoldersPath = await getLevel1SubfoldersOfWorkspace(workspaceFolders);
 
+  // Check each level 1 subfolder for a git repository
   for (const folderPath of level1SubfoldersPath) {
-    const git: SimpleGit = simpleGit(folderPath.fsPath);
-    try {
-      const isRepo = await git.checkIsRepo();
-      if (isRepo) {
-        const remotes = await git.getRemotes(true);
-        for (const remote of remotes) {
-          const url = new URL(remote.refs.fetch!);
-          if (url.hostname == new URL(settings.base_url).hostname) {
-            return { repo: git, remote: remote };
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error(`Error checking if folder is a repository: ${error.message}`);
+    var foundRepo = await checkIfArtemisRepo(folderPath.fsPath, settings.base_url);
+    if (foundRepo) {
+      return foundRepo;
     }
   }
 
   return undefined;
 }
 
+async function checkIfArtemisRepo(
+  workDirectory: string,
+  artemisUrl: string
+): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
+  const git: SimpleGit = simpleGit(workDirectory);
+  try {
+    const isRepo = await git.checkIsRepo();
+    if (isRepo) {
+      const remotes = await git.getRemotes(true);
+      for (const remote of remotes) {
+        const url = new URL(remote.refs.fetch!);
+        if (url.hostname == new URL(artemisUrl).hostname) {
+          return { repo: git, remote: remote };
+        }
+      }
+    }
+  } catch (error: any) {
+    console.error(`Error checking if folder is a repository: ${error.message}`);
+  }
 
+  return undefined;
+}
