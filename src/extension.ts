@@ -14,6 +14,7 @@ import { Result } from "@shared/models/result.model";
 import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
 import { GenericWebSocket } from "./shared/websocket";
+import { SubmissionWebsocket } from "./participation/submission.websocket";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -43,6 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
   GenericWebSocket.instance;
 
   const resultWebsocket = new ResultWebsocket();
+  const submissionWebsocket = new SubmissionWebsocket();
 }
 
 function initAuthentication(context: vscode.ExtensionContext) {

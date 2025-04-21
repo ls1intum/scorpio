@@ -1,11 +1,10 @@
-import { Result } from "@shared/models/result.model";
 import { getState, set_displayed_state } from "../shared/state";
 import { GenericWebSocket } from "../shared/websocket";
+import { ProgrammingSubmission } from "@shared/models/submission.model";
 
-const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newResults`;
+const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newSubmissions`;
 
-/// Handles the WebSocket connection for the results of a personal participation.
-export class ResultWebsocket {
+export class SubmissionWebsocket {
   constructor() {
     this.initWebsocket();
   }
@@ -16,16 +15,17 @@ export class ResultWebsocket {
       console.debug("Waiting for websocket connection...");
     } while (!GenericWebSocket.instance.connected);
 
-    const subscription = GenericWebSocket.instance.subscribeToTopic<Result>(PERSONAL_PARTICIPATION_TOPIC);
-    subscription.event((result) => {
-      this.handleMessage(result);
+    const subscription = GenericWebSocket.instance.subscribeToTopic<ProgrammingSubmission>(PERSONAL_PARTICIPATION_TOPIC);
+    subscription.event((submission) => {
+      this.handleMessage(submission);
     });
   }
 
-  private handleMessage(result: Result) {
-    const participationId = result.submission?.participation?.id;
+  private handleMessage(submission: ProgrammingSubmission) {
+    const participationId = submission.participation?.id;
 
     const state = getState();
+    // check if displayed participation is the same as the one in the submission
     let displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
       (participation) => participation.id === participationId
     );
@@ -34,20 +34,14 @@ export class ResultWebsocket {
       console.debug("No displayed student participation found");
       return;
     }
-
-    // flip submission result relationship
-    let submission = result.submission;
-    submission!.participation = undefined;
-
-    result.submission = undefined;
-    submission!.results = [result];
+    submission.participation = undefined;
 
     // replace the submission with the same id otherwise push it
-    if (!displayedStudentParticipation.submissions) {
+    if(!displayedStudentParticipation.submissions) {
       displayedStudentParticipation.submissions = [];
     }
     displayedStudentParticipation.submissions = displayedStudentParticipation.submissions?.filter(
-      (submission) => submission.id !== result.submission?.id
+      (s) => s.id !== submission.id
     );
     displayedStudentParticipation.submissions?.push(submission!);
 
