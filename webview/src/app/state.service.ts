@@ -30,6 +30,9 @@ export class StateService {
     repoKey: undefined,
   });
   public viewState$ = this.viewStateSubject.asObservable();
+  // Holds the pet visibility state
+  public petVisibleSubject = new BehaviorSubject<boolean>(false);
+  public petVisibleObservable = this.petVisibleSubject.asObservable();
 
   constructor() {
     window.addEventListener("message", (event) => {
@@ -74,6 +77,7 @@ export class StateService {
           });
           break;
         case CommandFromExtension.EASTER_EGG:
+          this.petVisibleSubject.next(message.text === "true");
           break;
       }
     });

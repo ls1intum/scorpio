@@ -1,4 +1,5 @@
 <main>
+  <app-pet [visible]="showPet()"></app-pet>
   @switch (viewState()){ @case (ViewState.LOGIN){
   <login></login>
   }@case (ViewState.COURSE_SELECTION){

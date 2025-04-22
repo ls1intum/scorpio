@@ -8,6 +8,7 @@ import { ExerciseSelectionView } from "./exercise/exercise-selection.view";
 import { ExerciseDetailView } from "./exercise-detail/exercise-detail.view";
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
+import { PetComponent } from "./easteregg/pet.component";
 
 provideVSCodeDesignSystem().register(vsCodeButton());
 
@@ -15,7 +16,7 @@ provideVSCodeDesignSystem().register(vsCodeButton());
   selector: "app-root",
   templateUrl: "./app.component.html",
   standalone: true,
-  imports: [BrowserModule, LoginView, CourseSelectionView, ExerciseSelectionView, ExerciseDetailView],
+  imports: [BrowserModule, LoginView, CourseSelectionView, ExerciseSelectionView, ExerciseDetailView, PetComponent],
 })
 export class AppComponent implements OnInit {
   protected ViewState = ViewState;
@@ -25,6 +26,7 @@ export class AppComponent implements OnInit {
   course: WritableSignal<Course | undefined> = signal(undefined);
   exercise: WritableSignal<Exercise | undefined> = signal(undefined);
   repoKey: WritableSignal<string | undefined> = signal(undefined);
+  showPet: WritableSignal<boolean> = signal(false);
 
   constructor(private stateService: StateService) {}
 
@@ -37,5 +39,9 @@ export class AppComponent implements OnInit {
         this.repoKey.set(repoKey);
       }
     );
+
+    this.stateService.petVisibleObservable.subscribe((visible) => {
+      this.showPet.set(visible);
+    });
   }
 }

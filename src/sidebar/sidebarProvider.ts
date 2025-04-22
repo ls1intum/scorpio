@@ -6,9 +6,7 @@ import { Course } from "@shared/models/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
 import { fetch_all_courses } from "../course/course.api";
-import {
-  fetch_programming_exercises_by_courseId,
-} from "../exercise/exercise.api";
+import { fetch_programming_exercises_by_courseId } from "../exercise/exercise.api";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import { get_problem_statement_details } from "../exercise/exercise";
 import { fetch_uml } from "../problemStatement/uml.api";
@@ -95,9 +93,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const courses: Course[] = await fetch_all_courses(
-            session.accessToken
-          );
+          const courses: Course[] = await fetch_all_courses(session.accessToken);
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_COURSE_OPTIONS,
             text: JSON.stringify(courses),
@@ -161,7 +157,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           const { course, exercise } = JSON.parse(data.text);
-          
+
           set_displayed_state(course, exercise);
           break;
         }
@@ -175,10 +171,32 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
 
     // The CSS file from the Angular build output
-    const stylesUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "styles.css"]);
+    const stylesUri = getUri(this._view.webview, this._extensionUri, [
+      "webview",
+      "build",
+      "browser",
+      "styles.css",
+    ]);
     // The JS files from the Angular build output
-    const polyfillsUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "polyfills.js"]);
-    const scriptUri = getUri(this._view.webview, this._extensionUri, ["webview", "build", "browser", "main.js"]);
+    const polyfillsUri = getUri(this._view.webview, this._extensionUri, [
+      "webview",
+      "build",
+      "browser",
+      "polyfills.js",
+    ]);
+    const scriptUri = getUri(this._view.webview, this._extensionUri, [
+      "webview",
+      "build",
+      "browser",
+      "main.js",
+    ]);
+    const petImageUri = getUri(this._view.webview, this._extensionUri, [
+      "webview",
+      "build",
+      "browser",
+      "assets",
+      "penguin.png"
+    ]);
 
     const nonce = getNonce();
 
@@ -188,7 +206,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${this._view.webview.cspSource};">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${this._view.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${this._view.webview.cspSource}; img-src ${this._view.webview.cspSource}">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>Hello World</title>
         </head>
@@ -196,7 +214,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <app-root></app-root>
           <script type="module" nonce="${nonce}" src="${polyfillsUri}"></script>
           <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
-        </body>
+          <script nonce="${nonce}"> window.petImageUrl = "${petImageUri}";</script>
+      </body>
       </html>
     `;
   }
