@@ -1,0 +1,8 @@
+.pet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 2rem;
+  height: auto;
+  z-index: 9999;
+}

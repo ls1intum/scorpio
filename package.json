@@ -44,6 +44,11 @@
           "editPresentation": "singlelineText",
           "type": "string",
           "format": "path"
+        },
+        "scorpio.?": {
+          "order": 99,
+          "description": "Wait and see",
+          "type": "boolean"
         }
       }
     },
@@ -199,16 +204,13 @@
     "install:all": "npm run install:webview && npm run install:extension",
     "build": "npm run build:webview && npm run build:extension",
     "watch": "npm run watch:webview && npm run watch:extension",
-
     "install:extension": "npm install --no-scripts",
     "build:extension": "webpack --mode production",
     "compile:extension": "webpack",
     "watch:extension": "webpack --watch",
-
     "install:webview": "cd webview && npm install",
     "build:webview": "cd webview && npm run build",
     "watch:webview": "cd webview && npm run watch",
-
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
     "pretest": "npm run compile:extension",
     "lint": "eslint src --ext ts",
