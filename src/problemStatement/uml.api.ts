@@ -1,11 +1,11 @@
 import { settings } from "../shared/settings";
 
-export async function fetch_uml(token: string, plantUml: string): Promise<string> {
+export async function fetch_uml(token: string, plantUml: string, useDarkTheme: boolean = false): Promise<string> {
   // Encode the plantUml string for use as a query parameter
   const encodedPlantUml = encodeURIComponent(plantUml);
 
   // automatically
-  const url = `${settings.base_url}/api/programming/plantuml/svg?plantuml=${encodedPlantUml}&useDarkTheme=true`;
+  const url = `${settings.base_url}/api/programming/plantuml/svg?plantuml=${encodedPlantUml}&useDarkTheme=${useDarkTheme}`;
 
   return fetch(url, {
     method: "GET",

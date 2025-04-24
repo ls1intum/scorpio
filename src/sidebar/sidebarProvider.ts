@@ -11,7 +11,8 @@ import { CommandFromExtension, CommandFromWebview } from "@shared/webview-comman
 import { get_problem_statement_details } from "../exercise/exercise";
 import { fetch_uml } from "../problemStatement/uml.api";
 import { getProjectKey } from "@shared/models/exercise.model";
-import { text } from "stream/consumers";
+import { umlFileProvider } from "../problemStatement/uml.db";
+import { getUmlBackgroundColor, isEditorDarkTheme } from "../problemStatement/uml.service";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -137,11 +138,29 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const plantUml = await fetch_uml(session.accessToken, data.text);
+          var plantUml = await fetch_uml(session.accessToken, data.text, isEditorDarkTheme());
+
+          // send the uml to the webview for rendering
           this._view?.webview.postMessage({
-            command: CommandFromExtension.SEND_UML + "/" + pathParts[1],
+            command: CommandFromExtension.SEND_UML + "/" + pathParts[1] + "/" + pathParts[2],
             text: plantUml,
           });
+
+          // save the uml to the file system for later pop out functionality
+          const previewUri = umlFileProvider.idsToUri(pathParts[1], pathParts[2]);
+          // add a background color to the svg
+          plantUml = plantUml.replace(
+            /<svg([^>]*)>/,
+            `<svg$1>
+            <style>svg { background-color: ${getUmlBackgroundColor()}; }</style>
+            `
+          );
+          umlFileProvider.writeFile(previewUri, Buffer.from(plantUml, "utf-8"));
+          break;
+        }
+        case CommandFromWebview.OPEN_UML: {
+          const previewUri = umlFileProvider.idsToUri(pathParts[1], pathParts[2]);
+          await vscode.commands.executeCommand("vscode.openWith", previewUri, "imagePreview.previewEditor");
           break;
         }
         case CommandFromWebview.CLONE_REPOSITORY: {
@@ -195,7 +214,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       "build",
       "browser",
       "assets",
-      "penguin.png"
+      "penguin.png",
     ]);
 
     const nonce = getNonce();

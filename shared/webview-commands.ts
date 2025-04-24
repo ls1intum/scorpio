@@ -6,6 +6,7 @@ export enum CommandFromWebview {
   GET_EXERCISE_OPTIONS = "getExerciseOptions",
   GET_EXERCISE_DETAILS = "getExerciseDetails",
   GET_UML = "getUml",
+  OPEN_UML = "openUml",
   CLONE_REPOSITORY = "cloneRepository",
   SUBMIT = "submit",
   SET_COURSE_AND_EXERCISE = "setCourseAndExercise",
