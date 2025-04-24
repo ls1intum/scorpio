@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
-import { tap } from "rxjs/operators";
 import DOMPurify from "dompurify";
 import { ArtemisTextReplacementPlugin } from "./artemis-text-replacement.plugin";
 import { escapeStringForUseInRegex } from "../regex.util";
@@ -74,16 +73,34 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
     window.addEventListener("message", (event) => {
       const message = event.data; // The JSON data
       const pathParts = message.command.split("/");
-      if (pathParts[0] === CommandFromExtension.SEND_UML && pathParts[1] === uml.id.toString()) {
-        const plantUmlHtmlContainer = document.getElementById(`plantUml-${uml.id}`);
+      if (
+        pathParts[0] === CommandFromExtension.SEND_UML &&
+        pathParts[1] === this.latestResult?.id?.toString() &&
+        pathParts[2] === uml.id.toString()
+      ) {
+        const plantUmlHtmlContainer = document.getElementById(`plantUml-${this.latestResult?.id}-${uml.id}`);
         if (plantUmlHtmlContainer) {
           // We need to sanitize the received svg as it could contain malicious code in a script tag.
           plantUmlHtmlContainer.innerHTML = DOMPurify.sanitize(message.text);
+
+          // make svg clickable
+          const svgElement = plantUmlHtmlContainer.querySelector("svg");
+          if (svgElement) {
+            svgElement.style.cursor = "pointer";
+            svgElement.addEventListener("click", () => {
+              vscode.postMessage({
+                command: `${CommandFromWebview.OPEN_UML}/${this.latestResult?.id}/${uml.id}`,
+              });
+            });
+          }
         }
       }
     });
 
-    vscode.postMessage({ command: `${CommandFromWebview.GET_UML}/${uml.id}`, text: uml.plantUml });
+    vscode.postMessage({
+      command: `${CommandFromWebview.GET_UML}/${this.latestResult?.id}/${uml.id}`,
+      text: uml.plantUml,
+    });
   }
 
   /**
@@ -100,7 +117,7 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
     // E.g. [task][Implement BubbleSort](testBubbleSort)
     const plantUmlRegex = /@startuml([^@]*)@enduml/g;
     // E.g. Implement BubbleSort, testBubbleSort
-    const plantUmlContainer = `<div class="mb-4" id="plantUml-${idPlaceholder}"></div>`;
+    const plantUmlContainer = `<div class="mb-4" id="plantUml-${this.latestResult?.id}-${idPlaceholder}"></div>`;
 
     // Replace test status markers.
     const plantUmls = text.match(plantUmlRegex) ?? [];

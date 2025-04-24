@@ -71,7 +71,7 @@ export class ProgrammingExerciseInstructionService {
   private separateTests(tests: number[], latestResult: Result): SplitTests {
     return tests.reduce(
       (acc, testId) => {
-        const feedback = latestResult?.feedbacks?.find((feedback) => feedback.testCase?.id === testId);
+        const feedback = latestResult?.feedbacks?.find((feedback) => feedback.testCase?.id === testId || feedback.testCaseId === testId);
 
         return {
           successfulTests:

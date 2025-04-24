@@ -10,11 +10,11 @@ import { sync_problem_statement_with_workspace } from "./problemStatement/proble
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
-import { Result } from "@shared/models/result.model";
 import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
 import { GenericWebSocket } from "./shared/websocket";
 import { SubmissionWebsocket } from "./participation/submission.websocket";
+import { umlFileProvider } from "./problemStatement/uml.db";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -31,6 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
   initAuthentication(context);
 
   const sidebar = initSidebar(context);
+
+  // init UmlPreview
+  context.subscriptions.push(
+    vscode.workspace.registerFileSystemProvider('uml-preview', umlFileProvider, { isReadonly: true })
+  );
+
 
   registerCommands(context, sidebar);
 
