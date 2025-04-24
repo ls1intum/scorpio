@@ -95,6 +95,7 @@ dialog {
   background-color: var(--vscode-editor-background);
   border: var(--vscode-editorWidget-border);
   color: var(--vscode-button-foreground);
+  overscroll-behavior: contain;
 }
 
 dialog::backdrop {
