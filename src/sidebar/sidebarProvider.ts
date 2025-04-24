@@ -12,6 +12,7 @@ import { get_problem_statement_details } from "../exercise/exercise";
 import { fetch_uml } from "../problemStatement/uml.api";
 import { getProjectKey } from "@shared/models/exercise.model";
 import { umlFileProvider } from "../problemStatement/uml.db";
+import { getUmlBackgroundColor, isEditorDarkTheme } from "../problemStatement/uml.service";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -137,7 +138,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const plantUml = await fetch_uml(session.accessToken, data.text);
+          var plantUml = await fetch_uml(session.accessToken, data.text, isEditorDarkTheme());
 
           // send the uml to the webview for rendering
           this._view?.webview.postMessage({
@@ -148,13 +149,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           // save the uml to the file system for later pop out functionality
           const previewUri = umlFileProvider.idsToUri(pathParts[1], pathParts[2]);
           // add a background color to the svg
-          const nonTransparentUml = plantUml.replace(
+          plantUml = plantUml.replace(
             /<svg([^>]*)>/,
             `<svg$1>
-            <style>svg { background-color: var(--vscode-editor-foreground); }</style>
+            <style>svg { background-color: ${getUmlBackgroundColor()}; }</style>
             `
           );
-          umlFileProvider.writeFile(previewUri, Buffer.from(nonTransparentUml, "utf-8"));
+          umlFileProvider.writeFile(previewUri, Buffer.from(plantUml, "utf-8"));
           break;
         }
         case CommandFromWebview.OPEN_UML: {
