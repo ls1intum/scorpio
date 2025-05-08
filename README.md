@@ -4,10 +4,10 @@ Scorpio is an IDE-integrated Visual Studio Code plugin for the online learning p
 
 ## Features
 
+_For features exclusively to the online IDE Theia Cloud, please refer to [Theia Cloud Scorpio README](README_THEIA.md)._
+
 ### Seamless Authentication
-The plugin allows the student to authenticate to Artemis. The authentication includes two independent authentication options. 
-1. the login process within the local IDE
-2. the automatic authentication of the student in the online IDE Theia Cloud without a redundant login process
+The plugin allows the student to authenticate to the Artemis Server with the known credentials from the web application.
 
 ![](.github/media/scorpio_login.gif)
 
@@ -22,6 +22,11 @@ The student can start the exercise from with the IDE. The exercise repository is
 ### Problem Statement
 The plugin displays the problem statement within the IDE. The problem statement related to the exercise repository, currently open in the student's workspace, is displayed. The problem statement can be composed of text and UML diagrams.
 
+
+### UML Diagram Pop Out
+The plugin allows the student to inspect the UML diagrams in detail. Each UML diagram can be opened in a separate window by simply clicking on it. 
+
+![](.github/media/scorpio_uml.gif)
 
 
 ### Exercise Submission
@@ -42,3 +47,6 @@ The plugin displays submission feedback within the IDE. The feedback can either 
 
 ## Development
 [Developer Guide](README_DEVELOPER.md)
+
+## Further Reading
+* Bachelor Thesis: [Scorpio: A Visual Studio Code Extension for Interactive Learning Platforms](<./.github/media/thesis/20241101 Jandow Dennis.pdf>)
