@@ -1,7 +1,11 @@
 # Development
 
 ## Setup
-Navigate into any of the repositories files and press `F5` (`fn + F5` on Mac) to start the extension. This will open a new instance of VSCode with the extension loaded. \
+Navigate into any of the repositories files and press
+
+<kbd>F5</kbd> (<kbd>fn + F5</kbd> on Mac) 
+
+to start the extension. This will open a new instance of VSCode with the extension loaded. \
 Behind the scenes, this shortcut runs the default task in [./vscode/tasks.json](.vscode/tasks.json) 
 ```bash
 npm build
