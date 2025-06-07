@@ -5,7 +5,7 @@ Navigate into any of the repositories files and press
 
 <kbd>F5</kbd> (<kbd>fn + F5</kbd> on Mac) 
 
-to start the extension. This will open a new instance of VSCode with the extension loaded. \
+to start the extension [<sub> ref <sub>](https://code.visualstudio.com/api/get-started/your-first-extension#debugging-the-extension). This will open a new instance of VSCode with the extension loaded. \
 Behind the scenes, this shortcut runs the default task in [./vscode/tasks.json](.vscode/tasks.json) 
 ```bash
 npm build
