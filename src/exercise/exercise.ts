@@ -3,10 +3,11 @@ import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getScoreString } from "@shared/models/exercise.model";
-import { start_exercise } from "../participation/participation.api";
+import { fetch_participation_by_repo_name, fetch_result_details, start_exercise } from "../participation/participation.api";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
-import { fetch_course_exercise_by_repo_name, fetch_exercise_by_id } from "./exercise.api";
+import { fetch_exercise_by_id, fetch_exercise_details_by_id } from "./exercise.api";
 import { cloneUserRepo } from "../participation/cloning.service";
+import { getLatestResult } from "@shared/models/participation.model";
 
 export async function build_exercise_options(course: Course): Promise<Exercise> {
   const exercises = course.exercises;
@@ -96,7 +97,7 @@ export async function cloneCurrentExercise() {
     if (!session) {
       throw new NotAuthenticatedError();
     }
-    
+
     participation = await start_exercise(session.accessToken, displayedExercise.id!);
   }
   displayedExercise.studentParticipations = [participation];
@@ -122,6 +123,11 @@ export async function get_problem_statement_details(exercise: Exercise) {
   return { course: course, exercise: exercise };
 }
 
+/**
+ *
+ * @param repoUrl the repository url of the exercise
+ * @returns the course plus the exercise with the participation of the repoURL and all submissions, results and feedbacks
+ */
 export async function get_course_exercise_by_repoUrl(
   repoUrl: string
 ): Promise<{ course: Course; exercise: Exercise }> {
@@ -135,11 +141,29 @@ export async function get_course_exercise_by_repoUrl(
 
   const repoName = repoUrl.split("/").pop()!.replace(".git", "");
 
-  const { course: course, exercise: exercise } = await fetch_course_exercise_by_repo_name(
-    session.accessToken,
-    repoName
-  );
+  let participation = await fetch_participation_by_repo_name(session.accessToken, repoName);
+  const participationId = participation.id!;
+  const exerciseId = participation.exercise?.id!;
 
+  // fetch the exercise details to get the submissions and results
+  const exercise = await fetch_exercise_details_by_id(session.accessToken, exerciseId);
+  const course = exercise.course!;
+
+  // fetch the result details to get the feedbacks and test cases
+  participation = exercise.studentParticipations?.find((p) => p.id === participationId)!;
+  const latestResult = getLatestResult(participation);
+  if (!participation || !latestResult) {
+    return { course: course, exercise: exercise };
+  }  
+
+  const feedbacks = await fetch_result_details(session.accessToken, participationId, latestResult.id!);
+
+  // assign feedbacks to the result
+  latestResult.feedbacks = feedbacks;
+
+  // assign test cases to the exercise as they are exercise specific
+  exercise.testCases = feedbacks.map((feedback) => feedback.testCase).filter((testCase) => testCase !== undefined);
+  
   return { course: course, exercise: exercise };
 }
 
