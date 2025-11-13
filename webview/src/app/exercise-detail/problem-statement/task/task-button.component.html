@@ -1,5 +1,5 @@
 <dialog #feedbackDialog class="feedbackDialog">
-  <feedback-list [feedbackList]="feedbackList()" (onClose)="feedbackDialog.close()"></feedback-list>
+  <feedback-list [feedbackList]="feedbackList() ?? []" (onClose)="feedbackDialog.close()"></feedback-list>
 </dialog>
 @if(loading()){
 <div class="spinner-grow spinner-grow-sm" role="status">
