@@ -5,7 +5,7 @@
   <em> Loading...</em>
 }@else if (result() ){
   <dialog #feedbackDialog class="feedbackDialog">
-    <feedback-list [feedbackList]="result()!.feedbacks" (onClose)="feedbackDialog.close()"></feedback-list>
+    <feedback-list [feedbackList]="result()?.feedbacks ?? []" (onClose)="feedbackDialog.close()"></feedback-list>
   </dialog>
   <u
   class="cursor-pointer"
