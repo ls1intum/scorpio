@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initSettings();
 
-  initAuthentication(context);
+  await initAuthentication(context);
 
   const sidebar = initSidebar(context);
 
@@ -56,20 +56,18 @@ export async function activate(context: vscode.ExtensionContext) {
   const submissionWebsocket = new SubmissionWebsocket();
 }
 
-function initAuthentication(context: vscode.ExtensionContext) {
+async function initAuthentication(context: vscode.ExtensionContext) {
   authenticationProvider = new ArtemisAuthenticationProvider(context.secrets);
 
   context.subscriptions.push(authenticationProvider);
 
-  (async () => {
-    // check if user is already authenticated
-    // is needed for the login button to be displayed on the profile button
-    const session = await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
-    });
+  // check if user is already authenticated
+  // is needed for the login button to be displayed on the profile button
+  const session = await vscode.authentication.getSession(AUTH_ID, [], {
+    createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
+  });
 
-    vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
-  })();
+  vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
 
   authenticationProvider.onAuthSessionsChange.event(({ added, removed, changed }) => {
     if (added && added.length > 0) {
