@@ -8,7 +8,7 @@ import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authent
 import { clear_repo_state, set_displayed_state, getState } from "./shared/state";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
-import { initTheia, theiaEnv } from "./theia/theia";
+import { initTheia, loadTheiaEnv, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
 import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
@@ -20,9 +20,12 @@ export var authenticationProvider: ArtemisAuthenticationProvider;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "scorpio" is now active!');
+
+  // Load credentials first (may poll credential bridge if configured)
+  await loadTheiaEnv();
 
   initTheia();
 
