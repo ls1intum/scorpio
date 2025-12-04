@@ -35,6 +35,24 @@ function parseTheiaEnv(env: Record<string, string | undefined>): TheiaEnv {
   };
 }
 
+
+async function getEnvVariable(key: string): Promise<string | undefined> {
+  try {
+    return await new Promise((resolve, reject) => {
+      exec(`echo $${key}`, (error, stdout) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(stdout.trim());
+        }
+      });
+    });
+  } catch (error) {
+    console.error(`Error fetching env variable ${key}: ${error}`);
+    return undefined;
+  }
+}
+
 /**
  * Strategy that reads credentials from process environment variables.
  * This is the default/legacy behavior.
@@ -44,28 +62,11 @@ export class ProcessEnvStrategy implements TheiaEnvStrategy {
     const env: Record<string, string | undefined> = Object.fromEntries(
       await Promise.all(
         ENV_KEYS.map((key) =>
-          this.getEnvVariable(key).then((value) => [key, value] as const),
+          getEnvVariable(key).then((value) => [key, value] as const),
         ),
       ),
     );
     return parseTheiaEnv(env);
-  }
-
-  private async getEnvVariable(key: string): Promise<string | undefined> {
-    try {
-      return await new Promise((resolve, reject) => {
-        exec(`echo $${key}`, (error, stdout) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(stdout.trim());
-          }
-        });
-      });
-    } catch (error) {
-      console.error(`Error fetching env variable ${key}: ${error}`);
-      return undefined;
-    }
   }
 }
 
@@ -167,13 +168,11 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
  * Factory function to create the appropriate theia environment strategy
  * based on the SCORPIO_THEIA_ENV_STRATEGY environment variable.
  */
-export function createTheiaEnvStrategy(): TheiaEnvStrategy {
-  const strategy = process.env.SCORPIO_THEIA_ENV_STRATEGY;
-  if (strategy === "data-bridge" || true) {
-    console.log(`Using data bridge strategy`);
+export async function createTheiaEnvStrategy(): Promise<TheiaEnvStrategy> {
+  const strategy = await getEnvVariable("SCORPIO_THEIA_ENV_STRATEGY");
+  if (strategy === "data-bridge") {
     return new DataBridgeStrategy();
   } else {
-    console.log(`Using process env strategy`);
     return new ProcessEnvStrategy();
   }
 }

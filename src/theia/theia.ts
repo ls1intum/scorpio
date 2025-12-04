@@ -19,7 +19,7 @@ export var theiaEnv: TheiaEnv = {
  * Must be called before accessing theiaEnv.
  */
 export async function loadTheiaEnv(): Promise<void> {
-  const strategy = createTheiaEnvStrategy();
+  const strategy = await createTheiaEnvStrategy();
   theiaEnv = await strategy.load();
 }
 
