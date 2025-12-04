@@ -64,9 +64,15 @@ async function initAuthentication(context: vscode.ExtensionContext) {
   (async () => {
     // check if user is already authenticated
     // is needed for the login button to be displayed on the profile button
-    const session = await vscode.authentication.getSession(AUTH_ID, [], {
-      createIfNone: theiaEnv.ARTEMIS_TOKEN !== undefined,
-    });
+    
+    // Try to get existing session silently first
+    let session = await vscode.authentication.getSession(AUTH_ID, [], { silent: true });
+    
+    // If no session exists but we have credentials, create one silently
+    if (!session && theiaEnv.ARTEMIS_TOKEN !== undefined) {
+      session = await authenticationProvider.createSession([]);
+    }
+    
     vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
   })();
 
