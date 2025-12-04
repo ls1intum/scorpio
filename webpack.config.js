@@ -66,6 +66,8 @@ const extensionConfig = {
   ],
   externals: {
     vscode: "commonjs vscode", // ignored because it doesn't exist
+    bufferutil: "commonjs bufferutil", // optional ws dependency
+    "utf-8-validate": "commonjs utf-8-validate", // optional ws dependency
   },
   performance: {
     hints: false,
