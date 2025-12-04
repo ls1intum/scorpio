@@ -74,6 +74,7 @@ export class ProcessEnvStrategy implements TheiaEnvStrategy {
  * Used when SCORPIO_ENV_STRATEGY=data-bridge.
  */
 export class DataBridgeStrategy implements TheiaEnvStrategy {
+  private static readonly DATA_BRIDGE_EXTENSION_ID = "tum-aet.data-bridge";
   private static readonly COMMAND = "dataBridge.getEnv";
   private static readonly POLL_INTERVAL_MS = 500;
   private static readonly TIMEOUT_MS = 60000;
@@ -89,11 +90,10 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
   async load(): Promise<TheiaEnv> {
     this.outputChannel.appendLine("Using data bridge strategy");
 
-    // Check if command exists
-    const commands = await vscode.commands.getCommands(true);
-    if (!commands.includes(DataBridgeStrategy.COMMAND)) {
+    const dataBridgeExt = vscode.extensions.getExtension(DataBridgeStrategy.DATA_BRIDGE_EXTENSION_ID);
+    if (!dataBridgeExt) {
       this.outputChannel.appendLine(
-        `Command ${DataBridgeStrategy.COMMAND} not found, falling back to process env`,
+        "Data bridge extension not installed, falling back to process env",
       );
       vscode.window.showWarningMessage(
         "Data bridge not available, falling back to environment variables",
@@ -101,8 +101,13 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
       return new ProcessEnvStrategy().load();
     }
 
+    if (!dataBridgeExt.isActive) {
+      this.outputChannel.appendLine("Activating data bridge extension...");
+      await dataBridgeExt.activate();
+    }
+
     this.outputChannel.appendLine(
-      "Data bridge command found, polling for environment variables...",
+      "Data bridge active, polling for environment variables...",
     );
     return this.pollForEnvironmentVariables();
   }
@@ -164,10 +169,11 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
  */
 export function createTheiaEnvStrategy(): TheiaEnvStrategy {
   const strategy = process.env.SCORPIO_THEIA_ENV_STRATEGY;
-
-  if (strategy === "data-bridge") {
+  if (strategy === "data-bridge" || true) {
+    console.log(`Using data bridge strategy`);
     return new DataBridgeStrategy();
   } else {
+    console.log(`Using process env strategy`);
     return new ProcessEnvStrategy();
   }
 }

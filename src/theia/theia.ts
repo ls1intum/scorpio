@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import simpleGit, { GitConfigScope } from "simple-git";
 import { hostname } from "os";
 import { cloneByGivenURL } from "../participation/cloning.service";
-import { createTheiaEnvStrategy, TheiaEnv } from "./credential-strategy";
+import { createTheiaEnvStrategy, TheiaEnv } from "./env-strategy";
 
 // Mutable theiaEnv that gets populated after loading
 export var theiaEnv: TheiaEnv = {
