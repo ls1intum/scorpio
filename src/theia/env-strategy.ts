@@ -78,7 +78,7 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
   private static readonly DATA_BRIDGE_EXTENSION_ID = "tum-aet.data-bridge";
   private static readonly COMMAND = "dataBridge.getEnv";
   private static readonly POLL_INTERVAL_MS = 500;
-  private static readonly TIMEOUT_MS = 60000;
+  private static readonly TIMEOUT_MS = 30000;
 
   private outputChannel: vscode.OutputChannel;
 
