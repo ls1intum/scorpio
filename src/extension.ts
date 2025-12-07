@@ -25,13 +25,14 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "scorpio" is now active!');
 
   // Load credentials first (may poll credential bridge if configured)
+  // Blocks the activation until the credentials are loaded
   await loadTheiaEnv();
 
   initTheia();
 
   initSettings();
 
-  await initAuthentication(context);
+  initAuthentication(context);
 
   const sidebar = initSidebar(context);
 
@@ -56,7 +57,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const submissionWebsocket = new SubmissionWebsocket();
 }
 
-async function initAuthentication(context: vscode.ExtensionContext) {
+function initAuthentication(context: vscode.ExtensionContext) {
   authenticationProvider = new ArtemisAuthenticationProvider(context.secrets);
 
   context.subscriptions.push(authenticationProvider);
