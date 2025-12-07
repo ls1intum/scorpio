@@ -5,7 +5,7 @@ import { cloneByGivenURL } from "../participation/cloning.service";
 import { createTheiaEnvStrategy, TheiaEnv } from "./env-strategy";
 
 // Mutable theiaEnv that gets populated after loading
-export var theiaEnv: TheiaEnv = {
+export let theiaEnv: TheiaEnv = {
   THEIA_FLAG: false,
   ARTEMIS_TOKEN: undefined,
   ARTEMIS_URL: undefined,
