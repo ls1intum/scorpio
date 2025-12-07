@@ -97,7 +97,7 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
         "Data bridge extension not installed, falling back to process env",
       );
       vscode.window.showWarningMessage(
-        "Data bridge not available, falling back to environment variables",
+        "Data bridge not available, falling back to process environment variables",
       );
       return new ProcessEnvStrategy().load();
     }
