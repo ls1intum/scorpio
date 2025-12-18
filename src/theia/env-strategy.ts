@@ -43,7 +43,12 @@ async function getEnvVariable(key: string): Promise<string | undefined> {
         if (error) {
           reject(error);
         } else {
-          resolve(stdout.trim());
+          const trimmed = stdout.trim();
+          // If the variable is empty, return undefined
+          // to indicate the variable is not set.
+          // We don't handle empty environment variables
+          // as they are not valid configuration in this context.
+          resolve(trimmed || undefined);
         }
       });
     });
