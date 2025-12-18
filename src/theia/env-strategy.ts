@@ -72,7 +72,7 @@ export class ProcessEnvStrategy implements TheiaEnvStrategy {
 
 /**
  * Strategy that polls the data bridge extension for environment variables.
- * Used when SCORPIO_ENV_STRATEGY=data-bridge.
+ * Used when SCORPIO_THEIA_ENV_STRATEGY=data-bridge.
  */
 export class DataBridgeStrategy implements TheiaEnvStrategy {
   private static readonly DATA_BRIDGE_EXTENSION_ID = "tum-aet.data-bridge";
