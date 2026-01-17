@@ -83,7 +83,7 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
   private static readonly DATA_BRIDGE_EXTENSION_ID = "tum-aet.data-bridge";
   private static readonly COMMAND = "dataBridge.getEnv";
   private static readonly POLL_INTERVAL_MS = 500;
-  private static readonly TIMEOUT_MS = 30000;
+  private static readonly TIMEOUT_MS = 10000;
 
   private outputChannel: vscode.OutputChannel;
 
@@ -143,9 +143,6 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
 
     this.outputChannel.appendLine(
       "Timeout waiting for environment variables, falling back to process env",
-    );
-    vscode.window.showWarningMessage(
-      "Timeout waiting for data bridge, falling back to environment variables",
     );
     return new ProcessEnvStrategy().load();
   }
