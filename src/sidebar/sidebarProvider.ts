@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
-import { onStateChange, set_displayed_state, State, getState } from "../shared/state";
+import { onStateChange, setDisplayedState, State, getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
 import { getUri } from "./getUri";
 import { getNonce } from "./getNonce";
-import { fetch_all_courses } from "../artemis/course.client";
-import { fetch_programming_exercises_by_courseId } from "../artemis/exercise.client";
+import { fetchAllCourses } from "../artemis/course.client";
+import { fetchProgrammingExercisesByCourseId } from "../artemis/exercise.client";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
-import { get_problem_statement_details } from "../exercise/exercise";
-import { fetch_uml } from "../artemis/problem-statement.client";
+import { getProblemStatementDetails } from "../exercise/exercise";
+import { fetchUml } from "../artemis/problem-statement.client";
 import { getProjectKey } from "@shared/models/exercise.model";
 import { umlFileProvider } from "../problemStatement/uml.db";
 import { getUmlBackgroundColor, isEditorDarkTheme } from "../problemStatement/uml.service";
@@ -94,7 +94,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const courses: Course[] = await fetch_all_courses(session.accessToken);
+          const courses: Course[] = await fetchAllCourses(session.accessToken);
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_COURSE_OPTIONS,
             text: JSON.stringify(courses),
@@ -108,7 +108,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          const exercises = await fetch_programming_exercises_by_courseId(
+          const exercises = await fetchProgrammingExercisesByCourseId(
             session.accessToken,
             getState().displayedCourse!.id!
           );
@@ -121,10 +121,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
           const state = getState();
 
-          const { course: course, exercise: exercise } = await get_problem_statement_details(
+          const { course: course, exercise: exercise } = await getProblemStatementDetails(
             getState().displayedExercise!
           );
-          set_displayed_state(course, exercise);
+          setDisplayedState(course, exercise);
           break;
         }
         case CommandFromWebview.GET_UML: {
@@ -138,7 +138,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!session) {
             return;
           }
-          var plantUml = await fetch_uml(session.accessToken, data.text, isEditorDarkTheme());
+          var plantUml = await fetchUml(session.accessToken, data.text, isEditorDarkTheme());
 
           // send the uml to the webview for rendering
           this._view?.webview.postMessage({
@@ -177,7 +177,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
           const { course, exercise } = JSON.parse(data.text);
 
-          set_displayed_state(course, exercise);
+          setDisplayedState(course, exercise);
           break;
         }
       }

@@ -1,6 +1,6 @@
 import { Result } from "@shared/models/result.model";
 import { ProgrammingSubmission } from "@shared/models/submission.model";
-import { getState, set_displayed_state } from "../shared/state";
+import { getState, setDisplayedState } from "../shared/state";
 
 export function handleSubmissionMessage(submission: ProgrammingSubmission) {
   const participationId = submission.participation?.id;
@@ -26,7 +26,7 @@ export function handleSubmissionMessage(submission: ProgrammingSubmission) {
   );
   displayedStudentParticipation.submissions.push(submission);
 
-  set_displayed_state(state.displayedCourse, state.displayedExercise);
+  setDisplayedState(state.displayedCourse, state.displayedExercise);
 }
 
 export function handleResultMessage(result: Result) {
@@ -61,5 +61,5 @@ export function handleResultMessage(result: Result) {
   );
   displayedStudentParticipation.submissions.push(submission);
 
-  set_displayed_state(state.displayedCourse, state.displayedExercise);
+  setDisplayedState(state.displayedCourse, state.displayedExercise);
 }

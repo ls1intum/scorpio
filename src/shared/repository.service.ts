@@ -4,10 +4,10 @@ import { NotAuthenticatedError } from "../authentication/not_authenticated.error
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getProjectKey } from "@shared/models/exercise.model";
-import { clear_repo_state, set_repo_state, getState } from "./state";
+import { clearRepoState, setRepoState, getState } from "./state";
 import simpleGit, { RemoteWithRefs, SimpleGit } from "simple-git";
 import { getLevel1SubfoldersOfWorkspace } from "../utils/filetree";
-import { get_course_exercise_by_repoUrl } from "../exercise/exercise";
+import { getCourseExerciseByRepoUrl } from "../exercise/exercise";
 import { getProjectKeyFromRepoUrl } from "@shared/models/participation.model";
 
 var gitRepo: SimpleGit | undefined;
@@ -49,7 +49,7 @@ export async function detectRepoCourseAndExercise() {
   const foundRepoAndRemote = await getArtemisRepo(session.account.id);
   if (!foundRepoAndRemote) {
     gitRepo = undefined;
-    clear_repo_state();
+    clearRepoState();
 
     console.log("No Artemis repository found");
     return;
@@ -62,12 +62,12 @@ export async function detectRepoCourseAndExercise() {
     return;
   }
 
-  const course_exercise: { course: Course; exercise: Exercise } = await get_course_exercise_by_repoUrl(
+  const course_exercise: { course: Course; exercise: Exercise } = await getCourseExerciseByRepoUrl(
     repoUrl
   );
 
   gitRepo = foundRepoAndRemote.repo;
-  set_repo_state(course_exercise.course, course_exercise.exercise);
+  setRepoState(course_exercise.course, course_exercise.exercise);
 }
 
 async function getArtemisRepo(

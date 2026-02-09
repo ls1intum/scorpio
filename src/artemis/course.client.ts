@@ -1,7 +1,7 @@
 import { Course } from "@shared/models/course.model";
 import { artemisRequestJson } from "../infra/http/artemis-http.client";
 
-export async function fetch_all_courses(token: string): Promise<Course[]> {
+export async function fetchAllCourses(token: string): Promise<Course[]> {
   const data = await artemisRequestJson<any>("/api/core/courses/for-dashboard", { token });
 
   return (

@@ -22,7 +22,7 @@ export function getState(): State {
   return _state;
 }
 
-export function set_displayed_state(course: Course | undefined, exercise: Exercise | undefined) {
+export function setDisplayedState(course: Course | undefined, exercise: Exercise | undefined) {
   _state.displayedCourse = course;
   _state.displayedExercise = exercise;
 
@@ -46,7 +46,7 @@ export function set_displayed_state(course: Course | undefined, exercise: Exerci
   onStateChange.fire(_state);
 }
 
-export function set_repo_state(course: Course, exercise: Exercise) {
+export function setRepoState(course: Course, exercise: Exercise) {
   _state.repoCourse = course;
   _state.repoExercise = exercise;
 
@@ -57,13 +57,13 @@ export function set_repo_state(course: Course, exercise: Exercise) {
 
   if (!_state.displayedCourse || !_state.displayedExercise) {
     // this methode will fire the onStateChange event
-    set_displayed_state(course, exercise);
+    setDisplayedState(course, exercise);
   } else {
     onStateChange.fire(_state);
   }
 }
 
-export function clear_repo_state() {
+export function clearRepoState() {
   _state.repoCourse = undefined;
   _state.repoExercise = undefined;
 

@@ -1,11 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { build_course_options } from "./course/course";
-import { build_exercise_options, cloneCurrentExercise } from "./exercise/exercise";
+import { buildCourseOptions } from "./course/course";
+import { buildExerciseOptions, cloneCurrentExercise } from "./exercise/exercise";
 import { SidebarProvider } from "./sidebar/sidebarProvider";
 import { ArtemisAuthenticationProvider, AUTH_ID } from "./authentication/authentication_provider";
-import { clear_repo_state, set_displayed_state, getState } from "./shared/state";
+import { clearRepoState, setDisplayedState, getState } from "./shared/state";
 import { sync_problem_statement_with_workspace } from "./problemStatement/problem_statement";
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, loadTheiaEnv, theiaEnv } from "./theia/theia";
@@ -88,8 +88,8 @@ function initAuthentication(context: vscode.ExtensionContext, realtimeSync: Real
     if (removed && removed.length > 0) {
       vscode.commands.executeCommand("setContext", "scorpio.authenticated", false);
 
-      clear_repo_state();
-      set_displayed_state(undefined, undefined);
+      clearRepoState();
+      setDisplayedState(undefined, undefined);
       return;
     }
   });
@@ -155,11 +155,11 @@ function registerCommands(
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayExercise", async () => {
       try {
-        const course = await build_course_options();
+        const course = await buildCourseOptions();
 
-        const exercise = await build_exercise_options(course);
+        const exercise = await buildExerciseOptions(course);
 
-        set_displayed_state(course, exercise);
+        setDisplayedState(course, exercise);
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to display Exercise");
       }
@@ -171,10 +171,10 @@ function registerCommands(
       const state = getState();
       if (state.displayedExercise) {
         // only remove exercise to get into exercise selection
-        set_displayed_state(state.displayedCourse, undefined);
+        setDisplayedState(state.displayedCourse, undefined);
       } else {
         // remove course to get into course selection
-        set_displayed_state(undefined, undefined);
+        setDisplayedState(undefined, undefined);
       }
     })
   );

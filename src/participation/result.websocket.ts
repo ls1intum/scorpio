@@ -1,5 +1,5 @@
 import { Result } from "@shared/models/result.model";
-import { getState, set_displayed_state } from "../shared/state";
+import { getState, setDisplayedState } from "../shared/state";
 import { GenericWebSocket } from "../shared/websocket";
 
 const PERSONAL_PARTICIPATION_TOPIC = `/user/topic/newResults`;
@@ -52,6 +52,6 @@ export class ResultWebsocket {
     displayedStudentParticipation.submissions?.push(submission!);
 
     // update displayed exercise to trigger re-render
-    set_displayed_state(state.displayedCourse, state.displayedExercise);
+    setDisplayedState(state.displayedCourse, state.displayedExercise);
   }
 }

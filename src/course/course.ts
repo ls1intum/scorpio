@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fetch_all_courses } from "../artemis/course.client";
+import { fetchAllCourses } from "../artemis/course.client";
 import { Course } from "@shared/models/course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
@@ -11,7 +11,7 @@ export type CourseOption = {
   course: Course;
 };
 
-export async function build_course_options(): Promise<Course> {
+export async function buildCourseOptions(): Promise<Course> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
   });
@@ -20,7 +20,7 @@ export async function build_course_options(): Promise<Course> {
     throw new NotAuthenticatedError();
   }
   const courses: Course[] =
-    await fetch_all_courses(session.accessToken);
+    await fetchAllCourses(session.accessToken);
 
   const courseOptions: CourseOption[] = courses
     .map((course) => ({

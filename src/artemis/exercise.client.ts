@@ -2,7 +2,7 @@ import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
 import { artemisRequestJson } from "../infra/http/artemis-http.client";
 
-export async function fetch_programming_exercises_by_courseId(
+export async function fetchProgrammingExercisesByCourseId(
   token: string,
   courseId: number
 ): Promise<Exercise[]> {
@@ -18,7 +18,7 @@ export async function fetch_programming_exercises_by_courseId(
   );
 }
 
-export async function fetch_exercise_by_id(
+export async function fetchExerciseById(
   token: string,
   exerciseId: number
 ): Promise<{ course: Course; exercise: Exercise }> {
@@ -26,7 +26,7 @@ export async function fetch_exercise_by_id(
   return { course: data.course as Course, exercise: data as Exercise };
 }
 
-export async function fetch_exercise_details_by_id(token: string, exerciseId: number): Promise<Exercise> {
+export async function fetchExerciseDetailesById(token: string, exerciseId: number): Promise<Exercise> {
   const response = await artemisRequestJson<any>(`/api/exercise/exercises/${exerciseId}/details`, { token });
   const exercise = response.exercise;
 
