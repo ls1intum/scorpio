@@ -10,11 +10,9 @@ import { sync_problem_statement_with_workspace } from "./problemStatement/proble
 import { NotAuthenticatedError } from "./authentication/not_authenticated.error";
 import { initTheia, loadTheiaEnv, theiaEnv } from "./theia/theia";
 import { initSettings } from "./shared/settings";
-import { ResultWebsocket } from "./participation/result.websocket";
 import { detectRepoCourseAndExercise, submitCurrentWorkspace } from "./shared/repository.service";
-import { GenericWebSocket } from "./shared/websocket";
-import { SubmissionWebsocket } from "./participation/submission.websocket";
 import { umlFileProvider } from "./problemStatement/uml.db";
+import { RealtimeSyncService } from "./participation/realtime-sync.service";
 
 export var authenticationProvider: ArtemisAuthenticationProvider;
 
@@ -31,8 +29,9 @@ export async function activate(context: vscode.ExtensionContext) {
   initTheia();
 
   initSettings();
-
-  initAuthentication(context);
+  const realtimeSync = new RealtimeSyncService();
+  context.subscriptions.push(realtimeSync);
+  initAuthentication(context, realtimeSync);
 
   const sidebar = initSidebar(context);
 
@@ -42,7 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
 
-  registerCommands(context, sidebar);
+  registerCommands(context, sidebar, realtimeSync);
 
   listenToEvents();
 
@@ -50,14 +49,12 @@ export async function activate(context: vscode.ExtensionContext) {
     console.error(e);
   });
 
-  // initialize the websocket
-  GenericWebSocket.instance;
-
-  const resultWebsocket = new ResultWebsocket();
-  const submissionWebsocket = new SubmissionWebsocket();
+  realtimeSync.start().catch((e) => {
+    console.error(e);
+  });
 }
 
-function initAuthentication(context: vscode.ExtensionContext) {
+function initAuthentication(context: vscode.ExtensionContext, realtimeSync: RealtimeSyncService) {
   authenticationProvider = new ArtemisAuthenticationProvider(context.secrets);
 
   context.subscriptions.push(authenticationProvider);
@@ -82,6 +79,9 @@ function initAuthentication(context: vscode.ExtensionContext) {
     if (added && added.length > 0) {
       vscode.commands.executeCommand("setContext", "scorpio.authenticated", true);
       vscode.commands.executeCommand("scorpio.workspace.detectRepo");
+      realtimeSync.start().catch((e) => {
+        console.error(e);
+      });
       return;
     }
 
@@ -106,7 +106,11 @@ function initSidebar(context: vscode.ExtensionContext): SidebarProvider {
   return sidebarProvider;
 }
 
-function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProvider) {
+function registerCommands(
+  context: vscode.ExtensionContext,
+  sidebar: SidebarProvider,
+  realtimeSync: RealtimeSyncService
+) {
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.restart", () => {
       deactivate();
@@ -178,18 +182,24 @@ function registerCommands(context: vscode.ExtensionContext, sidebar: SidebarProv
   // command to clone repository
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
-      cloneCurrentExercise().catch((e) => {
+      try {
+        await cloneCurrentExercise();
+        await realtimeSync.refreshNow();
+      } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
-      });
+      }
     })
   );
 
   // command to submit workspace
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.workspace.submit", async () => {
-      submitCurrentWorkspace().catch((e) => {
+      try {
+        await submitCurrentWorkspace();
+        await realtimeSync.refreshNow();
+      } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
-      });
+      }
     })
   );
 

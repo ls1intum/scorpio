@@ -3,9 +3,9 @@ import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getScoreString } from "@shared/models/exercise.model";
-import { fetch_participation_by_repo_name, fetch_result_details, start_exercise } from "../participation/participation.api";
+import { fetch_participation_by_repo_name, fetch_result_details, start_exercise } from "../artemis/participation.client";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
-import { fetch_exercise_by_id, fetch_exercise_details_by_id } from "./exercise.api";
+import { fetch_exercise_by_id, fetch_exercise_details_by_id } from "../artemis/exercise.client";
 import { cloneUserRepo } from "../participation/cloning.service";
 import { getLatestResult } from "@shared/models/participation.model";
 

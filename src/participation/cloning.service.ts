@@ -5,7 +5,7 @@ import { AUTH_ID } from "../authentication/authentication_provider";
 import { getState } from "../shared/state";
 import simpleGit from "simple-git";
 import * as path from "path";
-import { retrieveVcsAccessToken } from "../authentication/authentication_api";
+import { retrieveVcsAccessToken } from "../artemis/authentication.client";
 import { getWorkspaceFolder, theiaEnv } from "../theia/theia";
 import { addVcsTokenToUrl } from "@shared/models/participation.model";
 

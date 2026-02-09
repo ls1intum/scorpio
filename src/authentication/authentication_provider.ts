@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { authenticateToken } from "./authentication_api";
+import { authenticateToken } from "../artemis/authentication.client";
 import { theiaEnv } from "../theia/theia";
 import { settings } from "../shared/settings";
 import { hostname } from "os";

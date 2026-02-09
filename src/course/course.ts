@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fetch_all_courses } from "./course.api";
+import { fetch_all_courses } from "../artemis/course.client";
 import { Course } from "@shared/models/course.model";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
