@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { onStateChange, setDisplayedState, State, getState } from "../shared/state";
+import { onStateChange, setDisplayedState, getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { settings } from "../shared/settings";
 import { Course } from "@shared/models/course.model";
@@ -26,7 +26,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this.displayExercise();
     });
 
-    onAuthSessionsChange.event(async ({ added, removed }) => {
+    this.onAuthSessionsChange.event(async ({ added, removed }) => {
       if (added && added.length > 0) {
         this.login(added[0]);
         return;
@@ -119,8 +119,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
-          const state = getState();
-
           const { course: course, exercise: exercise } = await getProblemStatementDetails(
             getState().displayedExercise!
           );

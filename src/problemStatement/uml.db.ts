@@ -35,13 +35,13 @@ export class UmlFileProvider implements vscode.FileSystemProvider {
 
   // Only need to implement minimal methods
   writeFile(uri: vscode.Uri, content: Uint8Array): void {
-    const { resultId, umlId } = this.uriToIds(uri);
+    const { resultId } = this.uriToIds(uri);
 
     // check if all existing umls have the same resultId
     // if not, clear the storage (displayed Result has changed)
     const existingKeys = Array.from(this.umlStorage.keys());
     for (const k of existingKeys) {
-      const { resultId: existingResultId, umlId: existingUmlId } = this.uriToIds(vscode.Uri.parse(k));
+      const { resultId: existingResultId } = this.uriToIds(vscode.Uri.parse(k));
 
       if (existingResultId !== resultId) {
         this.umlStorage.delete(k);
