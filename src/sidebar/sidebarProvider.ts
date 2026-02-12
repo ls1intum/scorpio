@@ -22,11 +22,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     private readonly _extensionUri: vscode.Uri,
     private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
   ) {
-    onStateChange.event((e: State) => {
+    onStateChange.event(() => {
       this.displayExercise();
     });
 
-    onAuthSessionsChange.event(async ({ added, removed, changed }) => {
+    onAuthSessionsChange.event(async ({ added, removed }) => {
       if (added && added.length > 0) {
         this.login(added[0]);
         return;
@@ -59,7 +59,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     this.initHTML();
 
-    webviewView.onDidChangeVisibility((e) => {
+    webviewView.onDidChangeVisibility(() => {
       this.initState();
     });
 
@@ -251,7 +251,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.easterEgg();
   }
 
-  private login(session: vscode.AuthenticationSession) {
+  private login(_: vscode.AuthenticationSession) {
     this._view?.webview.postMessage({
       command: CommandFromExtension.SEND_LOGIN_STATE,
       text: true,

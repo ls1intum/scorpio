@@ -49,7 +49,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
    * @param scopes
    * @returns
    */
-  public async getSessions(scopes: string[] = []): Promise<vscode.AuthenticationSession[]> {
+  public async getSessions(): Promise<vscode.AuthenticationSession[]> {
     const session = await this.getSessionFromStorage();
     return session ? [session] : [];
   }

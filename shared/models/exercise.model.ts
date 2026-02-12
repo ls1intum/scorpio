@@ -27,7 +27,7 @@ export abstract class Exercise {
     public testCases?: TestCase[];
     public course?: Course;
 
-    constructor(type: ExerciseType) {}
+    constructor(_: ExerciseType) {}
 }
 
 export class ProgrammingExercise extends Exercise {

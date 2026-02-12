@@ -46,7 +46,7 @@ export async function detectRepoCourseAndExercise() {
     throw new NotAuthenticatedError();
   }
 
-  const foundRepoAndRemote = await getArtemisRepo(session.account.id);
+  const foundRepoAndRemote = await getArtemisRepo();
   if (!foundRepoAndRemote) {
     gitRepo = undefined;
     clearRepoState();
@@ -71,7 +71,6 @@ export async function detectRepoCourseAndExercise() {
 }
 
 async function getArtemisRepo(
-  username: string
 ): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
   if (!settings.base_url) {
     throw new Error("Base URL is not set");

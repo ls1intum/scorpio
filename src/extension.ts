@@ -75,7 +75,7 @@ function initAuthentication(context: vscode.ExtensionContext, realtimeSync: Real
   })();
 
 
-  authenticationProvider.onAuthSessionsChange.event(({ added, removed, changed }) => {
+  authenticationProvider.onAuthSessionsChange.event(({ added, removed }) => {
     if (added && added.length > 0) {
       vscode.commands.executeCommand("setContext", "scorpio.authenticated", true);
       vscode.commands.executeCommand("scorpio.workspace.detectRepo");
@@ -231,7 +231,7 @@ function registerCommands(
 
 function listenToEvents() {
   // listen to workspace changes to display problem statement
-  vscode.workspace.onDidChangeWorkspaceFolders((event) => {
+  vscode.workspace.onDidChangeWorkspaceFolders(() => {
     detectRepoCourseAndExercise().catch((e) => {
       console.error(e);
     });
