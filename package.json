@@ -217,7 +217,9 @@
     "package": "vsce package",
     "vscode:prepublish": "npm run build",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",
@@ -240,7 +242,8 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
     "webpack": "^5.93.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "oxfmt": "^0.31.0"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.0.0",
