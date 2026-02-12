@@ -12,23 +12,24 @@ import { ArtemisTextReplacementPlugin } from "./artemis-text-replacement.plugin"
  * This is coupled to the value used in `ProgrammingExerciseTaskService` in the server.
  * If you change the regex, make sure to change it in all places!
  */
-export const taskRegex = /\[task]\[([^[\]]+)]\(((?:[^(),]+(?:\([^()]*\)[^(),]*)?(?:,[^(),]+(?:\([^()]*\)[^(),]*)?)*)?)\)/g;
+export const taskRegex =
+  /\[task]\[([^[\]]+)]\(((?:[^(),]+(?:\([^()]*\)[^(),]*)?(?:,[^(),]+(?:\([^()]*\)[^(),]*)?)*)?)\)/g;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ProgrammingExerciseTaskExtensionWrapper extends ArtemisTextReplacementPlugin {
-    /**
-     * The task regex is coupled to the value used in ProgrammingExerciseTaskService in the server
-     * and `TaskCommand` in the client
-     * If you change the regex, make sure to change it in all places!
-     */
-    replaceText(text: string): string {
-        return text.replace(taskRegex, (match) => {
-            return this.escapeTaskSpecialCharactersForMarkdown(match);
-        });
-    }
+  /**
+   * The task regex is coupled to the value used in ProgrammingExerciseTaskService in the server
+   * and `TaskCommand` in the client
+   * If you change the regex, make sure to change it in all places!
+   */
+  replaceText(text: string): string {
+    return text.replace(taskRegex, (match) => {
+      return this.escapeTaskSpecialCharactersForMarkdown(match);
+    });
+  }
 
-    private escapeTaskSpecialCharactersForMarkdown = (text: string) => {
-        // We want to avoid special characters (such as underscores) in the task or test case names to be interpreted as markdown, as this may interfere with the preview.
-        return text.replace(/[`.*_+\-!${}()|[\]\\]/g, '\\$&');
-    };
+  private escapeTaskSpecialCharactersForMarkdown = (text: string) => {
+    // We want to avoid special characters (such as underscores) in the task or test case names to be interpreted as markdown, as this may interfere with the preview.
+    return text.replace(/[`.*_+\-!${}()|[\]\\]/g, "\\$&");
+  };
 }

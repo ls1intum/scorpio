@@ -37,9 +37,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // init UmlPreview
   context.subscriptions.push(
-    vscode.workspace.registerFileSystemProvider('uml-preview', umlFileProvider, { isReadonly: true })
+    vscode.workspace.registerFileSystemProvider("uml-preview", umlFileProvider, {
+      isReadonly: true,
+    }),
   );
-
 
   registerCommands(context, sidebar, realtimeSync);
 
@@ -62,18 +63,17 @@ function initAuthentication(context: vscode.ExtensionContext, realtimeSync: Real
   (async () => {
     // check if user is already authenticated
     // is needed for the login button to be displayed on the profile button
-    
+
     // Try to get existing session silently first
     let session = await vscode.authentication.getSession(AUTH_ID, [], { silent: true });
-    
+
     // If no session exists but we have credentials, create one silently
     if (!session && theiaEnv.ARTEMIS_TOKEN !== undefined) {
       session = await authenticationProvider.createSession([]);
     }
-    
+
     vscode.commands.executeCommand("setContext", "scorpio.authenticated", session !== undefined);
   })();
-
 
   authenticationProvider.onAuthSessionsChange.event(({ added, removed }) => {
     if (added && added.length > 0) {
@@ -99,9 +99,11 @@ function initSidebar(context: vscode.ExtensionContext): SidebarProvider {
   // register sidebar for problem statement
   const sidebarProvider = new SidebarProvider(
     context.extensionUri,
-    authenticationProvider.onAuthSessionsChange
+    authenticationProvider.onAuthSessionsChange,
   );
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider));
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider),
+  );
 
   return sidebarProvider;
 }
@@ -109,13 +111,13 @@ function initSidebar(context: vscode.ExtensionContext): SidebarProvider {
 function registerCommands(
   context: vscode.ExtensionContext,
   sidebar: SidebarProvider,
-  realtimeSync: RealtimeSyncService
+  realtimeSync: RealtimeSyncService,
 ) {
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.restart", () => {
       deactivate();
       activate(context);
-    })
+    }),
   );
 
   // command to login
@@ -132,7 +134,7 @@ function registerCommands(
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to login");
       }
-    })
+    }),
   );
 
   // command to logout
@@ -148,7 +150,7 @@ function registerCommands(
             });
           }
         });
-    })
+    }),
   );
 
   // command to select a course and exercise
@@ -163,7 +165,7 @@ function registerCommands(
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to display Exercise");
       }
-    })
+    }),
   );
 
   context.subscriptions.push(
@@ -176,7 +178,7 @@ function registerCommands(
         // remove course to get into course selection
         setDisplayedState(undefined, undefined);
       }
-    })
+    }),
   );
 
   // command to clone repository
@@ -188,7 +190,7 @@ function registerCommands(
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
       }
-    })
+    }),
   );
 
   // command to submit workspace
@@ -200,7 +202,7 @@ function registerCommands(
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
       }
-    })
+    }),
   );
 
   // command to detect repo in workspace
@@ -209,7 +211,7 @@ function registerCommands(
       detectRepoCourseAndExercise().catch((e) => {
         _errorMessage(e, LogLevel.ERROR, "Failed to detect repo");
       });
-    })
+    }),
   );
 
   // command to sync problem statement with workspace
@@ -218,14 +220,14 @@ function registerCommands(
       sync_problem_statement_with_workspace().catch((e) => {
         _errorMessage(e, LogLevel.ERROR, "Failed to sync workspace");
       });
-    })
+    }),
   );
 
   // command to refresh sidebar
   context.subscriptions.push(
     vscode.commands.registerCommand("scorpio.sidebar.refresh", () => {
       sidebar.resolveWebviewView(sidebar._view!);
-    })
+    }),
   );
 }
 
@@ -248,11 +250,13 @@ function _errorMessage(e: any, logLevel: LogLevel = LogLevel.ERROR, messagePrefi
     case LogLevel.INFO:
       console.info(e);
       if (e instanceof NotAuthenticatedError) {
-        vscode.window.showInformationMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
-          if (value === "Login") {
-            vscode.commands.executeCommand("scorpio.login");
-          }
-        });
+        vscode.window
+          .showInformationMessage(`${messagePrefix}: ${e.message}`, "Login")
+          .then((value) => {
+            if (value === "Login") {
+              vscode.commands.executeCommand("scorpio.login");
+            }
+          });
         return;
       }
       if (e instanceof Error) {
@@ -282,11 +286,13 @@ function _errorMessage(e: any, logLevel: LogLevel = LogLevel.ERROR, messagePrefi
     case LogLevel.WARN:
       console.warn(e);
       if (e instanceof NotAuthenticatedError) {
-        vscode.window.showWarningMessage(`${messagePrefix}: ${e.message}`, "Login").then((value) => {
-          if (value === "Login") {
-            vscode.commands.executeCommand("scorpio.login");
-          }
-        });
+        vscode.window
+          .showWarningMessage(`${messagePrefix}: ${e.message}`, "Login")
+          .then((value) => {
+            if (value === "Login") {
+              vscode.commands.executeCommand("scorpio.login");
+            }
+          });
         return;
       }
       if (e instanceof Error) {

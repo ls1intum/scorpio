@@ -2,7 +2,9 @@
 @if (exercisesDue().length > 0) {
 <h5 class="my-2">Due Next</h5>
 <div class="d-grid gap-1 fill-grid">
-  <ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesDue() }"></ng-container>
+  <ng-container
+    *ngTemplateOutlet="exerciselist; context: { exercises: exercisesDue() }"
+  ></ng-container>
 </div>
 } @if (exercisesPastDueDate().length > 0) {
 <h5 class="my-2">Past Due Date</h5>
@@ -14,7 +16,9 @@
 } @if (exercisesNoDueDate().length > 0) {
 <h5 class="my-2">No Due Date</h5>
 <div class="d-grid gap-1 fill-grid">
-  <ng-container *ngTemplateOutlet="exerciselist; context: { exercises: exercisesNoDueDate() }"></ng-container>
+  <ng-container
+    *ngTemplateOutlet="exerciselist; context: { exercises: exercisesNoDueDate() }"
+  ></ng-container>
 </div>
 }
 
@@ -35,10 +39,13 @@
       <div class="text-start">
         <b>Score:</b><br />
         @if (getScore(exercise) !== undefined) {
-          <span [class.text-fail]="getScore(exercise) !== 100" [class.text-success]="getScore(exercise) === 100">
-            {{getScore(exercise)}}%
-          </span>
-         } @else{
+        <span
+          [class.text-fail]="getScore(exercise) !== 100"
+          [class.text-success]="getScore(exercise) === 100"
+        >
+          {{getScore(exercise)}}%
+        </span>
+        } @else{
         <span>No graded result</span>
         }
       </div>

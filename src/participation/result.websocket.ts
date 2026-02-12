@@ -16,7 +16,9 @@ export class ResultWebsocket {
       console.debug("Waiting for websocket connection...");
     } while (!GenericWebSocket.instance.connected);
 
-    const subscription = GenericWebSocket.instance.subscribeToTopic<Result>(PERSONAL_PARTICIPATION_TOPIC);
+    const subscription = GenericWebSocket.instance.subscribeToTopic<Result>(
+      PERSONAL_PARTICIPATION_TOPIC,
+    );
     subscription.event((result) => {
       this.handleMessage(result);
     });
@@ -27,7 +29,7 @@ export class ResultWebsocket {
 
     const state = getState();
     let displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-      (participation) => participation.id === participationId
+      (participation) => participation.id === participationId,
     );
 
     if (!displayedStudentParticipation) {
@@ -47,7 +49,7 @@ export class ResultWebsocket {
       displayedStudentParticipation.submissions = [];
     }
     displayedStudentParticipation.submissions = displayedStudentParticipation.submissions?.filter(
-      (submission) => submission.id !== result.submission?.id
+      (submission) => submission.id !== result.submission?.id,
     );
     displayedStudentParticipation.submissions?.push(submission!);
 

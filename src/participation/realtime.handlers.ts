@@ -10,7 +10,7 @@ export function handleSubmissionMessage(submission: ProgrammingSubmission) {
 
   const state = getState();
   const displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-    (participation) => participation.id === participationId
+    (participation) => participation.id === participationId,
   );
 
   if (!displayedStudentParticipation) {
@@ -22,7 +22,7 @@ export function handleSubmissionMessage(submission: ProgrammingSubmission) {
   displayedStudentParticipation.submissions ??= [];
 
   displayedStudentParticipation.submissions = displayedStudentParticipation.submissions.filter(
-    (currentSubmission) => currentSubmission.id !== submission.id
+    (currentSubmission) => currentSubmission.id !== submission.id,
   );
   displayedStudentParticipation.submissions.push(submission);
 
@@ -37,7 +37,7 @@ export function handleResultMessage(result: Result) {
 
   const state = getState();
   const displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-    (participation) => participation.id === participationId
+    (participation) => participation.id === participationId,
   );
 
   if (!displayedStudentParticipation) {
@@ -57,7 +57,7 @@ export function handleResultMessage(result: Result) {
   displayedStudentParticipation.submissions ??= [];
 
   displayedStudentParticipation.submissions = displayedStudentParticipation.submissions.filter(
-    (currentSubmission) => currentSubmission.id !== submission.id
+    (currentSubmission) => currentSubmission.id !== submission.id,
   );
   displayedStudentParticipation.submissions.push(submission);
 

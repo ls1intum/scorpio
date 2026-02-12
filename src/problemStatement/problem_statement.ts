@@ -6,7 +6,7 @@ export async function sync_problem_statement_with_workspace() {
   if (!state.repoCourse || !state.repoExercise) {
     await vscode.commands.executeCommand("scorpio.workspace.detectRepo");
   }
-  if(!state.repoCourse || !state.repoExercise) {
+  if (!state.repoCourse || !state.repoExercise) {
     return;
   }
 

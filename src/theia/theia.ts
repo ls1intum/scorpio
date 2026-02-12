@@ -52,8 +52,8 @@ export async function initTheia() {
       theiaEnv.GIT_MAIL = theiaEnv.GIT_MAIL
         ? theiaEnv.GIT_MAIL
         : theiaEnv.GIT_USER
-        ? theiaEnv.GIT_USER + "@artemis-theia.de"
-        : hostnameConst + "@artemis-theia.de";
+          ? theiaEnv.GIT_USER + "@artemis-theia.de"
+          : hostnameConst + "@artemis-theia.de";
 
       await git.addConfig("user.name", theiaEnv.GIT_USER, undefined, GitConfigScope.global);
       await git.addConfig("user.email", theiaEnv.GIT_MAIL, undefined, GitConfigScope.global);

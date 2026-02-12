@@ -4,7 +4,11 @@ import { Task } from "./task.model";
 import { Feedback } from "@shared/models/feedback.model";
 import { FeedbackListComponent } from "../../test-result/feedback-list.component";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faCircleCheck, faCircleQuestion, faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCircleCheck,
+  faCircleQuestion,
+  faCircleXmark,
+} from "@fortawesome/free-regular-svg-icons";
 
 @Component({
   selector: "task-button",
@@ -19,7 +23,9 @@ export class TaskButton {
   feedbackList = input.required<Feedback[]>();
   loading = input.required<boolean>();
 
-  protected positiveFeedback = computed(() => this.feedbackList().filter((feedback) => feedback.positive));
+  protected positiveFeedback = computed(() =>
+    this.feedbackList().filter((feedback) => feedback.positive),
+  );
   protected TaskStatus = TaskStatus;
   protected status = computed(() => {
     if (this.feedbackList().length === 0) {

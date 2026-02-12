@@ -1,6 +1,9 @@
 import { artemisRequestText, artemisRequest } from "../infra/http/artemis-http.client";
 
-export async function authenticateToken(username: string, password: string): Promise<{ access_token: string }> {
+export async function authenticateToken(
+  username: string,
+  password: string,
+): Promise<{ access_token: string }> {
   const response = await artemisRequest("/api/core/public/authenticate", {
     method: "POST",
     query: { tool: "SCORPIO" },
@@ -28,7 +31,11 @@ export function retrieveVcsAccessToken(token: string, participationId: number): 
   });
 }
 
-function getVcsAccessToken(token: string, participationId: number, method: "GET" | "PUT"): Promise<string> {
+function getVcsAccessToken(
+  token: string,
+  participationId: number,
+  method: "GET" | "PUT",
+): Promise<string> {
   return artemisRequestText("/api/core/account/participation-vcs-access-token", {
     method,
     token,

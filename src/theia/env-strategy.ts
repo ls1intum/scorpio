@@ -35,7 +35,6 @@ function parseTheiaEnv(env: Record<string, string | undefined>): TheiaEnv {
   };
 }
 
-
 async function getEnvVariable(key: string): Promise<string | undefined> {
   try {
     return await new Promise((resolve, reject) => {
@@ -66,9 +65,7 @@ export class ProcessEnvStrategy implements TheiaEnvStrategy {
   async load(): Promise<TheiaEnv> {
     const env: Record<string, string | undefined> = Object.fromEntries(
       await Promise.all(
-        ENV_KEYS.map((key) =>
-          getEnvVariable(key).then((value) => [key, value] as const),
-        ),
+        ENV_KEYS.map((key) => getEnvVariable(key).then((value) => [key, value] as const)),
       ),
     );
     return parseTheiaEnv(env);
@@ -88,15 +85,15 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
   private outputChannel: vscode.OutputChannel;
 
   constructor() {
-    this.outputChannel = vscode.window.createOutputChannel(
-      "Scorpio Environment Variables",
-    );
+    this.outputChannel = vscode.window.createOutputChannel("Scorpio Environment Variables");
   }
 
   async load(): Promise<TheiaEnv> {
     this.outputChannel.appendLine("Using data bridge strategy");
 
-    const dataBridgeExt = vscode.extensions.getExtension(DataBridgeStrategy.DATA_BRIDGE_EXTENSION_ID);
+    const dataBridgeExt = vscode.extensions.getExtension(
+      DataBridgeStrategy.DATA_BRIDGE_EXTENSION_ID,
+    );
     if (!dataBridgeExt) {
       this.outputChannel.appendLine(
         "Data bridge extension not installed, falling back to process env",
@@ -112,9 +109,7 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
       await dataBridgeExt.activate();
     }
 
-    this.outputChannel.appendLine(
-      "Data bridge active, polling for environment variables...",
-    );
+    this.outputChannel.appendLine("Data bridge active, polling for environment variables...");
     return this.pollForEnvironmentVariables();
   }
 
@@ -127,16 +122,12 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
       // Check if we have ALL environment variables available
       // We won't act until all environment variables are available.
       if (ENV_KEYS.every((key) => Boolean(env[key]))) {
-        this.outputChannel.appendLine(
-          "Environment variables received from bridge",
-        );
+        this.outputChannel.appendLine("Environment variables received from bridge");
         return parseTheiaEnv(env);
       }
 
       this.outputChannel.appendLine(
-        `Waiting for environment variables... (${Math.round(
-          (Date.now() - startTime) / 1000,
-        )}s)`,
+        `Waiting for environment variables... (${Math.round((Date.now() - startTime) / 1000)}s)`,
       );
       await this.sleep(DataBridgeStrategy.POLL_INTERVAL_MS);
     }
@@ -147,13 +138,12 @@ export class DataBridgeStrategy implements TheiaEnvStrategy {
     return new ProcessEnvStrategy().load();
   }
 
-  private async fetchEnvironmentVariables(): Promise<
-    Record<string, string | undefined>
-  > {
+  private async fetchEnvironmentVariables(): Promise<Record<string, string | undefined>> {
     try {
-      const result = await vscode.commands.executeCommand<
-        Record<string, string>
-      >(DataBridgeStrategy.COMMAND, [...ENV_KEYS]);
+      const result = await vscode.commands.executeCommand<Record<string, string>>(
+        DataBridgeStrategy.COMMAND,
+        [...ENV_KEYS],
+      );
       return result ?? {};
     } catch (error) {
       this.outputChannel.appendLine(`Error fetching credentials: ${error}`);

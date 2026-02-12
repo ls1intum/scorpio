@@ -6,7 +6,10 @@ import { escapeStringForUseInRegex } from "../regex.util";
 import { Result } from "@shared/models/result.model";
 import { CommandFromExtension, CommandFromWebview } from "@shared/webview-commands";
 import { vscode } from "src/app/vscode";
-import { ProgrammingExerciseInstructionService, TestCaseState } from "../programming-exercise.service";
+import {
+  ProgrammingExerciseInstructionService,
+  TestCaseState,
+} from "../programming-exercise.service";
 
 type umlIndexed = { id: number; plantUml: string };
 
@@ -18,7 +21,9 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
   // unique index, even if multiple plant uml diagrams are shown from different problem statements on the same page (in different tabs)
   private plantUmlIndex = 0;
 
-  constructor(private programmingExerciseInstructionService: ProgrammingExerciseInstructionService) {
+  constructor(
+    private programmingExerciseInstructionService: ProgrammingExerciseInstructionService,
+  ) {
     super();
   }
 
@@ -46,10 +51,13 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
     const testsColorRegex = /testsColor\((\s*[^()\s]+(\([^()]*\))?)\)/g;
 
     uml.plantUml = uml.plantUml.replace(testsColorRegex, (match: string, capture: string) => {
-      const tests = this.programmingExerciseInstructionService.convertTestListToIds(capture, undefined);
+      const tests = this.programmingExerciseInstructionService.convertTestListToIds(
+        capture,
+        undefined,
+      );
       const { testCaseState } = this.programmingExerciseInstructionService.testStatusForTask(
         tests,
-        this.latestResult
+        this.latestResult,
       );
       switch (testCaseState) {
         case TestCaseState.SUCCESS:
@@ -78,7 +86,9 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
         pathParts[1] === this.latestResult?.id?.toString() &&
         pathParts[2] === uml.id.toString()
       ) {
-        const plantUmlHtmlContainer = document.getElementById(`plantUml-${this.latestResult?.id}-${uml.id}`);
+        const plantUmlHtmlContainer = document.getElementById(
+          `plantUml-${this.latestResult?.id}-${uml.id}`,
+        );
         if (plantUmlHtmlContainer) {
           // We need to sanitize the received svg as it could contain malicious code in a script tag.
           plantUmlHtmlContainer.innerHTML = DOMPurify.sanitize(message.text);
@@ -133,11 +143,13 @@ export class ProgrammingExercisePlantUmlExtensionWrapper extends ArtemisTextRepl
     const replacedText = plantUmlsIndexed.reduce((acc: string, umlIndexed: umlIndexed): string => {
       return acc.replace(
         new RegExp(escapeStringForUseInRegex(umlIndexed.plantUml), "g"),
-        plantUmlContainer.replace(idPlaceholder, umlIndexed.id.toString())
+        plantUmlContainer.replace(idPlaceholder, umlIndexed.id.toString()),
       );
     }, text);
 
-    const coloredUmls = plantUmlsIndexed.map((plantUmlIndexed: umlIndexed) => this.colorUML(plantUmlIndexed));
+    const coloredUmls = plantUmlsIndexed.map((plantUmlIndexed: umlIndexed) =>
+      this.colorUML(plantUmlIndexed),
+    );
 
     // send the adapted plantUml to the server for rendering and inject the result into the html DOM based on the unique plantUml id
     this.injectableElementsFoundSubject.next(() => {

@@ -22,7 +22,7 @@ export class RealtimeSyncService implements vscode.Disposable {
     this.disposables.push(
       this.webSocket.onConnectionStateChange((state) => {
         this.handleConnectionState(state);
-      })
+      }),
     );
   }
 
@@ -73,14 +73,15 @@ export class RealtimeSyncService implements vscode.Disposable {
     this.disposables.push(
       resultSubscription.event((result) => {
         handleResultMessage(result);
-      })
+      }),
     );
 
-    const submissionSubscription = this.webSocket.subscribeToTopic<ProgrammingSubmission>(SUBMISSIONS_TOPIC);
+    const submissionSubscription =
+      this.webSocket.subscribeToTopic<ProgrammingSubmission>(SUBMISSIONS_TOPIC);
     this.disposables.push(
       submissionSubscription.event((submission) => {
         handleSubmissionMessage(submission);
-      })
+      }),
     );
 
     this.subscriptionsInitialized = true;
@@ -139,7 +140,10 @@ export class RealtimeSyncService implements vscode.Disposable {
       return;
     }
 
-    const refreshedExercise = await fetchExerciseDetailesById(session.accessToken, displayedExerciseId);
+    const refreshedExercise = await fetchExerciseDetailesById(
+      session.accessToken,
+      displayedExerciseId,
+    );
     setDisplayedState(refreshedExercise.course ?? state.displayedCourse, refreshedExercise);
   }
 }

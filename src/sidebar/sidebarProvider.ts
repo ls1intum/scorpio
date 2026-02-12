@@ -20,7 +20,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
-    private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>
+    private readonly onAuthSessionsChange: vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>,
   ) {
     onStateChange.event(() => {
       this.displayExercise();
@@ -110,7 +110,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           }
           const exercises = await fetchProgrammingExercisesByCourseId(
             session.accessToken,
-            getState().displayedCourse!.id!
+            getState().displayedCourse!.id!,
           );
           this._view?.webview.postMessage({
             command: CommandFromExtension.SEND_EXERCISE_OPTIONS,
@@ -120,7 +120,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
         case CommandFromWebview.GET_EXERCISE_DETAILS: {
           const { course: course, exercise: exercise } = await getProblemStatementDetails(
-            getState().displayedExercise!
+            getState().displayedExercise!,
           );
           setDisplayedState(course, exercise);
           break;
@@ -151,14 +151,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             /<svg([^>]*)>/,
             `<svg$1>
             <style>svg { background-color: ${getUmlBackgroundColor()}; }</style>
-            `
+            `,
           );
           umlFileProvider.writeFile(previewUri, Buffer.from(plantUml, "utf-8"));
           break;
         }
         case CommandFromWebview.OPEN_UML: {
           const previewUri = umlFileProvider.idsToUri(pathParts[1], pathParts[2]);
-          await vscode.commands.executeCommand("vscode.openWith", previewUri, "imagePreview.previewEditor");
+          await vscode.commands.executeCommand(
+            "vscode.openWith",
+            previewUri,
+            "imagePreview.previewEditor",
+          );
           break;
         }
         case CommandFromWebview.CLONE_REPOSITORY: {

@@ -25,7 +25,7 @@ export async function submitCurrentWorkspace() {
   const confirm = await vscode.window.showWarningMessage(
     `Are you sure you want to submit your workspace \n`,
     { modal: true },
-    "Confirm"
+    "Confirm",
   );
 
   if (confirm !== "Confirm") {
@@ -33,7 +33,7 @@ export async function submitCurrentWorkspace() {
   }
   await gitRepo.add(".");
   await gitRepo.commit("Submit workspace from artemis plugin");
-  await gitRepo.push()
+  await gitRepo.push();
 
   vscode.window.showInformationMessage("Workspace submitted successfully");
 }
@@ -56,22 +56,23 @@ export async function detectRepoCourseAndExercise() {
   }
 
   const repoUrl = foundRepoAndRemote.remote.refs.fetch!;
-  if (getProjectKeyFromRepoUrl(repoUrl) === getProjectKey(getState().repoCourse, getState().repoExercise)) {
+  if (
+    getProjectKeyFromRepoUrl(repoUrl) ===
+    getProjectKey(getState().repoCourse, getState().repoExercise)
+  ) {
     console.log("Repo already detected");
     gitRepo = foundRepoAndRemote.repo;
     return;
   }
 
-  const course_exercise: { course: Course; exercise: Exercise } = await getCourseExerciseByRepoUrl(
-    repoUrl
-  );
+  const course_exercise: { course: Course; exercise: Exercise } =
+    await getCourseExerciseByRepoUrl(repoUrl);
 
   gitRepo = foundRepoAndRemote.repo;
   setRepoState(course_exercise.course, course_exercise.exercise);
 }
 
-async function getArtemisRepo(
-): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
+async function getArtemisRepo(): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
   if (!settings.base_url) {
     throw new Error("Base URL is not set");
   }
@@ -106,7 +107,7 @@ async function getArtemisRepo(
 
 async function checkIfArtemisRepo(
   workDirectory: string,
-  artemisUrl: string
+  artemisUrl: string,
 ): Promise<{ repo: SimpleGit; remote: RemoteWithRefs } | undefined> {
   const git: SimpleGit = simpleGit(workDirectory);
   try {

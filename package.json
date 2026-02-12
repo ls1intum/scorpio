@@ -1,25 +1,79 @@
 {
   "name": "artemis-scorpio",
   "displayName": "Artemis - Scorpio",
-  "description": "",
-  "publisher": "tum-aet",
-  "icon": "media/icon.png",
   "version": "0.0.0",
-  "engines": {
-    "vscode": "^1.95.0"
-  },
+  "description": "",
   "categories": [
     "Other"
   ],
-  "extensionKind": [
-    "workspace",
-    "ui"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "bugs": {
+    "url": "https://github.com/ls1intum/scorpio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ls1intum/scorpio.git"
+  },
+  "publisher": "tum-aet",
   "main": "./dist/extension.js",
   "browser": "./dist/extension.js",
+  "scripts": {
+    "install:all": "npm run install:webview && npm run install:extension",
+    "build": "npm run build:webview && npm run build:extension",
+    "watch": "npm run watch:webview && npm run watch:extension",
+    "install:extension": "npm install --no-scripts",
+    "build:extension": "webpack --mode production",
+    "compile:extension": "webpack",
+    "watch:extension": "webpack --watch",
+    "install:webview": "cd webview && npm install",
+    "build:webview": "cd webview && npm run build",
+    "watch:webview": "cd webview && npm run watch",
+    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
+    "pretest": "npm run compile:extension",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "vscode:prepublish": "npm run build",
+    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
+    "@vscode/vsce": "^3.1.1",
+    "fetch-cookie": "^3.0.1",
+    "markdown-it": "^14.1.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "simple-git": "^3.27.0",
+    "sockjs-client": "^1.6.1",
+    "ts-node": "^10.9.2",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/assert": "^1.5.10",
+    "@types/mocha": "^10.0.9",
+    "@types/sockjs-client": "^1.5.4",
+    "@types/stompjs": "^2.3.10",
+    "@types/vscode": "^1.94.0",
+    "@types/webpack-env": "^1.18.5",
+    "@types/ws": "^8.5.13",
+    "@typescript-eslint/eslint-plugin": "^8.9.0",
+    "@typescript-eslint/parser": "^8.9.0",
+    "@vscode/test-web": "^0.0.62",
+    "assert": "^2.1.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.12.0",
+    "html-loader": "^5.1.0",
+    "mocha": "^10.7.3",
+    "oxfmt": "^0.31.0",
+    "process": "^0.11.10",
+    "raw-loader": "^4.0.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
+  },
   "contributes": {
     "authentication": [
       {
@@ -200,72 +254,18 @@
       ]
     }
   },
-  "scripts": {
-    "install:all": "npm run install:webview && npm run install:extension",
-    "build": "npm run build:webview && npm run build:extension",
-    "watch": "npm run watch:webview && npm run watch:extension",
-    "install:extension": "npm install --no-scripts",
-    "build:extension": "webpack --mode production",
-    "compile:extension": "webpack",
-    "watch:extension": "webpack --watch",
-    "install:webview": "cd webview && npm install",
-    "build:webview": "cd webview && npm run build",
-    "watch:webview": "cd webview && npm run watch",
-    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-    "pretest": "npm run compile:extension",
-    "lint": "eslint src --ext ts",
-    "package": "vsce package",
-    "vscode:prepublish": "npm run build",
-    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check"
-  },
-  "devDependencies": {
-    "@types/assert": "^1.5.10",
-    "@types/mocha": "^10.0.9",
-    "@types/sockjs-client": "^1.5.4",
-    "@types/stompjs": "^2.3.10",
-    "@types/vscode": "^1.94.0",
-    "@types/webpack-env": "^1.18.5",
-    "@types/ws": "^8.5.13",
-    "@typescript-eslint/eslint-plugin": "^8.9.0",
-    "@typescript-eslint/parser": "^8.9.0",
-    "@vscode/test-web": "^0.0.62",
-    "assert": "^2.1.0",
-    "dotenv": "^16.4.5",
-    "eslint": "^9.12.0",
-    "html-loader": "^5.1.0",
-    "mocha": "^10.7.3",
-    "process": "^0.11.10",
-    "raw-loader": "^4.0.2",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.5.4",
-    "webpack": "^5.93.0",
-    "webpack-cli": "^5.1.4",
-    "oxfmt": "^0.31.0"
-  },
-  "dependencies": {
-    "@stomp/stompjs": "^7.0.0",
-    "@vscode/vsce": "^3.1.1",
-    "fetch-cookie": "^3.0.1",
-    "markdown-it": "^14.1.0",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "simple-git": "^3.27.0",
-    "sockjs-client": "^1.6.1",
-    "ts-node": "^10.9.2",
-    "uuid": "^10.0.0",
-    "ws": "^8.18.0"
-  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "extensionDependencies": [
     "vscode.git"
   ],
-  "bugs": {
-    "url": "https://github.com/ls1intum/scorpio/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ls1intum/scorpio.git"
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.95.0"
   }
 }

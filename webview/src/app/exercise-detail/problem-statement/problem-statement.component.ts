@@ -12,7 +12,7 @@ import {
   OnDestroy,
   effect,
 } from "@angular/core";
-import hljs from 'highlight.js';
+import hljs from "highlight.js";
 import { htmlForMarkdown } from "./markdown-util/markdown.converter";
 import { CommonModule } from "@angular/common";
 import { Task, TaskArray } from "./task/task.model";
@@ -25,7 +25,11 @@ import { ProgrammingExercisePlantUmlExtensionWrapper } from "./markdown-util/pla
 import { merge, Subscription } from "rxjs";
 import { ProgrammingExerciseInstructionService } from "./programming-exercise.service";
 import { ProgrammingExerciseTaskExtensionWrapper, taskRegex } from "./markdown-util/task.plugin";
-import { getLatestResult, getLatestResultBySubmission, getLatestSubmission } from "@shared/models/participation.model";
+import {
+  getLatestResult,
+  getLatestResultBySubmission,
+  getLatestSubmission,
+} from "@shared/models/participation.model";
 
 const taskDivElement = (exerciseId: number, taskId: number) => `pe-${exerciseId}-task-${taskId}`;
 
@@ -41,11 +45,15 @@ export class ProblemStatementComponent implements OnDestroy {
   // accept exercise as input
   exercise = input.required<Exercise>();
 
-  latestSubmission = computed(() => getLatestSubmission(this.exercise().studentParticipations?.at(0)));
+  latestSubmission = computed(() =>
+    getLatestSubmission(this.exercise().studentParticipations?.at(0)),
+  );
   latestResult = computed(() => getLatestResultBySubmission(this.latestSubmission()));
   loading = computed(() => !!this.latestSubmission() && !this.latestResult());
-  
-  problemStatement: Signal<string> = computed(() => this.renderMarkdown(this.exercise().problemStatement));
+
+  problemStatement: Signal<string> = computed(() =>
+    this.renderMarkdown(this.exercise().problemStatement),
+  );
 
   public tasks: TaskArray = [];
   private taskIndex = 0;
@@ -61,7 +69,7 @@ export class ProblemStatementComponent implements OnDestroy {
   constructor(
     private programmingExerciseInstructionService: ProgrammingExerciseInstructionService,
     private taskPlugin: ProgrammingExerciseTaskExtensionWrapper,
-    private plantUmlPlugin: ProgrammingExercisePlantUmlExtensionWrapper
+    private plantUmlPlugin: ProgrammingExercisePlantUmlExtensionWrapper,
   ) {
     effect(() => {
       this.plantUmlPlugin.setLatestResult(this.latestResult());
@@ -70,7 +78,7 @@ export class ProblemStatementComponent implements OnDestroy {
     this.markdownExtensions = [this.taskPlugin.getExtension(), this.plantUmlPlugin.getExtension()];
 
     this.injectableContentFoundSubscription = merge(
-      plantUmlPlugin.subscribeForInjectableElementsFound()
+      plantUmlPlugin.subscribeForInjectableElementsFound(),
     ).subscribe((injectableCallback) => {
       this.injectableContentForMarkdownCallbacks = [
         ...this.injectableContentForMarkdownCallbacks,
@@ -118,7 +126,10 @@ export class ProblemStatementComponent implements OnDestroy {
           completeString: testMatch![0],
           taskName: testMatch![1],
           testIds: testMatch![2]
-            ? this.programmingExerciseInstructionService.convertTestListToIds(testMatch![2], this.exercise().testCases)
+            ? this.programmingExerciseInstructionService.convertTestListToIds(
+                testMatch![2],
+                this.exercise().testCases,
+              )
             : [],
         };
       });
@@ -130,18 +141,22 @@ export class ProblemStatementComponent implements OnDestroy {
         // Added zero-width space as content so the div actually consumes a line to prevent a <ol> display bug in Safari
         acc.replace(
           new RegExp(escapeStringForUseInRegex(task), "g"),
-          `<div class="${taskDivElement(this.exercise().id!, id)} d-flex">&#8203;</div>`
+          `<div class="${taskDivElement(this.exercise().id!, id)} d-flex">&#8203;</div>`,
         ),
-      problemStatementHtml
+      problemStatementHtml,
     );
   }
 
   private injectTasksIntoDocument = () => {
-    this.renderer.setProperty(this.problemContainer.nativeElement, "innerHTML", this.problemStatement());
+    this.renderer.setProperty(
+      this.problemContainer.nativeElement,
+      "innerHTML",
+      this.problemStatement(),
+    );
 
     this.tasks.forEach((task) => {
       const taskHtmlContainers = document.getElementsByClassName(
-        taskDivElement(this.exercise().id!, task.id)
+        taskDivElement(this.exercise().id!, task.id),
       );
 
       for (let i = 0; i < taskHtmlContainers.length; i++) {
@@ -155,9 +170,10 @@ export class ProblemStatementComponent implements OnDestroy {
     const componentRef = this.viewContainerRef.createComponent(TaskButton);
 
     componentRef.setInput("task", task);
-    const matchedFeedback = this.latestResult()?.feedbacks?.filter((feedback: Feedback) =>
-      !feedback.testCaseId || task.testIds.includes(feedback.testCaseId)
-    ) ?? [];
+    const matchedFeedback =
+      this.latestResult()?.feedbacks?.filter(
+        (feedback: Feedback) => !feedback.testCaseId || task.testIds.includes(feedback.testCaseId),
+      ) ?? [];
     componentRef.setInput("feedbackList", matchedFeedback ?? []);
     componentRef.setInput("loading", this.loading());
 

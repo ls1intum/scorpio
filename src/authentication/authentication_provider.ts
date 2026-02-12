@@ -24,7 +24,9 @@ class ArtemisSession implements vscode.AuthenticationSession {
   }
 }
 
-export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvider, vscode.Disposable {
+export class ArtemisAuthenticationProvider
+  implements vscode.AuthenticationProvider, vscode.Disposable
+{
   private readonly _disposable: vscode.Disposable | undefined;
   private sessionPromise: Promise<ArtemisSession | undefined>;
 
@@ -34,7 +36,7 @@ export class ArtemisAuthenticationProvider implements vscode.AuthenticationProvi
 
     this._disposable = vscode.Disposable.from(
       vscode.authentication.registerAuthenticationProvider(AUTH_ID, AUTH_NAME, this),
-      secretStorage.onDidChange(() => this.checkForUpdates())
+      secretStorage.onDidChange(() => this.checkForUpdates()),
     );
   }
 

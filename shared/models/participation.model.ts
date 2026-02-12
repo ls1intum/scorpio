@@ -20,27 +20,33 @@ export class StudentParticipation {
   constructor() {}
 }
 
-export function getLatestSubmission(participation: StudentParticipation | undefined): ProgrammingSubmission | undefined {
-  if( !participation || !participation.submissions || participation.submissions.length === 0) {
+export function getLatestSubmission(
+  participation: StudentParticipation | undefined,
+): ProgrammingSubmission | undefined {
+  if (!participation || !participation.submissions || participation.submissions.length === 0) {
     return undefined;
   }
-  
+
   return participation?.submissions?.reduce((latestSubmission, currentSubmission) => {
     return latestSubmission.id! > currentSubmission.id! ? latestSubmission : currentSubmission;
   });
 }
 
-export function getLatestResultBySubmission(submission: ProgrammingSubmission | undefined): Result | undefined {
+export function getLatestResultBySubmission(
+  submission: ProgrammingSubmission | undefined,
+): Result | undefined {
   if (!submission || !submission.results || submission.results.length === 0) {
     return undefined;
   }
-  
+
   return submission?.results?.reduce((latestResult, currentResult) => {
     return latestResult.id! > currentResult.id! ? latestResult : currentResult;
-  })
+  });
 }
 
-export function getLatestResult(participation: StudentParticipation | undefined): Result | undefined {
+export function getLatestResult(
+  participation: StudentParticipation | undefined,
+): Result | undefined {
   return getLatestResultBySubmission(getLatestSubmission(participation));
 }
 

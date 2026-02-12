@@ -1,9 +1,9 @@
 import type { WebviewApi } from "vscode-webview";
 
 export enum OutgoingCommands {
-  INFO =  "info",
+  INFO = "info",
   ERROR = "error",
-};
+}
 
 /**
  * A utility wrapper around the acquireVsCodeApi() function, which enables

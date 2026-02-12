@@ -16,8 +16,12 @@ export class FeedbackListComponent {
   onClose = output<void>();
   feedbackList = input.required<Feedback[]>();
 
-  protected failedFeedbackList = computed(() => this.feedbackList().filter((feedback) => !feedback.positive));
-  protected passedFeedbackList = computed(() => this.feedbackList().filter((feedback) => feedback.positive));
+  protected failedFeedbackList = computed(() =>
+    this.feedbackList().filter((feedback) => !feedback.positive),
+  );
+  protected passedFeedbackList = computed(() =>
+    this.feedbackList().filter((feedback) => feedback.positive),
+  );
 
   protected readonly faX = faX;
 

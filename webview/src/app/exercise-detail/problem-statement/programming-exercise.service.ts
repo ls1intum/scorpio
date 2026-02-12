@@ -35,7 +35,11 @@ export class ProgrammingExerciseInstructionService {
    * @param latestResult the result to check for if the tests were successful.
    */
   public testStatusForTask = (testIds: number[], latestResult?: Result): TaskResult => {
-    if (latestResult?.successful && (!latestResult.feedbacks || !latestResult.feedbacks.length) && testIds) {
+    if (
+      latestResult?.successful &&
+      (!latestResult.feedbacks || !latestResult.feedbacks.length) &&
+      testIds
+    ) {
       // Case 1: Submission fulfills all test cases and there are no feedbacks (legacy case), no further checking needed.
       return {
         testCaseState: TestCaseState.SUCCESS,
@@ -71,17 +75,26 @@ export class ProgrammingExerciseInstructionService {
   private separateTests(tests: number[], latestResult: Result): SplitTests {
     return tests.reduce(
       (acc, testId) => {
-        const feedback = latestResult?.feedbacks?.find((feedback) => feedback.testCase?.id === testId || feedback.testCaseId === testId);
+        const feedback = latestResult?.feedbacks?.find(
+          (feedback) => feedback.testCase?.id === testId || feedback.testCaseId === testId,
+        );
 
         return {
           successfulTests:
             feedback?.positive === true ? [...acc.successfulTests, testId] : acc.successfulTests,
-          failedTests: feedback?.positive === false ? [...acc.failedTests, testId] : acc.failedTests,
+          failedTests:
+            feedback?.positive === false ? [...acc.failedTests, testId] : acc.failedTests,
           notExecutedTests:
-            feedback?.positive === undefined ? [...acc.notExecutedTests, testId] : acc.notExecutedTests,
+            feedback?.positive === undefined
+              ? [...acc.notExecutedTests, testId]
+              : acc.notExecutedTests,
         };
       },
-      { successfulTests: [] as number[], failedTests: [] as number[], notExecutedTests: [] as number[] }
+      {
+        successfulTests: [] as number[],
+        failedTests: [] as number[],
+        notExecutedTests: [] as number[],
+      },
     );
   }
 
@@ -98,7 +111,10 @@ export class ProgrammingExerciseInstructionService {
       });
   }
 
-  public convertProblemStatementTextToTestId(test: string, testCases?: TestCase[]): number | undefined {
+  public convertProblemStatementTextToTestId(
+    test: string,
+    testCases?: TestCase[],
+  ): number | undefined {
     // If the text contains <testid> and </testid>, directly use the number inside
     const match = testIdRegex.exec(test);
     if (match) {

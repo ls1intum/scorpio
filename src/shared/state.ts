@@ -29,8 +29,12 @@ export function setDisplayedState(course: Course | undefined, exercise: Exercise
   if (course) {
     // if an exercise is displayed and it was not due yet, set the displayedKey to enable the clone button
     if (exercise && (!exercise.dueDate || new Date(exercise.dueDate) >= new Date())) {
-      vscode.commands.executeCommand("setContext", "scorpio.displayedKey", getProjectKey(course, exercise));
-    }else{
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.displayedKey",
+        getProjectKey(course, exercise),
+      );
+    } else {
       // if the exercise was due, disable the clone button
       vscode.commands.executeCommand("setContext", "scorpio.displayedKey", null);
     }
@@ -52,7 +56,9 @@ export function setRepoState(course: Course, exercise: Exercise) {
 
   // if the exercise is not due yet, set the repoKey to enable the push button
   if (!exercise.dueDate || new Date(exercise.dueDate) >= new Date()) {
-    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [getProjectKey(course, exercise)]);
+    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
+      getProjectKey(course, exercise),
+    ]);
   }
 
   if (!_state.displayedCourse || !_state.displayedExercise) {

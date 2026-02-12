@@ -15,7 +15,9 @@ export class SubmissionWebsocket {
       console.debug("Waiting for websocket connection...");
     } while (!GenericWebSocket.instance.connected);
 
-    const subscription = GenericWebSocket.instance.subscribeToTopic<ProgrammingSubmission>(PERSONAL_PARTICIPATION_TOPIC);
+    const subscription = GenericWebSocket.instance.subscribeToTopic<ProgrammingSubmission>(
+      PERSONAL_PARTICIPATION_TOPIC,
+    );
     subscription.event((submission) => {
       this.handleMessage(submission);
     });
@@ -27,7 +29,7 @@ export class SubmissionWebsocket {
     const state = getState();
     // check if displayed participation is the same as the one in the submission
     let displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-      (participation) => participation.id === participationId
+      (participation) => participation.id === participationId,
     );
 
     if (!displayedStudentParticipation) {
@@ -37,11 +39,11 @@ export class SubmissionWebsocket {
     submission.participation = undefined;
 
     // replace the submission with the same id otherwise push it
-    if(!displayedStudentParticipation.submissions) {
+    if (!displayedStudentParticipation.submissions) {
       displayedStudentParticipation.submissions = [];
     }
     displayedStudentParticipation.submissions = displayedStudentParticipation.submissions?.filter(
-      (s) => s.id !== submission.id
+      (s) => s.id !== submission.id,
     );
     displayedStudentParticipation.submissions?.push(submission!);
 

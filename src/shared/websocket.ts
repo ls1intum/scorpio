@@ -55,7 +55,7 @@ export class GenericWebSocket {
 
     const startTime = Date.now();
     await this.ensureConnection();
-    
+
     if (this.connected) {
       return true;
     }
@@ -103,7 +103,8 @@ export class GenericWebSocket {
 
     this.stompClient = new StompJs.Client({
       brokerURL: url.toString(),
-      webSocketFactory: () => new WebSocket(url, { headers: { Authorization: `Bearer ${session.accessToken}` } }),
+      webSocketFactory: () =>
+        new WebSocket(url, { headers: { Authorization: `Bearer ${session.accessToken}` } }),
       connectHeaders: {
         Authorization: `Bearer ${session.accessToken}`,
       },

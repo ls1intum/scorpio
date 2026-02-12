@@ -19,28 +19,22 @@ export async function buildCourseOptions(): Promise<Course> {
   if (!session) {
     throw new NotAuthenticatedError();
   }
-  const courses: Course[] =
-    await fetchAllCourses(session.accessToken);
+  const courses: Course[] = await fetchAllCourses(session.accessToken);
 
-  const courseOptions: CourseOption[] = courses
-    .map((course) => ({
-      label: course.title!,
-      detail: (() => {
-        const nextExercise = course.exercises
-          ?.filter(
-            (exercise) =>
-              exercise.dueDate && exercise.dueDate > new Date()
-          )
-          .sort((a, b) => (a.dueDate! > b.dueDate! ? 1 : -1))
-          .at(0);
-        return nextExercise
-          ? `Next exercise: ${nextExercise.title} due on ${
-              nextExercise.dueDate!.toLocaleString()}`
-          : "No upcoming exercise";
-      })(),
-      description: `${course.absoluteScore}/${course.maxPoints} Points`,
-      course: course,
-    }));
+  const courseOptions: CourseOption[] = courses.map((course) => ({
+    label: course.title!,
+    detail: (() => {
+      const nextExercise = course.exercises
+        ?.filter((exercise) => exercise.dueDate && exercise.dueDate > new Date())
+        .sort((a, b) => (a.dueDate! > b.dueDate! ? 1 : -1))
+        .at(0);
+      return nextExercise
+        ? `Next exercise: ${nextExercise.title} due on ${nextExercise.dueDate!.toLocaleString()}`
+        : "No upcoming exercise";
+    })(),
+    description: `${course.absoluteScore}/${course.maxPoints} Points`,
+    course: course,
+  }));
 
   const selectedCourse = await vscode.window.showQuickPick(courseOptions, {
     placeHolder: "Select a course",
