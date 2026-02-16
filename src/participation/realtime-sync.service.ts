@@ -31,6 +31,8 @@ export class RealtimeSyncService implements vscode.Disposable {
 
     if (connected) {
       this.ensureRealtimeSubscriptions();
+      // populate with initial data
+      await this.refreshNow();
       return;
     }
 
@@ -38,7 +40,7 @@ export class RealtimeSyncService implements vscode.Disposable {
   }
 
   public async refreshNow(): Promise<void> {
-    // await this.pollDisplayedExerciseDetails();
+    await this.pollDisplayedExerciseDetails();
   }
 
   public dispose(): void {
@@ -56,6 +58,9 @@ export class RealtimeSyncService implements vscode.Disposable {
     if (state === "connected") {
       this.ensureRealtimeSubscriptions();
       this.stopFallbackPolling();
+      this.refreshNow().catch((error) => {
+        console.debug("Refresh after websocket reconnect failed", error);
+      });
       return;
     }
 

@@ -3,15 +3,10 @@ import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getScoreString } from "@shared/models/exercise.model";
-import {
-  fetchParticipationByRepoName,
-  fetchResultDetails,
-  startExercise,
-} from "../artemis/participation.client";
+import { fetchParticipationByRepoName, startExercise } from "../artemis/participation.client";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
 import { fetchExerciseById, fetchExerciseDetailesById } from "../artemis/exercise.client";
 import { cloneUserRepo } from "../participation/cloning.service";
-import { getLatestResult } from "@shared/models/participation.model";
 
 export async function buildExerciseOptions(course: Course): Promise<Exercise> {
   const exercises = course.exercises;
@@ -130,7 +125,7 @@ export async function getProblemStatementDetails(exercise: Exercise) {
 /**
  *
  * @param repoUrl the repository url of the exercise
- * @returns the course plus the exercise with the participation of the repoURL and all submissions, results and feedbacks
+ * @returns the course plus the exercise with the latest submission/result details
  */
 export async function getCourseExerciseByRepoUrl(
   repoUrl: string,
@@ -145,34 +140,12 @@ export async function getCourseExerciseByRepoUrl(
 
   const repoName = repoUrl.split("/").pop()!.replace(".git", "");
 
-  let participation = await fetchParticipationByRepoName(session.accessToken, repoName);
-  const participationId = participation.id!;
+  const participation = await fetchParticipationByRepoName(session.accessToken, repoName);
   const exerciseId = participation.exercise?.id!;
 
   // fetch the exercise details to get the submissions and results
   const exercise = await fetchExerciseDetailesById(session.accessToken, exerciseId);
   const course = exercise.course!;
-
-  // fetch the result details to get the feedbacks and test cases
-  participation = exercise.studentParticipations?.find((p) => p.id === participationId)!;
-  const latestResult = getLatestResult(participation);
-  if (!participation || !latestResult) {
-    return { course: course, exercise: exercise };
-  }
-
-  const feedbacks = await fetchResultDetails(
-    session.accessToken,
-    participationId,
-    latestResult.id!,
-  );
-
-  // assign feedbacks to the result
-  latestResult.feedbacks = feedbacks;
-
-  // assign test cases to the exercise as they are exercise specific
-  exercise.testCases = feedbacks
-    .map((feedback) => feedback.testCase)
-    .filter((testCase) => testCase !== undefined);
 
   return { course: course, exercise: exercise };
 }

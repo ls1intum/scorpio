@@ -59,10 +59,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     this.initHTML();
 
-    webviewView.onDidChangeVisibility(() => {
-      this.initState();
-    });
-
     this.initState();
 
     webviewView.webview.onDidReceiveMessage(async (data) => {

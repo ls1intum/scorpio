@@ -102,7 +102,9 @@ function initSidebar(context: vscode.ExtensionContext): SidebarProvider {
     authenticationProvider.onAuthSessionsChange,
   );
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider),
+    vscode.window.registerWebviewViewProvider("artemis-sidebar", sidebarProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
   );
 
   return sidebarProvider;
@@ -198,7 +200,6 @@ function registerCommands(
     vscode.commands.registerCommand("scorpio.workspace.submit", async () => {
       try {
         await submitCurrentWorkspace();
-        await realtimeSync.refreshNow();
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to submit workspace");
       }

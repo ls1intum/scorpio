@@ -1,6 +1,11 @@
 import { Course } from "@shared/models/course.model";
 import { Exercise } from "@shared/models/exercise.model";
+import { Feedback } from "@shared/models/feedback.model";
+import { Result } from "@shared/models/result.model";
+import { ProgrammingSubmission } from "@shared/models/submission.model";
+import { TestCase } from "@shared/models/testcase.model";
 import { artemisRequestJson } from "../infra/http/artemis-http.client";
+import { fetchResultDetails } from "./participation.client";
 
 export async function fetchProgrammingExercisesByCourseId(
   token: string,
@@ -38,30 +43,73 @@ export async function fetchExerciseDetailesById(
   const response = await artemisRequestJson<any>(`/api/exercise/exercises/${exerciseId}/details`, {
     token,
   });
-  const exercise = response.exercise;
+  const exercise = response.exercise as Exercise;
+  exercise.dueDate = exercise.dueDate ? new Date(exercise.dueDate) : undefined;
 
-  // Transform API response to match our data model:
-  // From: participation -> results -> submission
-  // To:   participation -> submissions -> results
-  exercise.studentParticipations = (exercise.studentParticipations ?? []).map(
-    (participation: any) => {
-      const submissions = (participation.results ?? []).map((result: any) => {
-        const { submission } = result;
-        const resultWithoutSubmission = { ...result, submission: undefined };
+  const testCasesById = new Map<number, TestCase>();
+  const normalizedParticipations = [];
+  for (const participation of exercise.studentParticipations ?? []) {
+    const normalizedSubmissions: ProgrammingSubmission[] = (participation.submissions ?? []).map(
+      (submission: any) => ({
+        ...submission,
+        submissionDate: submission.submissionDate ? new Date(submission.submissionDate) : undefined,
+        results: (submission.results ?? []).map((result: any) => ({
+          ...result,
+          completionDate: result.completionDate ? new Date(result.completionDate) : undefined,
+          submission: undefined,
+        })) as Result[],
+        participation: undefined,
+      }),
+    );
 
-        return {
-          ...submission,
-          results: [resultWithoutSubmission],
-        };
-      });
+    const latestSubmission = getLatestById(normalizedSubmissions);
+    const latestResult: Result | undefined = latestSubmission
+      ? getLatestById<Result>(latestSubmission.results ?? [])
+      : undefined;
 
-      return {
-        ...participation,
-        submissions,
-        results: undefined,
-      };
-    },
-  );
+    if (latestSubmission) {
+      latestSubmission.results = latestResult ? [latestResult] : [];
+    }
 
-  return exercise as Exercise;
+    if (latestResult?.id && participation.id) {
+      const feedbacks: Feedback[] = await fetchResultDetails(
+        token,
+        participation.id,
+        latestResult.id,
+      );
+      latestResult.feedbacks = feedbacks;
+      for (const feedback of feedbacks) {
+        const testCase = feedback.testCase;
+        if (testCase?.id !== undefined) {
+          testCasesById.set(testCase.id, testCase);
+        }
+      }
+    }
+
+    normalizedParticipations.push({
+      ...participation,
+      submissions: latestSubmission ? [latestSubmission] : [],
+      results: undefined,
+    });
+  }
+  exercise.studentParticipations = normalizedParticipations;
+
+  if (testCasesById.size > 0) {
+    exercise.testCases = Array.from(testCasesById.values());
+  }
+
+  return exercise;
+}
+
+// Assumes ids are
+function getLatestById<T extends { id?: number }>(items: T[]): T | undefined {
+  if (items.length === 0) {
+    return undefined;
+  }
+
+  return items.reduce((latest, current) => {
+    const latestId = latest.id ?? -1;
+    const currentId = current.id ?? -1;
+    return currentId > latestId ? current : latest;
+  });
 }

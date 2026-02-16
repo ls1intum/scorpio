@@ -113,5 +113,5 @@ export function getProjectKey(
 
 export function getScoreString(exercise: Exercise): string {
   const score = getLatestResult(exercise.studentParticipations?.at(0))?.score;
-  return score ? `${score} %` : "No graded result";
+  return score !== undefined && score !== null ? `${score} %` : "No graded result";
 }
