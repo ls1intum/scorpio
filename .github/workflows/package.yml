@@ -1,54 +1,54 @@
 name: Package
 on:
-    workflow_call:
-        inputs:
-          version:
-            description: 'Version of the plugin to build'
-            default: "0.0.0"
-            required: false
-            type: string
-    pull_request:
-        branches:
-            - main
-    push:
-        branches:
-            - main
+  workflow_call:
+    inputs:
+      version:
+        description: "Version of the plugin to build"
+        default: "0.0.0"
+        required: false
+        type: string
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 jobs:
-    package:
-        name: Package
-        runs-on: ubuntu-latest
-        steps:
-            # Check out current repository
-            - name: Fetch Sources
-              uses: actions/checkout@v4
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v4
 
-            - uses: actions/setup-node@v4
-              with:
-                node-version: 20
-                cache: "npm"
-                registry-url: "https://npm.pkg.github.com"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
 
-            - name: Install CI
-              run: npm ci
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install CI
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Change version
-              run: npm version ${{ inputs.version }} --no-git-tag-version
+      - name: Change version
+        run: npm version ${{ inputs.version }} --no-git-tag-version
 
-            - name: Install Dependencies
-              run: npm run install:all
-                
-            - name: Build Project
-              run: npm run build
+      - name: Install Dependencies
+        run: npm run install:all
 
-            - name: Package VSIX
-              run: npm run package
+      - name: Build Project
+        run: npm run build
 
-            # Upload plugin artifact
-            - name: Upload Artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  path: ./*.vsix
-                  name: scorpio-${{ inputs.version }}.vsix
+      - name: Package VSIX
+        run: npm run package
+
+      # Upload plugin artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./*.vsix
+          name: scorpio-${{ inputs.version }}.vsix

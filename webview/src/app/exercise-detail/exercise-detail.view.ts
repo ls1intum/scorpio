@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, OnInit, Signal } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  OnInit,
+  Signal,
+} from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ProblemStatementComponent } from "./problem-statement/problem-statement.component";
 import { CommandFromWebview } from "@shared/webview-commands";

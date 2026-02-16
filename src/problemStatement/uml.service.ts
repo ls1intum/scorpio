@@ -16,6 +16,6 @@ export function addBackgroundColorToSvg(svg: string, backgroundColor: string): s
     /<svg([^>]*)>/,
     `<svg$1>
         <style>svg { background-color: ${backgroundColor}; }</style>
-        `
+        `,
   );
 }

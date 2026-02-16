@@ -53,7 +53,7 @@ const extensionConfig = {
             loader: "ts-loader",
           },
         ],
-      }
+      },
     ],
   },
   plugins: [

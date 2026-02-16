@@ -42,7 +42,7 @@ export async function cloneUserRepo(repoUrl: string, username: string) {
 
   const vcsToken = await retrieveVcsAccessToken(
     session.accessToken,
-    getState().displayedExercise?.studentParticipations![0].id!
+    getState().displayedExercise?.studentParticipations![0].id!,
   );
   // Clone the repository
   const cloneUrlWithToken = new URL(addVcsTokenToUrl(repoUrl, username, vcsToken));
@@ -55,7 +55,7 @@ export async function cloneUserRepo(repoUrl: string, username: string) {
       { modal: true },
       "Open",
       "Open in New Window",
-      "Cancel"
+      "Cancel",
     );
 
     if (openIn === "Open") {

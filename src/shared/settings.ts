@@ -30,7 +30,9 @@ function getSettings(): Settings {
     vscode.window.showErrorMessage("Artemis Base URL not set. Please set it in the settings.");
   }
 
-  const default_repo_path = vscode.workspace.getConfiguration("scorpio").get<string>("defaults.repoPath");
+  const default_repo_path = vscode.workspace
+    .getConfiguration("scorpio")
+    .get<string>("defaults.repoPath");
 
   const easter_egg = vscode.workspace.getConfiguration("scorpio").get<boolean>("?") ?? false;
 
@@ -65,11 +67,17 @@ async function handleSettingsChange(e: vscode.ConfigurationChangeEvent) {
     if (theiaEnv.THEIA_FLAG) {
       console.warn("Default repository path can not be changed in theia environment");
       const config = vscode.workspace.getConfiguration("scorpio");
-      config.update("defaults.repoPath", settings.default_repo_path, vscode.ConfigurationTarget.Global);
+      config.update(
+        "defaults.repoPath",
+        settings.default_repo_path,
+        vscode.ConfigurationTarget.Global,
+      );
       return;
     }
 
-    const default_repo_path = vscode.workspace.getConfiguration("scorpio").get<string>("defaults.repoPath");
+    const default_repo_path = vscode.workspace
+      .getConfiguration("scorpio")
+      .get<string>("defaults.repoPath");
     settings.default_repo_path = default_repo_path;
   }
 

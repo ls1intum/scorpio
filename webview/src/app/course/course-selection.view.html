@@ -12,11 +12,14 @@
   >
     <h6 class="text-center w-100 text-truncate m-0">{{ courseWithNextDue.course.title }}</h6>
     <div class="text-start mb-1">
-      <b>Score:</b><br>
-      <span>{{courseWithNextDue.course.absoluteScore}} / {{courseWithNextDue.course.maxPoints}} Points</span>
+      <b>Score:</b><br />
+      <span
+        >{{courseWithNextDue.course.absoluteScore}} / {{courseWithNextDue.course.maxPoints}}
+        Points</span
+      >
     </div>
     <div class="text-start">
-      <b>Next exercise:</b><br>
+      <b>Next exercise:</b><br />
       @if (courseWithNextDue.nextDueExercise) {
       <span
         ><code>{{courseWithNextDue.nextDueExercise.title}}</code> due on

@@ -48,7 +48,7 @@ export function htmlForMarkdown(
   markdownText?: string,
   extensions: PluginSimple[] = [],
   allowedHtmlTags: string[] | undefined = undefined,
-  allowedHtmlAttributes: string[] | undefined = undefined
+  allowedHtmlAttributes: string[] | undefined = undefined,
 ): string {
   if (!markdownText || markdownText === "") {
     return "";

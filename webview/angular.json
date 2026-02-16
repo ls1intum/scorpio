@@ -21,10 +21,7 @@
               "base": "build"
             },
             "index": "src/index.html",
-            "polyfills": [
-              "src/polyfills.ts",
-              "@angular/localize/init"
-            ],
+            "polyfills": ["src/polyfills.ts", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/assets"],
             "styles": [
@@ -33,7 +30,11 @@
               "src/vscode.css"
             ],
             "scripts": [],
-            "allowedCommonJsDependencies": ["@vscode/markdown-it-katex", "dompurify", "markdown-it-class"],
+            "allowedCommonJsDependencies": [
+              "@vscode/markdown-it-katex",
+              "dompurify",
+              "markdown-it-class"
+            ],
             "inlineStyleLanguage": "css",
             "browser": "src/main.ts"
           },

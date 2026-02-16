@@ -24,9 +24,8 @@ import * as bootstrap from "bootstrap";
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CourseSelectionView implements OnInit, AfterViewInit {
-  coursesWithNextDue: WritableSignal<{ course: Course; nextDueExercise: Exercise | undefined }[]> = signal(
-    []
-  );
+  coursesWithNextDue: WritableSignal<{ course: Course; nextDueExercise: Exercise | undefined }[]> =
+    signal([]);
 
   constructor() {}
 

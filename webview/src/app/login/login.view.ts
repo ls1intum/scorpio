@@ -10,7 +10,7 @@ import { CommandFromWebview } from "@shared/webview-commands";
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class LoginView {
   requestLogin() {

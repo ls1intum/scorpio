@@ -1,6 +1,7 @@
 import { Result } from "@shared/models/result.model";
 import { ProgrammingSubmission } from "@shared/models/submission.model";
-import { getState, set_displayed_state } from "../shared/state";
+import { getLatestSubmission } from "@shared/models/participation.model";
+import { getState, setDisplayedState } from "../shared/state";
 
 export function handleSubmissionMessage(submission: ProgrammingSubmission) {
   const participationId = submission.participation?.id;
@@ -10,23 +11,37 @@ export function handleSubmissionMessage(submission: ProgrammingSubmission) {
 
   const state = getState();
   const displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-    (participation) => participation.id === participationId
+    (participation) => participation.id === participationId,
   );
 
   if (!displayedStudentParticipation) {
     return;
   }
 
-  submission.participation = undefined;
+  const normalizedSubmission: ProgrammingSubmission = {
+    ...submission,
+    participation: undefined,
+  };
 
-  displayedStudentParticipation.submissions ??= [];
+  const currentLatestSubmission = getLatestSubmission(displayedStudentParticipation);
+  if (
+    currentLatestSubmission &&
+    (currentLatestSubmission.id ?? -1) > (normalizedSubmission.id ?? -1)
+  ) {
+    return;
+  }
 
-  displayedStudentParticipation.submissions = displayedStudentParticipation.submissions.filter(
-    (currentSubmission) => currentSubmission.id !== submission.id
+  const existingResultsForSameSubmission =
+    currentLatestSubmission?.id === normalizedSubmission.id
+      ? currentLatestSubmission?.results
+      : undefined;
+  normalizedSubmission.results = getLatestResultArray(
+    normalizedSubmission.results,
+    existingResultsForSameSubmission,
   );
-  displayedStudentParticipation.submissions.push(submission);
+  displayedStudentParticipation.submissions = [normalizedSubmission];
 
-  set_displayed_state(state.displayedCourse, state.displayedExercise);
+  setDisplayedState(state.displayedCourse, state.displayedExercise);
 }
 
 export function handleResultMessage(result: Result) {
@@ -37,7 +52,7 @@ export function handleResultMessage(result: Result) {
 
   const state = getState();
   const displayedStudentParticipation = state.displayedExercise?.studentParticipations?.find(
-    (participation) => participation.id === participationId
+    (participation) => participation.id === participationId,
   );
 
   if (!displayedStudentParticipation) {
@@ -49,17 +64,47 @@ export function handleResultMessage(result: Result) {
     return;
   }
 
-  submission.participation = undefined;
+  const currentLatestSubmission = getLatestSubmission(displayedStudentParticipation);
+  if (currentLatestSubmission && (currentLatestSubmission.id ?? -1) > submission.id) {
+    return;
+  }
 
-  result.submission = undefined;
-  submission.results = [result];
+  const normalizedResult: Result = {
+    ...result,
+    submission: undefined,
+  };
 
-  displayedStudentParticipation.submissions ??= [];
+  const nextLatestSubmission: ProgrammingSubmission =
+    currentLatestSubmission && currentLatestSubmission.id === submission.id
+      ? {
+          ...currentLatestSubmission,
+          results: getLatestResultArray(currentLatestSubmission.results, [normalizedResult]),
+        }
+      : {
+          ...submission,
+          participation: undefined,
+          results: [normalizedResult],
+        };
 
-  displayedStudentParticipation.submissions = displayedStudentParticipation.submissions.filter(
-    (currentSubmission) => currentSubmission.id !== submission.id
-  );
-  displayedStudentParticipation.submissions.push(submission);
+  displayedStudentParticipation.submissions = [nextLatestSubmission];
 
-  set_displayed_state(state.displayedCourse, state.displayedExercise);
+  setDisplayedState(state.displayedCourse, state.displayedExercise);
+}
+
+function getLatestResultArray(...resultArrays: Array<Result[] | undefined>): Result[] {
+  const allResults = resultArrays.flatMap((results) => results ?? []);
+  const latest = getLatestById(allResults);
+  return latest ? [latest] : [];
+}
+
+function getLatestById<T extends { id?: number }>(items: T[]): T | undefined {
+  if (items.length === 0) {
+    return undefined;
+  }
+
+  return items.reduce((latest, current) => {
+    const latestId = latest.id ?? -1;
+    const currentId = current.id ?? -1;
+    return currentId > latestId ? current : latest;
+  });
 }

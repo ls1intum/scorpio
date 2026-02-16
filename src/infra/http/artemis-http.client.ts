@@ -25,7 +25,10 @@ function buildUrl(path: string, query?: Record<string, QueryValue>): URL {
   return url;
 }
 
-export async function artemisRequest(path: string, options: ArtemisRequestOptions = {}): Promise<Response> {
+export async function artemisRequest(
+  path: string,
+  options: ArtemisRequestOptions = {},
+): Promise<Response> {
   const headers: Record<string, string> = { ...options.headers };
   if (options.token) {
     headers.Authorization = `Bearer ${options.token}`;
@@ -40,7 +43,10 @@ export async function artemisRequest(path: string, options: ArtemisRequestOption
   });
 }
 
-export async function artemisRequestJson<T>(path: string, options: ArtemisRequestOptions = {}): Promise<T> {
+export async function artemisRequestJson<T>(
+  path: string,
+  options: ArtemisRequestOptions = {},
+): Promise<T> {
   const response = await artemisRequest(path, {
     ...options,
     headers: {
@@ -57,7 +63,10 @@ export async function artemisRequestJson<T>(path: string, options: ArtemisReques
   return (await response.json()) as T;
 }
 
-export async function artemisRequestText(path: string, options: ArtemisRequestOptions = {}): Promise<string> {
+export async function artemisRequestText(
+  path: string,
+  options: ArtemisRequestOptions = {},
+): Promise<string> {
   const response = await artemisRequest(path, options);
 
   if (!response.ok) {

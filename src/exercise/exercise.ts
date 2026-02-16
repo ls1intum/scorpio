@@ -3,13 +3,12 @@ import { getState } from "../shared/state";
 import { AUTH_ID } from "../authentication/authentication_provider";
 import { Course } from "@shared/models/course.model";
 import { Exercise, getScoreString } from "@shared/models/exercise.model";
-import { fetch_participation_by_repo_name, fetch_result_details, start_exercise } from "../artemis/participation.client";
+import { fetchParticipationByRepoName, startExercise } from "../artemis/participation.client";
 import { NotAuthenticatedError } from "../authentication/not_authenticated.error";
-import { fetch_exercise_by_id, fetch_exercise_details_by_id } from "../artemis/exercise.client";
+import { fetchExerciseById, fetchExerciseDetailesById } from "../artemis/exercise.client";
 import { cloneUserRepo } from "../participation/cloning.service";
-import { getLatestResult } from "@shared/models/participation.model";
 
-export async function build_exercise_options(course: Course): Promise<Exercise> {
+export async function buildExerciseOptions(course: Course): Promise<Exercise> {
   const exercises = course.exercises;
   if (!exercises) {
     throw new Error("No exercises found in the course");
@@ -71,7 +70,7 @@ export async function build_exercise_options(course: Course): Promise<Exercise> 
     ],
     {
       placeHolder: "Select an exercise",
-    }
+    },
   );
   if (!selectedExercise || !selectedExercise.exercise) {
     throw new Error("No exercise was selected");
@@ -98,26 +97,26 @@ export async function cloneCurrentExercise() {
       throw new NotAuthenticatedError();
     }
 
-    participation = await start_exercise(session.accessToken, displayedExercise.id!);
+    participation = await startExercise(session.accessToken, displayedExercise.id!);
   }
   displayedExercise.studentParticipations = [participation];
 
   await cloneUserRepo(participation.repositoryUri!, participation.participantIdentifier!);
 }
 
-export async function get_problem_statement_details(exercise: Exercise) {
+export async function getProblemStatementDetails(exercise: Exercise) {
   // check if exercise has an active participation
   let course: Course;
 
   const studentParticipation = exercise.studentParticipations?.at(0);
   if (studentParticipation) {
     // if so query the details by repoUrl of the latest participation
-    ({ course: course, exercise: exercise } = await get_course_exercise_by_repoUrl(
-      studentParticipation.repositoryUri!
+    ({ course: course, exercise: exercise } = await getCourseExerciseByRepoUrl(
+      studentParticipation.repositoryUri!,
     ));
   } else {
     // if not query the details (mainly the problem statement) by the exercise id
-    ({ course, exercise } = await get_course_exercise_by_exercise_id(exercise.id!));
+    ({ course, exercise } = await getCourseExerciseByExerciseId(exercise.id!));
   }
 
   return { course: course, exercise: exercise };
@@ -126,10 +125,10 @@ export async function get_problem_statement_details(exercise: Exercise) {
 /**
  *
  * @param repoUrl the repository url of the exercise
- * @returns the course plus the exercise with the participation of the repoURL and all submissions, results and feedbacks
+ * @returns the course plus the exercise with the latest submission/result details
  */
-export async function get_course_exercise_by_repoUrl(
-  repoUrl: string
+export async function getCourseExerciseByRepoUrl(
+  repoUrl: string,
 ): Promise<{ course: Course; exercise: Exercise }> {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
@@ -141,33 +140,17 @@ export async function get_course_exercise_by_repoUrl(
 
   const repoName = repoUrl.split("/").pop()!.replace(".git", "");
 
-  let participation = await fetch_participation_by_repo_name(session.accessToken, repoName);
-  const participationId = participation.id!;
+  const participation = await fetchParticipationByRepoName(session.accessToken, repoName);
   const exerciseId = participation.exercise?.id!;
 
   // fetch the exercise details to get the submissions and results
-  const exercise = await fetch_exercise_details_by_id(session.accessToken, exerciseId);
+  const exercise = await fetchExerciseDetailesById(session.accessToken, exerciseId);
   const course = exercise.course!;
 
-  // fetch the result details to get the feedbacks and test cases
-  participation = exercise.studentParticipations?.find((p) => p.id === participationId)!;
-  const latestResult = getLatestResult(participation);
-  if (!participation || !latestResult) {
-    return { course: course, exercise: exercise };
-  }  
-
-  const feedbacks = await fetch_result_details(session.accessToken, participationId, latestResult.id!);
-
-  // assign feedbacks to the result
-  latestResult.feedbacks = feedbacks;
-
-  // assign test cases to the exercise as they are exercise specific
-  exercise.testCases = feedbacks.map((feedback) => feedback.testCase).filter((testCase) => testCase !== undefined);
-  
   return { course: course, exercise: exercise };
 }
 
-async function get_course_exercise_by_exercise_id(exerciseId: number) {
+async function getCourseExerciseByExerciseId(exerciseId: number) {
   const session = await vscode.authentication.getSession(AUTH_ID, [], {
     createIfNone: false,
   });
@@ -176,7 +159,10 @@ async function get_course_exercise_by_exercise_id(exerciseId: number) {
     throw new NotAuthenticatedError();
   }
 
-  const { course: course, exercise: exercise } = await fetch_exercise_by_id(session.accessToken, exerciseId);
+  const { course: course, exercise: exercise } = await fetchExerciseById(
+    session.accessToken,
+    exerciseId,
+  );
 
   return { course: course, exercise: exercise };
 }

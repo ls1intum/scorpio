@@ -3,8 +3,8 @@ import { Result } from "@shared/models/result.model";
 import { ProgrammingSubmission } from "@shared/models/submission.model";
 import { GenericWebSocket, WebSocketConnectionState } from "../shared/websocket";
 import { AUTH_ID } from "../authentication/authentication_provider";
-import { fetch_exercise_details_by_id } from "../artemis/exercise.client";
-import { getState, set_displayed_state } from "../shared/state";
+import { fetchExerciseDetailesById } from "../artemis/exercise.client";
+import { getState, setDisplayedState } from "../shared/state";
 import { handleResultMessage, handleSubmissionMessage } from "./realtime.handlers";
 
 const RESULTS_TOPIC = `/user/topic/newResults`;
@@ -22,7 +22,7 @@ export class RealtimeSyncService implements vscode.Disposable {
     this.disposables.push(
       this.webSocket.onConnectionStateChange((state) => {
         this.handleConnectionState(state);
-      })
+      }),
     );
   }
 
@@ -31,6 +31,8 @@ export class RealtimeSyncService implements vscode.Disposable {
 
     if (connected) {
       this.ensureRealtimeSubscriptions();
+      // populate with initial data
+      await this.refreshNow();
       return;
     }
 
@@ -38,7 +40,7 @@ export class RealtimeSyncService implements vscode.Disposable {
   }
 
   public async refreshNow(): Promise<void> {
-    // await this.pollDisplayedExerciseDetails();
+    await this.pollDisplayedExerciseDetails();
   }
 
   public dispose(): void {
@@ -56,6 +58,9 @@ export class RealtimeSyncService implements vscode.Disposable {
     if (state === "connected") {
       this.ensureRealtimeSubscriptions();
       this.stopFallbackPolling();
+      this.refreshNow().catch((error) => {
+        console.debug("Refresh after websocket reconnect failed", error);
+      });
       return;
     }
 
@@ -73,14 +78,15 @@ export class RealtimeSyncService implements vscode.Disposable {
     this.disposables.push(
       resultSubscription.event((result) => {
         handleResultMessage(result);
-      })
+      }),
     );
 
-    const submissionSubscription = this.webSocket.subscribeToTopic<ProgrammingSubmission>(SUBMISSIONS_TOPIC);
+    const submissionSubscription =
+      this.webSocket.subscribeToTopic<ProgrammingSubmission>(SUBMISSIONS_TOPIC);
     this.disposables.push(
       submissionSubscription.event((submission) => {
         handleSubmissionMessage(submission);
-      })
+      }),
     );
 
     this.subscriptionsInitialized = true;
@@ -139,7 +145,10 @@ export class RealtimeSyncService implements vscode.Disposable {
       return;
     }
 
-    const refreshedExercise = await fetch_exercise_details_by_id(session.accessToken, displayedExerciseId);
-    set_displayed_state(refreshedExercise.course ?? state.displayedCourse, refreshedExercise);
+    const refreshedExercise = await fetchExerciseDetailesById(
+      session.accessToken,
+      displayedExerciseId,
+    );
+    setDisplayedState(refreshedExercise.course ?? state.displayedCourse, refreshedExercise);
   }
 }

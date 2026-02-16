@@ -16,12 +16,19 @@ provideVSCodeDesignSystem().register(vsCodeButton());
   selector: "app-root",
   templateUrl: "./app.component.html",
   standalone: true,
-  imports: [BrowserModule, LoginView, CourseSelectionView, ExerciseSelectionView, ExerciseDetailView, PetComponent],
+  imports: [
+    BrowserModule,
+    LoginView,
+    CourseSelectionView,
+    ExerciseSelectionView,
+    ExerciseDetailView,
+    PetComponent,
+  ],
 })
 export class AppComponent implements OnInit {
   protected ViewState = ViewState;
   protected signal = signal;
-  
+
   viewState: WritableSignal<ViewState> = signal(ViewState.LOGIN);
   course: WritableSignal<Course | undefined> = signal(undefined);
   exercise: WritableSignal<Exercise | undefined> = signal(undefined);
@@ -37,7 +44,7 @@ export class AppComponent implements OnInit {
         this.course.set(course);
         this.exercise.set(exercise);
         this.repoKey.set(repoKey);
-      }
+      },
     );
 
     this.stateService.petVisibleObservable.subscribe((visible) => {

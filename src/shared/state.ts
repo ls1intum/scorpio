@@ -22,15 +22,19 @@ export function getState(): State {
   return _state;
 }
 
-export function set_displayed_state(course: Course | undefined, exercise: Exercise | undefined) {
+export function setDisplayedState(course: Course | undefined, exercise: Exercise | undefined) {
   _state.displayedCourse = course;
   _state.displayedExercise = exercise;
 
   if (course) {
     // if an exercise is displayed and it was not due yet, set the displayedKey to enable the clone button
     if (exercise && (!exercise.dueDate || new Date(exercise.dueDate) >= new Date())) {
-      vscode.commands.executeCommand("setContext", "scorpio.displayedKey", getProjectKey(course, exercise));
-    }else{
+      vscode.commands.executeCommand(
+        "setContext",
+        "scorpio.displayedKey",
+        getProjectKey(course, exercise),
+      );
+    } else {
       // if the exercise was due, disable the clone button
       vscode.commands.executeCommand("setContext", "scorpio.displayedKey", null);
     }
@@ -46,24 +50,26 @@ export function set_displayed_state(course: Course | undefined, exercise: Exerci
   onStateChange.fire(_state);
 }
 
-export function set_repo_state(course: Course, exercise: Exercise) {
+export function setRepoState(course: Course, exercise: Exercise) {
   _state.repoCourse = course;
   _state.repoExercise = exercise;
 
   // if the exercise is not due yet, set the repoKey to enable the push button
   if (!exercise.dueDate || new Date(exercise.dueDate) >= new Date()) {
-    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [getProjectKey(course, exercise)]);
+    vscode.commands.executeCommand("setContext", "scorpio.repoKey", [
+      getProjectKey(course, exercise),
+    ]);
   }
 
   if (!_state.displayedCourse || !_state.displayedExercise) {
     // this methode will fire the onStateChange event
-    set_displayed_state(course, exercise);
+    setDisplayedState(course, exercise);
   } else {
     onStateChange.fire(_state);
   }
 }
 
-export function clear_repo_state() {
+export function clearRepoState() {
   _state.repoCourse = undefined;
   _state.repoExercise = undefined;
 

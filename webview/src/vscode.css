@@ -103,12 +103,12 @@ dialog::backdrop {
   opacity: 0.5;
 }
 
-.feedbackDialog{
-    width: 86%;
-    height: 86%;
-    position: fixed;
-    top: 4%;
-    left: 2%;
+.feedbackDialog {
+  width: 86%;
+  height: 86%;
+  position: fixed;
+  top: 4%;
+  left: 2%;
 }
 
 .no-result {
@@ -127,8 +127,7 @@ dialog::backdrop {
   cursor: pointer;
 }
 
-[id^=plantUml-]>* {
+[id^="plantUml-"] > * {
   height: 100% !important;
   max-width: 100%;
 }
-

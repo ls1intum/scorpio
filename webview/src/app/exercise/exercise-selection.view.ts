@@ -36,11 +36,11 @@ export class ExerciseSelectionView implements OnInit, AfterViewInit {
   exercisesDue = computed(() =>
     this.exercises()
       .filter((exercise) => exercise.dueDate && exercise.dueDate >= new Date())
-      .sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime())
+      .sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime()),
   );
 
   exercisesPastDueDate = computed(() =>
-    this.exercises().filter((exercise) => exercise.dueDate && exercise.dueDate < new Date())
+    this.exercises().filter((exercise) => exercise.dueDate && exercise.dueDate < new Date()),
   );
 
   exercisesNoDueDate = computed(() => this.exercises().filter((exercise) => !exercise.dueDate));
