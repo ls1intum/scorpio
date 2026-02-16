@@ -27,13 +27,13 @@
       <em [ngClass]="'no-result'">No Test Results</em>
     }
     @case (TaskStatus.SUCCESS) {
-      <u class="cursor-pointer" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
-        {{ positiveFeedback().length }} of {{ totalTests() }} passed
-      </u>
+      <u class="cursor-pointer" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()"
+        >{{ positiveFeedback().length }} of {{ totalTests() }} passed</u
+      >
     }
     @case (TaskStatus.FAIL) {
-      <u class="cursor-pointer" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()">
-        {{ positiveFeedback().length }} of {{ totalTests() }} passed
+      <u class="cursor-pointer" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()"
+        >{{ positiveFeedback().length }} of {{ totalTests() }} passed
       </u>
     }
   }
