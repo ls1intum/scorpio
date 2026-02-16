@@ -171,9 +171,10 @@ export class ProblemStatementComponent implements OnDestroy {
 
     componentRef.setInput("task", task);
     const matchedFeedback =
-      this.latestResult()?.feedbacks?.filter(
-        (feedback: Feedback) => !feedback.testCaseId || task.testIds.includes(feedback.testCaseId),
-      ) ?? [];
+      this.latestResult()?.feedbacks?.filter((feedback: Feedback) => {
+        const feedbackTestCaseId = feedback.testCase?.id ?? feedback.testCaseId;
+        return feedbackTestCaseId !== undefined && task.testIds.includes(feedbackTestCaseId);
+      }) ?? [];
     componentRef.setInput("feedbackList", matchedFeedback ?? []);
     componentRef.setInput("loading", this.loading());
 

@@ -1,8 +1,5 @@
 <dialog #feedbackDialog class="feedbackDialog">
-  <feedback-list
-    [feedbackList]="feedbackList() ?? []"
-    (onClose)="feedbackDialog.close()"
-  ></feedback-list>
+  <feedback-list [feedbackList]="feedbackList()" (onClose)="feedbackDialog.close()"></feedback-list>
 </dialog>
 @if (loading()) {
   <div class="spinner-grow spinner-grow-sm" role="status">
@@ -31,12 +28,12 @@
     }
     @case (TaskStatus.SUCCESS) {
       <u class="cursor-pointer" [ngClass]="'text-success'" (click)="feedbackDialog.showModal()">
-        {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
+        {{ positiveFeedback().length }} of {{ totalTests() }} passed
       </u>
     }
     @case (TaskStatus.FAIL) {
       <u class="cursor-pointer" [ngClass]="'text-fail'" (click)="feedbackDialog.showModal()">
-        {{ positiveFeedback().length }} of {{ feedbackList().length }} passed
+        {{ positiveFeedback().length }} of {{ totalTests() }} passed
       </u>
     }
   }

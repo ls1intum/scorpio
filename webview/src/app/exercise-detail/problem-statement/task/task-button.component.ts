@@ -23,6 +23,9 @@ export class TaskButton {
   feedbackList = input.required<Feedback[]>();
   loading = input.required<boolean>();
 
+  protected totalTests = computed(
+    () => this.task().testIds.filter((testId) => testId !== -1).length,
+  );
   protected positiveFeedback = computed(() =>
     this.feedbackList().filter((feedback) => feedback.positive),
   );
