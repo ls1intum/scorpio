@@ -90,7 +90,7 @@
           "type": "string",
           "format": "uri",
           "editPresentation": "singlelineText",
-          "default": "https://artemis-test1.artemis.cit.tum.de"
+          "default": "https://artemis.cit.tum.de"
         },
         "scorpio.defaults.repoPath": {
           "order": 3,
