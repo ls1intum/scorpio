@@ -188,6 +188,9 @@ function registerCommands(
     vscode.commands.registerCommand("scorpio.displayedExercise.clone", async () => {
       try {
         await cloneCurrentExercise();
+        // In Theia mode the repo is cloned into the workspace as a subfolder,
+        // so we can detect it immediately and update repoKey without a round-trip.
+        await detectRepoCourseAndExercise();
         await realtimeSync.refreshNow();
       } catch (e) {
         _errorMessage(e, LogLevel.ERROR, "Failed to clone repository");
