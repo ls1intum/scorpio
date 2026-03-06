@@ -7,11 +7,11 @@
     "Other"
   ],
   "bugs": {
-    "url": "https://github.com/ls1intum/scorpio/issues"
+    "url": "https://github.com/EduIDE/scorpio/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ls1intum/scorpio.git"
+    "url": "https://github.com/EduIDE/scorpio.git"
   },
   "publisher": "tum-aet",
   "main": "./dist/extension.js",
