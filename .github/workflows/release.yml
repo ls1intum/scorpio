@@ -8,6 +8,8 @@ on:
 jobs:
   package:
     name: Package
+    permissions:
+      contents: read
     uses: ./.github/workflows/package.yml
     secrets: inherit
     with:
@@ -17,6 +19,8 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     needs: package
+    permissions:
+      contents: write
     environment: prod
     steps:
       # Check out current repository
