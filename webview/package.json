@@ -28,7 +28,7 @@
     "@vscode/markdown-it-katex": "^1.1.0",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "bootstrap": "^5.3.3",
-    "dompurify": "^3.1.7",
+    "dompurify": "^3.3.2",
     "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
     "markdown-it-class": "^1.0.0",
