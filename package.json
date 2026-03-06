@@ -41,7 +41,7 @@
     "@stomp/stompjs": "^7.0.0",
     "@vscode/vsce": "^3.1.1",
     "fetch-cookie": "^3.0.1",
-    "markdown-it": "^14.1.0",
+    "markdown-it": "^14.1.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "simple-git": "^3.27.0",
