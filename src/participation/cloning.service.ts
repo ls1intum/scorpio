@@ -8,6 +8,8 @@ import * as path from "path";
 import { retrieveVcsAccessToken } from "../artemis/authentication.client";
 import { getWorkspaceFolder, theiaEnv } from "../theia/theia";
 import { addVcsTokenToUrl } from "@shared/models/participation.model";
+import { ProgrammingExercise, ProgrammingLanguage } from "@shared/models/exercise.model";
+import { warmupGradleDaemon } from "./gradle.service";
 
 export async function cloneUserRepo(repoUrl: string, username: string) {
   // get folder to clone repo into
@@ -47,6 +49,12 @@ export async function cloneUserRepo(repoUrl: string, username: string) {
   // Clone the repository
   const cloneUrlWithToken = new URL(addVcsTokenToUrl(repoUrl, username, vcsToken));
   const clonePath = await cloneByGivenURL(cloneUrlWithToken, destinationPath);
+
+  // Pre-warm Gradle daemon in background to avoid ~3s init on first build
+  const exercise = getState().displayedExercise;
+  if ((exercise as ProgrammingExercise)?.programmingLanguage === ProgrammingLanguage.JAVA) {
+    warmupGradleDaemon(clonePath);
+  }
 
   if (!theiaEnv.THEIA_FLAG) {
     // Prompt the user to open the cloned folder in a new workspace
