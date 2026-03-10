@@ -44,7 +44,7 @@
     "markdown-it": "^14.1.1",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
-    "simple-git": "^3.27.0",
+    "simple-git": "^3.32.3",
     "sockjs-client": "^1.6.1",
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0",
