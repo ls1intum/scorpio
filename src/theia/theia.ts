@@ -2,7 +2,12 @@ import * as vscode from "vscode";
 import simpleGit, { GitConfigScope } from "simple-git";
 import { hostname } from "os";
 import { cloneByGivenURL } from "../participation/cloning.service";
-import { createTheiaEnvStrategy, DEFAULT_GRADLE_PREWARM, TheiaEnv } from "./env-strategy";
+import {
+  createTheiaEnvStrategy,
+  DEFAULT_GRADLE_PREWARM,
+  DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM,
+  TheiaEnv,
+} from "./env-strategy";
 
 // Mutable theiaEnv that gets populated after loading
 export let theiaEnv: TheiaEnv = {
@@ -14,6 +19,7 @@ export let theiaEnv: TheiaEnv = {
   GIT_MAIL: undefined,
   GIT_TOKEN: undefined,
   GRADLE_PREWARM: DEFAULT_GRADLE_PREWARM,
+  GRADLE_PREWARM_AUTO_CONFIRM: DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM,
 };
 
 // Full untyped map of every variable that was provided (including arbitrary keys
@@ -55,9 +61,7 @@ export async function initTheia() {
 
     await cloneByGivenURL(theiaEnv.GIT_URI, workspaceFolderUri.fsPath, {
       mode: "workspace-root",
-      httpExtraHeader: useGiteaToken
-        ? `Authorization: Bearer ${theiaEnv.GIT_TOKEN}`
-        : undefined,
+      httpExtraHeader: useGiteaToken ? `Authorization: Bearer ${theiaEnv.GIT_TOKEN}` : undefined,
     });
   }
 

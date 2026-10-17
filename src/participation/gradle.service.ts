@@ -19,9 +19,9 @@ const PREWARM_ARGS: Record<Exclude<GradlePrewarmLevel, "off">, string[]> = {
 };
 
 /**
- * Side effects the prewarm performs, grouped behind a seam so tests can assert the security
- * gate (no build is ever started without explicit user confirmation) without touching the
- * real filesystem, child_process or VS Code.
+ * Side effects the prewarm performs, grouped behind a seam so tests can assert the confirmation
+ * gate (when it is active, no build starts without the student's confirmation) without touching
+ * the real filesystem, child_process or VS Code.
  */
 export type GradlePrewarmEffects = {
   gradlewExists: (gradlewPath: string) => boolean;
@@ -32,8 +32,9 @@ export type GradlePrewarmEffects = {
 
 /**
  * Asks the student whether the repository's Gradle wrapper may be executed to prewarm the
- * build. The prompt is non-modal and defaults to "no": if the student ignores it nothing runs,
- * which keeps the feature opt-in while removing the silent code-execution property.
+ * build. Used only when GRADLE_PREWARM_AUTO_CONFIRM is false. The prompt is non-modal and
+ * defaults to "no": if the student ignores it nothing runs, removing the silent code-execution
+ * property for deployments that do not trust exercise templates.
  */
 async function promptPrewarmConfirmation(_projectPath: string): Promise<boolean> {
   const choice = await vscode.window.showWarningMessage(
@@ -69,11 +70,14 @@ export const defaultGradlePrewarmEffects: GradlePrewarmEffects = {
  * first build can skip the phases warmed here.
  *
  * Security: `./gradlew` and the bundled Gradle wrapper jar are repository-controlled, so a
- * tampered exercise template could run arbitrary code during prewarm. The wrapper is therefore
- * never executed automatically - the student must explicitly confirm first, and confirmation
- * defaults to "no".
+ * tampered exercise template could run arbitrary code during prewarm. The behavior is governed
+ * by `autoConfirm` (the GRADLE_PREWARM_AUTO_CONFIRM env var):
+ * - `true` (default): the prewarm runs automatically. Appropriate when exercise templates are
+ *   provisioned by a trusted platform, where the long first build matters more than the risk.
+ * - `false`: the student must explicitly confirm before the wrapper runs, and confirmation
+ *   defaults to "no". The safe choice when templates are not trusted.
  *
- * Silently skips (no prompt) if:
+ * Silently skips (no prompt, no build) if:
  * - Prewarming is disabled (`level` is "off")
  * - Running on Windows (not a supported environment)
  * - The project does not contain a `gradlew` file (not a Gradle project)
@@ -81,6 +85,7 @@ export const defaultGradlePrewarmEffects: GradlePrewarmEffects = {
 export async function warmupGradleDaemon(
   projectPath: string,
   level: GradlePrewarmLevel = "daemon",
+  autoConfirm = true,
   effects: GradlePrewarmEffects = defaultGradlePrewarmEffects,
 ): Promise<void> {
   if (level === "off" || process.platform === "win32") {
@@ -92,7 +97,7 @@ export async function warmupGradleDaemon(
     return;
   }
 
-  const confirmed = await effects.confirm(projectPath).catch(() => false);
+  const confirmed = autoConfirm ? true : await effects.confirm(projectPath).catch(() => false);
   if (!confirmed) {
     return;
   }

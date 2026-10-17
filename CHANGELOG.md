@@ -10,9 +10,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Security
 
-- Gradle prewarm no longer runs the cloned repository's `./gradlew` wrapper automatically. The
-  student must explicitly confirm before any repository-controlled Gradle build is executed,
-  removing a silent remote-code-execution path from tampered exercise templates.
+- Gradle prewarm's execution of the cloned repository's `./gradlew` wrapper is now configurable
+  via the `GRADLE_PREWARM_AUTO_CONFIRM` environment variable. It defaults to `true` (prewarm runs
+  automatically, so the long first build is still skipped where exercise templates are provisioned
+  by a trusted platform). Set it to `false` to require the student to explicitly confirm before any
+  repository-controlled Gradle build is executed, removing the silent remote-code-execution path
+  for deployments that do not trust templates. `GRADLE_PREWARM=off` still disables prewarm entirely.
 - The VCS/Git access token is no longer embedded in the clone URL or passed on the git command
   line. It is injected through the git process environment (`GIT_CONFIG_*`) during clone and
   persisted only into `.git/config` for later in-IDE fetch/push.

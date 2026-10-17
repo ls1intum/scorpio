@@ -18,11 +18,11 @@ function makeEffects(overrides: Partial<GradlePrewarmEffects>) {
   return { effects, runCalls };
 }
 
-suite("warmupGradleDaemon security gate", () => {
+suite("warmupGradleDaemon confirmation gate (GRADLE_PREWARM_AUTO_CONFIRM=false)", () => {
   test("does not run the Gradle wrapper when the user declines", async () => {
     const { effects, runCalls } = makeEffects({ confirm: async () => false });
 
-    await warmupGradleDaemon("/repo", "daemon", effects);
+    await warmupGradleDaemon("/repo", "daemon", false, effects);
 
     assert.strictEqual(runCalls.length, 0, "no build may start without confirmation");
   });
@@ -30,41 +30,10 @@ suite("warmupGradleDaemon security gate", () => {
   test("runs the Gradle wrapper only after explicit confirmation", async () => {
     const { effects, runCalls } = makeEffects({ confirm: async () => true });
 
-    await warmupGradleDaemon("/repo", "daemon", effects);
+    await warmupGradleDaemon("/repo", "daemon", false, effects);
 
     assert.strictEqual(runCalls.length, 1);
     assert.deepStrictEqual(runCalls[0].args, ["--daemon", "help"]);
-  });
-
-  test("never prompts or runs when prewarming is disabled", async () => {
-    let confirmed = false;
-    const { effects, runCalls } = makeEffects({
-      confirm: async () => {
-        confirmed = true;
-        return true;
-      },
-    });
-
-    await warmupGradleDaemon("/repo", "off", effects);
-
-    assert.strictEqual(confirmed, false, "disabled prewarm must not prompt");
-    assert.strictEqual(runCalls.length, 0);
-  });
-
-  test("does not prompt when the project has no gradlew", async () => {
-    let confirmed = false;
-    const { effects, runCalls } = makeEffects({
-      gradlewExists: () => false,
-      confirm: async () => {
-        confirmed = true;
-        return true;
-      },
-    });
-
-    await warmupGradleDaemon("/repo", "full", effects);
-
-    assert.strictEqual(confirmed, false, "non-Gradle project must not prompt");
-    assert.strictEqual(runCalls.length, 0);
   });
 
   test("treats a confirmation failure as a decline", async () => {
@@ -74,8 +43,51 @@ suite("warmupGradleDaemon security gate", () => {
       },
     });
 
-    await warmupGradleDaemon("/repo", "deps", effects);
+    await warmupGradleDaemon("/repo", "deps", false, effects);
 
     assert.strictEqual(runCalls.length, 0);
+  });
+});
+
+suite("warmupGradleDaemon auto-confirm (GRADLE_PREWARM_AUTO_CONFIRM=true, default)", () => {
+  test("runs the Gradle wrapper without prompting", async () => {
+    let prompted = false;
+    const { effects, runCalls } = makeEffects({
+      confirm: async () => {
+        prompted = true;
+        return true;
+      },
+    });
+
+    await warmupGradleDaemon("/repo", "full", true, effects);
+
+    assert.strictEqual(prompted, false, "auto-confirm must not prompt the student");
+    assert.strictEqual(runCalls.length, 1);
+    assert.deepStrictEqual(runCalls[0].args, ["--daemon", "build", "-x", "test"]);
+  });
+});
+
+suite("warmupGradleDaemon skip conditions", () => {
+  test("never prompts or runs when prewarming is disabled", async () => {
+    let prompted = false;
+    const { effects, runCalls } = makeEffects({
+      confirm: async () => {
+        prompted = true;
+        return true;
+      },
+    });
+
+    await warmupGradleDaemon("/repo", "off", false, effects);
+
+    assert.strictEqual(prompted, false, "disabled prewarm must not prompt");
+    assert.strictEqual(runCalls.length, 0);
+  });
+
+  test("does not run when the project has no gradlew, even with auto-confirm", async () => {
+    const { effects, runCalls } = makeEffects({ gradlewExists: () => false });
+
+    await warmupGradleDaemon("/repo", "full", true, effects);
+
+    assert.strictEqual(runCalls.length, 0, "non-Gradle project must not build");
   });
 });

@@ -91,10 +91,15 @@ export async function cloneUserRepo(repoUrl: string, username: string) {
 
   // Pre-warm Gradle in the background so the student's first build is faster.
   // The depth (off/daemon/deps/full) is controlled by the GRADLE_PREWARM env var.
-  // Runs only after the student explicitly confirms (see warmupGradleDaemon).
+  // By default this runs automatically; set GRADLE_PREWARM_AUTO_CONFIRM=false to
+  // require the student to confirm first (see warmupGradleDaemon).
   const exercise = getState().displayedExercise;
   if ((exercise as ProgrammingExercise)?.programmingLanguage === ProgrammingLanguage.JAVA) {
-    void warmupGradleDaemon(clonePath, theiaEnv.GRADLE_PREWARM);
+    void warmupGradleDaemon(
+      clonePath,
+      theiaEnv.GRADLE_PREWARM,
+      theiaEnv.GRADLE_PREWARM_AUTO_CONFIRM,
+    );
   }
 
   if (!theiaEnv.THEIA_FLAG) {
