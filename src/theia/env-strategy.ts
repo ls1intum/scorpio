@@ -20,6 +20,7 @@ export type TheiaEnv = {
   GIT_MAIL: string | undefined;
   GIT_TOKEN: string | undefined;
   GRADLE_PREWARM: GradlePrewarmLevel;
+  GRADLE_PREWARM_AUTO_CONFIRM: boolean;
 };
 
 const ENV_KEYS = [
@@ -31,6 +32,7 @@ const ENV_KEYS = [
   "GIT_MAIL",
   "GIT_TOKEN",
   "GRADLE_PREWARM",
+  "GRADLE_PREWARM_AUTO_CONFIRM",
 ] as const satisfies Array<string>;
 
 /**
@@ -38,6 +40,17 @@ const ENV_KEYS = [
  * daemon is cheap and benefits every Gradle session, so it is the safe default.
  */
 export const DEFAULT_GRADLE_PREWARM: GradlePrewarmLevel = "daemon";
+
+/**
+ * Whether the Gradle prewarm may run automatically after cloning, without asking
+ * the student first. Default true: exercise templates are provisioned by the
+ * platform and prewarming saves a long first build, so most deployments want it
+ * on. Set the GRADLE_PREWARM_AUTO_CONFIRM env var to false to require an explicit
+ * confirmation before any repository-controlled `gradlew` is executed (the safe
+ * choice when templates are not trusted). GRADLE_PREWARM="off" disables prewarm
+ * entirely regardless of this flag.
+ */
+export const DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM = true;
 
 function parseGradlePrewarm(value: string | undefined): GradlePrewarmLevel {
   const level = value?.trim().toLowerCase();
@@ -50,6 +63,23 @@ function parseGradlePrewarm(value: string | undefined): GradlePrewarmLevel {
     );
   }
   return DEFAULT_GRADLE_PREWARM;
+}
+
+function parseGradlePrewarmAutoConfirm(value: string | undefined): boolean {
+  const flag = value?.trim().toLowerCase();
+  if (flag === undefined || flag === "") {
+    return DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM;
+  }
+  if (flag === "true" || flag === "1" || flag === "yes" || flag === "on") {
+    return true;
+  }
+  if (flag === "false" || flag === "0" || flag === "no" || flag === "off") {
+    return false;
+  }
+  console.warn(
+    `Unknown GRADLE_PREWARM_AUTO_CONFIRM value "${value}", falling back to "${DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM}"`,
+  );
+  return DEFAULT_GRADLE_PREWARM_AUTO_CONFIRM;
 }
 
 /**
@@ -81,6 +111,7 @@ export function parseTheiaEnv(env: Record<string, string | undefined>): TheiaEnv
     GIT_MAIL: env["GIT_MAIL"],
     GIT_TOKEN: env["GIT_TOKEN"],
     GRADLE_PREWARM: parseGradlePrewarm(env["GRADLE_PREWARM"]),
+    GRADLE_PREWARM_AUTO_CONFIRM: parseGradlePrewarmAutoConfirm(env["GRADLE_PREWARM_AUTO_CONFIRM"]),
   };
 }
 
