@@ -6,11 +6,14 @@ import * as fs from "fs/promises";
 import { cloneByGivenURL } from "../participation/cloning.service";
 import { warmupGradleDaemon } from "../participation/gradle.service";
 import { createTheiaEnvStrategy, DEFAULT_GRADLE_PREWARM, TheiaEnv } from "./env-strategy";
+import { redactUrlCredentials } from "./env-parsing";
 
 export let theiaEnv: TheiaEnv = {
   THEIA_FLAG: false,
   ARTEMIS_URL: undefined,
   GIT_URI: undefined,
+  GIT_REF: undefined,
+  GIT_SOURCE: "other",
   GIT_USER: undefined,
   GIT_MAIL: undefined,
   GRADLE_PREWARM: DEFAULT_GRADLE_PREWARM,
@@ -79,18 +82,34 @@ export async function initTheia() {
     }
 
     const alreadyCloned = await isRepoAlreadyCloned(workspaceFolderUri.fsPath, theiaEnv.GIT_URI);
+    let cloned = true;
     if (alreadyCloned) {
       console.log("Repository already present, skipping auto-clone");
     } else {
-      await cloneByGivenURL(theiaEnv.GIT_URI, workspaceFolderUri.fsPath, {
-        mode: "workspace-root",
-      });
+      try {
+        await cloneByGivenURL(theiaEnv.GIT_URI, workspaceFolderUri.fsPath, {
+          mode: "workspace-root",
+          ref: theiaEnv.GIT_REF,
+        });
+      } catch (e: any) {
+        // Without this the student just sees an empty workspace. Artemis URLs carry a token, so
+        // neither the URL nor git's message is shown unredacted.
+        const message = redactUrlCredentials(`${e?.message ?? e}`);
+        console.error(message);
+        vscode.window.showErrorMessage(
+          `Could not clone ${redactUrlCredentials(theiaEnv.GIT_URI.toString())}: ${message}`,
+        );
+        cloned = false;
+      }
     }
 
     // Pre-warm Gradle in the background every session so the student's build is faster,
     // even on restarts where the repo is already present but the daemon is cold.
-    // Depth is controlled by GRADLE_PREWARM; warmupGradleDaemon skips non-Gradle repos.
-    warmupGradleDaemon(workspaceFolderUri.fsPath, theiaEnv.GRADLE_PREWARM);
+    // Depth is controlled by GRADLE_PREWARM (off by default outside Artemis); warmupGradleDaemon
+    // skips non-Gradle repos.
+    if (cloned) {
+      warmupGradleDaemon(workspaceFolderUri.fsPath, theiaEnv.GRADLE_PREWARM);
+    }
   }
 
   if (theiaEnv.THEIA_FLAG) {
